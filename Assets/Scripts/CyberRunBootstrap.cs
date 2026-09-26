@@ -9,6 +9,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     const int SegmentCount = 14;
     readonly List<Transform> segments = new();
     readonly List<Collider> obstacles = new();
+    readonly List<Transform> movingHazards = new();
     static readonly Dictionary<int,Material> materialCache=new();
     Transform player;
     Camera cam;
@@ -196,6 +197,22 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         if((index&1)==0)
             OverheadFrame(root);
 
+        if(index%6==3)
+        {
+            int hazardLane=((index/3)%3)-1;
+            var moving=Cube(
+                "MovingLaser",
+                root,
+                new Vector3(1.55f,.22f,1.05f),
+                new Vector3(hazardLane*LaneWidth,1.55f,2.5f),
+                new Color(1.7f,.04f,.42f),
+                true);
+            var movingCollider=moving.GetComponent<Collider>();
+            if(movingCollider!=null)
+                obstacles.Add(movingCollider);
+            movingHazards.Add(moving.transform);
+        }
+
         segments.Add(root);
     }
 
@@ -379,6 +396,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
         if(sliding && (slideTimer-=dt)<=0) SetSliding(false);
 
+        UpdateMovingHazards();
         Recycle();
         RecenterWorldIfNeeded();
         FollowCamera(dt);
@@ -541,6 +559,24 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             cam.transform.position-=Vector3.forward*shift;
 
         previousPlayerPosition=player.position;
+    }
+
+    void UpdateMovingHazards()
+    {
+        float t=Time.time;
+
+        for(int i=0;i<movingHazards.Count;i++)
+        {
+            var hazard=movingHazards[i];
+            if(hazard==null) continue;
+
+            float phase=hazard.GetInstanceID()*.013f;
+            Vector3 pos=hazard.localPosition;
+            pos.y=1.55f+
+                Mathf.Sin(t*2.1f+phase)*.42f;
+            pos.x+=Mathf.Sin(t*1.15f+phase)*.012f;
+            hazard.localPosition=pos;
+        }
     }
 
     void Recycle()
