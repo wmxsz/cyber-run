@@ -7,6 +7,7 @@ public sealed class CyberRunHolograms : MonoBehaviour
 {
     Shader holoShader;
     readonly List<Transform> holograms=new();
+    readonly List<Vector3> basePositions=new();
     Material sharedMaterial;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -92,6 +93,7 @@ public sealed class CyberRunHolograms : MonoBehaviour
         }
 
         holograms.Add(go.transform);
+        basePositions.Add(go.transform.localPosition);
     }
 
     void Update()
@@ -103,7 +105,7 @@ public sealed class CyberRunHolograms : MonoBehaviour
             var h=holograms[i];
             if(h==null) continue;
 
-            Vector3 p=h.localPosition;
+            Vector3 p=basePositions[i];
             p.y+=Mathf.Sin(t*1.2f+i*.7f)*.0025f;
             h.localPosition=p;
 
