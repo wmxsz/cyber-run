@@ -18,6 +18,7 @@ public sealed class CyberRunPowerVFX : MonoBehaviour
     }
 
     readonly List<Arc> arcs=new();
+    readonly MaterialPropertyBlock block=new();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
@@ -142,7 +143,7 @@ public sealed class CyberRunPowerVFX : MonoBehaviour
 
             if(arc.renderer!=null)
             {
-                var block=new MaterialPropertyBlock();
+                block.Clear();
                 block.SetColor("_BaseColor",arc.color*pulse);
                 block.SetFloat("_GlowStrength",
                     group==2 ? 1.2f : .9f);
