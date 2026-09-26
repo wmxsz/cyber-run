@@ -3,7 +3,9 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using System.IO;
+using System.Reflection;
 using UnityEditor.Build;
+using UnityEditor.Build.Profile;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -22,6 +24,7 @@ public static class CyberRunBuildSetup
         PlayerSettings.defaultInterfaceOrientation=UIOrientation.Portrait;
 
         EnsureRenderPipeline();
+        EnsureInputHandling();
         EnsureScene();
     }
 
@@ -59,6 +62,55 @@ public static class CyberRunBuildSetup
         GraphicsSettings.alwaysIncludedShaders=included.ToArray();
         EditorUtility.SetDirty(urp);
         AssetDatabase.SaveAssets();
+    }
+
+    static void EnsureInputHandling()
+    {
+        SetActiveInputHandler(GetGlobalPlayerSettings());
+
+        var profile=BuildProfile.GetActiveBuildProfile();
+        if(profile==null) return;
+
+        var profileField=typeof(BuildProfile).GetField(
+            "m_PlayerSettings",
+            BindingFlags.Instance|BindingFlags.NonPublic);
+
+        var profileSettings=profileField?.GetValue(profile) as PlayerSettings;
+        if(profileSettings!=null)
+            SetActiveInputHandler(profileSettings);
+    }
+
+    static PlayerSettings GetGlobalPlayerSettings()
+    {
+        var field=typeof(BuildProfile).GetField(
+            "s_GlobalPlayerSettings",
+            BindingFlags.Static|BindingFlags.NonPublic);
+
+        var global=field?.GetValue(null) as PlayerSettings;
+        if(global!=null) return global;
+
+        var all=Resources.FindObjectsOfTypeAll<PlayerSettings>();
+        return all!=null && all.Length>0 ? all[0] : null;
+    }
+
+    static void SetActiveInputHandler(PlayerSettings settings)
+    {
+        if(settings==null) return;
+
+        var serialized=new SerializedObject(settings);
+        var property=serialized.FindProperty("activeInputHandler");
+        if(property==null)
+        {
+            Debug.LogError("CyberRun: cannot find PlayerSettings.activeInputHandler.");
+            return;
+        }
+
+        // 0 = Old Input Manager, 1 = New Input System, 2 = Both.
+        if(property.intValue!=2)
+        {
+            property.intValue=2;
+            serialized.ApplyModifiedProperties();
+        }
     }
 
     static void EnsureScene()
