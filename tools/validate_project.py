@@ -43,6 +43,7 @@ required_runtime = [
     'Shader.Find("CyberRun/Unlit")',
 ]
 for marker in required_runtime:
+required_runtime.extend(["float difficulty=Mathf.Clamp01(distance/1800f);","speed+dt*(.1f+difficulty*.045f)","21.5f","difficultyStep=Mathf.FloorToInt("])
     if marker not in runtime:
         errors.append(f"runtime marker missing: {marker}")
 if "SceneManager.LoadScene" in runtime:
