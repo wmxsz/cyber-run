@@ -37,18 +37,28 @@ public static class CyberRunBuildSetup
             urp=ScriptableObject.CreateInstance<UniversalRenderPipelineAsset>();
             urp.LoadBuiltinRendererData(RendererType.UniversalRenderer);
             AssetDatabase.CreateAsset(urp,path);
-            AssetDatabase.SaveAssets();
         }
 
         GraphicsSettings.defaultRenderPipeline=urp;
         QualitySettings.renderPipeline=urp;
 
+        var included=new System.Collections.Generic.List<Shader>();
+        var existing=GraphicsSettings.alwaysIncludedShaders;
+        if(existing!=null)
+        {
+            for(int i=0;i<existing.Length;i++)
+                if(existing[i]!=null && !included.Contains(existing[i]))
+                    included.Add(existing[i]);
+        }
+
         var lit=Shader.Find("Universal Render Pipeline/Lit");
         var unlit=Shader.Find("Universal Render Pipeline/Unlit");
-        var shaders=new System.Collections.Generic.List<Shader>();
-        if(lit!=null) shaders.Add(lit);
-        if(unlit!=null) shaders.Add(unlit);
-        GraphicsSettings.alwaysIncludedShaders=shaders.ToArray();
+        if(lit!=null && !included.Contains(lit)) included.Add(lit);
+        if(unlit!=null && !included.Contains(unlit)) included.Add(unlit);
+
+        GraphicsSettings.alwaysIncludedShaders=included.ToArray();
+        EditorUtility.SetDirty(urp);
+        AssetDatabase.SaveAssets();
     }
 
     static void EnsureScene()
