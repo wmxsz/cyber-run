@@ -4,6 +4,8 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using System.IO;
 using UnityEditor.Build;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 [InitializeOnLoad]
 public static class CyberRunBuildSetup
@@ -19,7 +21,34 @@ public static class CyberRunBuildSetup
         PlayerSettings.Android.minSdkVersion=AndroidSdkVersions.AndroidApiLevel26;
         PlayerSettings.defaultInterfaceOrientation=UIOrientation.Portrait;
 
+        EnsureRenderPipeline();
         EnsureScene();
+    }
+
+    static void EnsureRenderPipeline()
+    {
+        const string dir="Assets/Settings";
+        const string path=dir+"/CyberRunURP.asset";
+        Directory.CreateDirectory(dir);
+
+        var urp=AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>(path);
+        if(urp==null)
+        {
+            urp=ScriptableObject.CreateInstance<UniversalRenderPipelineAsset>();
+            urp.LoadBuiltinRendererData(RendererType.UniversalRenderer);
+            AssetDatabase.CreateAsset(urp,path);
+            AssetDatabase.SaveAssets();
+        }
+
+        GraphicsSettings.defaultRenderPipeline=urp;
+        QualitySettings.renderPipeline=urp;
+
+        var lit=Shader.Find("Universal Render Pipeline/Lit");
+        var unlit=Shader.Find("Universal Render Pipeline/Unlit");
+        var shaders=new System.Collections.Generic.List<Shader>();
+        if(lit!=null) shaders.Add(lit);
+        if(unlit!=null) shaders.Add(unlit);
+        GraphicsSettings.alwaysIncludedShaders=shaders.ToArray();
     }
 
     static void EnsureScene()
