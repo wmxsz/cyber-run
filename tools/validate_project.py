@@ -212,6 +212,10 @@ for forbidden in [
 if "FieldInfo" in content or "BindingFlags" in content or "using System.Reflection" in content:
     errors.append("content systems still contains reflection state access")
 
+if "CreatePrimitive(" in content_update or "new Material(" in content_update:
+    errors.append("content Update contains object creation")
+
+
 if errors:
     print("CYBER RUN STATIC CHECK: FAIL")
     for error in errors:
