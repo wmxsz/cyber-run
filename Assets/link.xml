@@ -6,7 +6,6 @@
     <type fullname="CyberRunVisualOverdrive" preserve="all" />
     <type fullname="CyberRunCityVisual" preserve="all" />
     <type fullname="CyberRunGameplayVisuals" preserve="all" />
-    <type fullname="CyberRunShaderBuildKeeper" preserve="all" />
     <type fullname="CyberRunEngineAudio" preserve="all" />
     <type fullname="CyberRunStreetProps" preserve="all" />
     <type fullname="CyberRunSkylineProps" preserve="all" />
