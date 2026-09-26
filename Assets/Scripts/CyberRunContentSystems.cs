@@ -18,8 +18,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         public readonly List<Vector3> coinSpawnPositions=new();
         public readonly List<GameObject> powerups=new();
         public readonly List<Transform> vehicles=new();
+        public readonly List<Transform> vehicleGlows=new();
         public readonly List<Collider> obstacles=new();
         public Renderer[] renderers;
+        public bool visualsVisible=true;
         public int cycle;
         public float lastZ;
     }
@@ -294,6 +296,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 seg.root,
                 new Vector3(index%2==0?-5.4f:5.4f,1.1f,-2f));
             seg.vehicles.Add(car);
+            seg.vehicleGlows.Add(car!=null ? car.Find("CarGlow") : null);
         }
 
         if(index%4==2)
@@ -1001,6 +1004,13 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
             segment.renderers=
                 segment.root.GetComponentsInChildren<Renderer>(true);
+
+            for(int j=0;j<segment.renderers.Length;j++)
+            {
+                var renderer=segment.renderers[j];
+                if(renderer!=null)
+                    renderer.enabled=segment.visualsVisible;
+            }
         }
     }
 
@@ -1016,21 +1026,20 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             if(s.root==null||s.renderers==null) continue;
 
             float dz=Mathf.Abs(s.root.position.z-playerZ);
-            bool visible=dz<visibleDistance;
-            bool currentlyEnabled=true;
+            bool visible=s.visualsVisible;
 
-            if(s.renderers.Length>0 && s.renderers[0]!=null)
-                currentlyEnabled=s.renderers[0].enabled;
-
-            if(currentlyEnabled && dz>visibleDistance+hysteresis)
+            if(s.visualsVisible && dz>visibleDistance+hysteresis)
                 visible=false;
-            else if(!currentlyEnabled && dz<visibleDistance)
+            else if(!s.visualsVisible && dz<visibleDistance)
                 visible=true;
 
+            if(visible==s.visualsVisible) continue;
+
+            s.visualsVisible=visible;
             for(int j=0;j<s.renderers.Length;j++)
             {
                 var renderer=s.renderers[j];
-                if(renderer!=null && renderer.enabled!=visible)
+                if(renderer!=null)
                     renderer.enabled=visible;
             }
         }
@@ -1289,21 +1298,27 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     {
         float time=Time.time;
 
-        foreach(var s in data)
-        foreach(var v in s.vehicles)
+        for(int i=0;i<data.Count;i++)
         {
-            if(v==null) continue;
+            var s=data[i];
+            for(int j=0;j<s.vehicles.Count;j++)
+            {
+                var v=s.vehicles[j];
+                if(v==null) continue;
 
-            float phase=s.root.GetInstanceID()%100*.13f;
-            var pos=v.localPosition;
+                float phase=s.root.GetInstanceID()%100*.13f;
+                var pos=v.localPosition;
             pos.y=1.1f+Mathf.Sin(time*1.7f+phase)*.035f;
             pos.z=Mathf.PingPong(time*.85f+phase*3f,26f)-13f;
-            v.localPosition=pos;
+                v.localPosition=pos;
 
-            float pulse=.5f+.5f*Mathf.Sin(time*4f+phase);
-            var glow=v.Find("CarGlow");
-            if(glow!=null)
-                glow.localScale=new Vector3(1f,.85f+.25f*pulse,1f);
+                float pulse=.5f+.5f*Mathf.Sin(time*4f+phase);
+                Transform glow=j<s.vehicleGlows.Count
+                    ? s.vehicleGlows[j]
+                    : null;
+                if(glow!=null)
+                    glow.localScale=new Vector3(1f,.85f+.25f*pulse,1f);
+            }
         }
 
         for(int i=0;i<drones.Count;i++)
