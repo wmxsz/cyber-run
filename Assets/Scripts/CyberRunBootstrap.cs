@@ -251,7 +251,9 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         Vector2 delta=position-touchStart;
         touchStart=Vector2.zero;
 
-        if(delta.sqrMagnitude>30f*30f) return false;
+        float tapThreshold=Mathf.Clamp(
+            Mathf.Min(Screen.width,Screen.height)*.045f,24f,72f);
+        if(delta.sqrMagnitude>tapThreshold*tapThreshold) return false;
 
         Vector2 guiPosition=new Vector2(position.x,Screen.height-position.y);
         Rect restartRect=new Rect(
@@ -291,11 +293,19 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             if(t.press.wasPressedThisFrame)
                 touchStart=t.position.ReadValue();
 
+            if(t.phase.ReadValue()==UnityEngine.InputSystem.TouchPhase.Canceled)
+            {
+                touchStart=Vector2.zero;
+                return;
+            }
+
             if(t.press.wasReleasedThisFrame)
             {
                 Vector2 delta=t.position.ReadValue()-touchStart;
+                float swipeThreshold=Mathf.Clamp(
+                    Mathf.Min(Screen.width,Screen.height)*.07f,40f,110f);
 
-                if(delta.magnitude>=55f)
+                if(delta.magnitude>=swipeThreshold)
                 {
                     if(Mathf.Abs(delta.x)>Mathf.Abs(delta.y))
                     {
