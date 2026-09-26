@@ -37,6 +37,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     bool wasSliding;
     bool paused;
     bool initialized;
+    bool started;
+    bool appAutoPaused;
     float introTimer=4f;
     int coinCount;
     long bestScore;
@@ -62,6 +64,11 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         SetupAudio();
         SetupParticleTrail();
         SetupGuiStyles();
+
+        started=false;
+        paused=false;
+        appAutoPaused=false;
+        Time.timeScale=0f;
         initialized=true;
     }
 
@@ -456,9 +463,45 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         };
     }
 
+    bool StartScreenTapped()
+    {
+        if(Keyboard.current!=null &&
+           (Keyboard.current.enterKey.wasPressedThisFrame ||
+            Keyboard.current.spaceKey.wasPressedThisFrame))
+            return true;
+
+        if(Touchscreen.current==null) return false;
+
+        var touch=Touchscreen.current.primaryTouch;
+        if(!touch.press.wasReleasedThisFrame) return false;
+
+        Vector2 delta=touch.position.ReadValue()-touchStart;
+        touchStart=Vector2.zero;
+        float threshold=Mathf.Clamp(
+            Mathf.Min(Screen.width,Screen.height)*.07f,40f,110f);
+
+        return delta.magnitude<threshold;
+    }
+
+    void StartRun()
+    {
+        started=true;
+        paused=false;
+        appAutoPaused=false;
+        introTimer=4f;
+        Time.timeScale=1f;
+    }
+
     void Update()
     {
         if(!initialized||player==null) return;
+
+        if(!started)
+        {
+            if(StartScreenTapped())
+                StartRun();
+            return;
+        }
 
         if(introTimer>0f) introTimer-=Time.unscaledDeltaTime;
 
@@ -639,13 +682,27 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     void SetPaused(bool value)
     {
         paused=value;
-        Time.timeScale=paused?0f:1f;
+        if(paused)
+            Time.timeScale=0f;
+        else
+        {
+            started=true;
+            Time.timeScale=1f;
+        }
     }
 
     void OnApplicationPause(bool pause)
     {
-        if(pause&&!IsGameOver())
+        if(pause && started && !IsGameOver())
+        {
+            appAutoPaused=true;
             SetPaused(true);
+        }
+        else if(!pause && appAutoPaused)
+        {
+            appAutoPaused=false;
+            SetPaused(false);
+        }
     }
 
     void OnDestroy()
@@ -659,6 +716,32 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(!initialized||player==null||hudStyle==null) return;
 
         var safe=Screen.safeArea;
+
+        if(!started && !IsGameOver())
+        {
+            GUI.color=new Color(.006f,.008f,.025f,.96f);
+            GUI.DrawTexture(
+                new Rect(0,0,Screen.width,Screen.height),
+                Texture2D.whiteTexture);
+            GUI.color=Color.white;
+
+            GUI.Label(
+                new Rect(Screen.width*.5f-180f,Screen.height*.28f,360f,60f),
+                "CYBER RUN",hudStyle);
+
+            GUI.Label(
+                new Rect(Screen.width*.5f-180f,Screen.height*.28f+52f,360f,28f),
+                "NEON METROPOLIS",subStyle);
+
+            GUI.Label(
+                new Rect(Screen.width*.5f-150f,Screen.height*.62f,300f,32f),
+                "TAP TO START",hudStyle);
+
+            GUI.Label(
+                new Rect(Screen.width*.5f-170f,Screen.height*.62f+38f,340f,26f),
+                "SWIPE  /  JUMP  /  SLIDE",subStyle);
+            return;
+        }
         float left=safe.x+18f;
         float top=Screen.height-safe.yMax+16f;
 
