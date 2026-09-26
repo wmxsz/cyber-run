@@ -12,5 +12,6 @@
     <type fullname="CyberRunHolograms" preserve="all" />
     <type fullname="CyberRunRoadVisual" preserve="all" />
     <type fullname="CyberRunIntensityController" preserve="all" />
+    <type fullname="CyberRunPowerVFX" preserve="all" />
   </assembly>
 </linker>
