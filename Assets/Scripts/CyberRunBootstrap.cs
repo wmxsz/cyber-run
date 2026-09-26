@@ -27,6 +27,27 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     public float CurrentSpeed => speed;
     public float Distance => distance;
 
+    public bool CancelHitWithShield()
+    {
+        if(gameOver)
+        {
+            gameOver=false;
+            yVelocity=0f;
+            sliding=false;
+            slideTimer=0f;
+            if(player!=null)
+            {
+                player.position=new Vector3(
+                    player.position.x,PlayerGroundY+.02f,player.position.z);
+                player.localScale=playerBaseScale;
+                previousPlayerPosition=player.position;
+            }
+            return true;
+        }
+        return false;
+    }
+
+
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Boot()
