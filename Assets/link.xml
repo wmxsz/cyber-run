@@ -16,5 +16,6 @@
     <type fullname="CyberRunSectorPalette" preserve="all" />
     <type fullname="CyberRunMusicSystem" preserve="all" />
     <type fullname="CyberRunActionVFX" preserve="all" />
+    <type fullname="CyberRunNeonWorld" preserve="all" />
   </assembly>
 </linker>
