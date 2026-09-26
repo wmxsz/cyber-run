@@ -15,6 +15,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     {
         public Transform root;
         public readonly List<GameObject> coins=new();
+        public readonly List<Vector3> coinSpawnPositions=new();
         public readonly List<GameObject> powerups=new();
         public readonly List<Transform> vehicles=new();
         public readonly List<Collider> obstacles=new();
@@ -278,6 +279,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 seg.root,
                 new Vector3(lane*LaneWidth,y,z));
             seg.coins.Add(coin);
+            seg.coinSpawnPositions.Add(coin.transform.localPosition);
         }
 
         if((index&1)==0)
@@ -1074,6 +1076,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
             coin.transform.localPosition=
                 new Vector3(chosen*LaneWidth,y,z);
+
+            if(i<segment.coinSpawnPositions.Count)
+                segment.coinSpawnPositions[i]=coin.transform.localPosition;
         }
     }
 
@@ -1243,15 +1248,27 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             for(int j=0;j<segment.coins.Count;j++)
             {
                 var coin=segment.coins[j];
-                if(coin!=null)
-                    coin.SetActive(true);
+                if(coin==null) continue;
+
+                if(j<segment.coinSpawnPositions.Count)
+                    coin.transform.localPosition=
+                        segment.coinSpawnPositions[j];
+
+                coin.transform.localRotation=
+                    Quaternion.Euler(90f,0f,0f);
+                coin.transform.localScale=
+                    new Vector3(.34f,.09f,.34f);
+                coin.SetActive(true);
             }
 
             for(int j=0;j<segment.powerups.Count;j++)
             {
                 var powerup=segment.powerups[j];
-                if(powerup!=null)
-                    powerup.SetActive(true);
+                if(powerup==null) continue;
+
+                powerup.transform.localRotation=Quaternion.identity;
+                powerup.transform.localScale=Vector3.one*.42f;
+                powerup.SetActive(true);
             }
         }
 
