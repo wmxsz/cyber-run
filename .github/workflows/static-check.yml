@@ -19,7 +19,7 @@ jobs:
         run: python3 -m py_compile tools/*.py
 
       - name: Validate latest commit formatting
-        run: git diff --check HEAD^ HEAD
+        run: git show --check --oneline HEAD
 
       - name: Validate project
         run: python3 tools/validate_project.py
