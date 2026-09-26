@@ -260,6 +260,7 @@ for marker in [
     "CreateDataGate(",
     "ConfigureBoostGate(",
     "UpdateBoostGates()",
+    "UpdateSectorMilestones()",
     "TriggerSpeedBurst(",
     "gateStreak",
     "renderers=root.GetComponentsInChildren<Renderer>(true)",
