@@ -125,10 +125,50 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                     (b&1)==0 ? new Color(.05f,.8f,1f) : new Color(.95f,.08f,.65f));
             }
 
+        int pattern=index%8;
+        int[] obstacleLanes;
+        bool[] slideTypes;
+
+        switch(pattern)
+        {
+            case 0:
+                obstacleLanes=new[]{-1,1};
+                slideTypes=new[]{false,true};
+                break;
+            case 1:
+                obstacleLanes=new[]{0,-1};
+                slideTypes=new[]{false,true};
+                break;
+            case 2:
+                obstacleLanes=new[]{1,0};
+                slideTypes=new[]{true,false};
+                break;
+            case 3:
+                obstacleLanes=new[]{-1,0};
+                slideTypes=new[]{true,false};
+                break;
+            case 4:
+                obstacleLanes=new[]{0,1};
+                slideTypes=new[]{true,false};
+                break;
+            case 5:
+                obstacleLanes=new[]{1,-1};
+                slideTypes=new[]{false,true};
+                break;
+            case 6:
+                obstacleLanes=new[]{-1,1};
+                slideTypes=new[]{true,false};
+                break;
+            default:
+                obstacleLanes=new[]{0,1};
+                slideTypes=new[]{false,true};
+                break;
+        }
+
         for(int o=0;o<2;o++)
         {
-            float x=(((index+o)%3)-1)*LaneWidth;
-            bool slideGate=((index+o)&1)==1;
+            bool slideGate=slideTypes[o];
+            float x=obstacleLanes[o]*LaneWidth;
             Vector3 scale=slideGate
                 ? new Vector3(1.8f,.4f,1.1f)
                 : new Vector3(1.8f,1.4f,1.1f);
@@ -136,10 +176,17 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                 ? new Vector3(x,2.15f,-8f+o*17f)
                 : new Vector3(x,.7f,-8f+o*17f);
 
-            var obstacle=Cube(slideGate?"SlideGate":"JumpObstacle",root,scale,localPos,
-                slideGate?new Color(1f,.25f,.85f):new Color(1f,.12f,.05f),true);
+            var obstacle=Cube(
+                slideGate?"SlideGate":"JumpObstacle",
+                root,scale,localPos,
+                slideGate
+                    ? new Color(1f,.25f,.85f)
+                    : new Color(1f,.12f,.05f),
+                true);
+
             var obstacleCollider=obstacle.GetComponent<Collider>();
-            if(obstacleCollider!=null) obstacles.Add(obstacleCollider);
+            if(obstacleCollider!=null)
+                obstacles.Add(obstacleCollider);
         }
 
         if((index&1)==0)
