@@ -652,6 +652,34 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                     hazard.localPosition.z);
             }
         }
+
+        foreach(var child in segment.GetComponentsInChildren<Transform>(true))
+        {
+            if(child.name!="MovingLaser") continue;
+
+            int chosenLane=((cycle+segment.GetInstanceID())%3)-1;
+            bool collidesWithStatic=false;
+
+            for(int i=0;i<2;i++)
+            {
+                if(Mathf.Abs(
+                    hazards[i].localPosition.x-
+                    chosenLane*LaneWidth)<.01f)
+                {
+                    collidesWithStatic=true;
+                    break;
+                }
+            }
+
+            if(collidesWithStatic)
+                chosenLane=Mathf.Clamp(chosenLane+1,-1,1);
+
+            child.localPosition=new Vector3(
+                chosenLane*LaneWidth,
+                child.localPosition.y,
+                child.localPosition.z);
+            break;
+        }
     }
 
     void FollowCamera(float dt)
