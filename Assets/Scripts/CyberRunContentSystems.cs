@@ -50,6 +50,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     int coinCount;
     float overdriveTimer;
     float magnetTimer;
+    float shieldTimer;
     long bestScore;
     float overdriveFlash;
 
@@ -239,9 +240,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(index%5==0)
         {
             float x=(((index+2)%3)-1)*LaneWidth;
-            bool overdrive=(index/5)%2==0;
+            int kind=(index/5)%3;
             var powerup=CreatePowerup(
-                seg.root,new Vector3(x,1.45f,12f),overdrive);
+                seg.root,new Vector3(x,1.45f,12f),kind);
             seg.powerups.Add(powerup);
         }
 
@@ -318,18 +319,26 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         return root;
     }
 
-    GameObject CreatePowerup(Transform parent,Vector3 localPos,bool overdrive)
+    GameObject CreatePowerup(Transform parent,Vector3 localPos,int kind)
     {
         var g=GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        g.name=overdrive?"OverdriveCore":"MagnetCore";
+        g.name=kind switch
+        {
+            0=>"OverdriveCore",
+            1=>"MagnetCore",
+            _=>"ShieldCore"
+        };
         g.transform.SetParent(parent,false);
         g.transform.localPosition=localPos;
         g.transform.localScale=Vector3.one*.42f;
 
-        ApplyMaterial(g.GetComponent<Renderer>(),
-            overdrive
-                ? new Color(.2f,2.1f,4.8f)
-                : new Color(1.8f,.08f,2.8f));
+        Color color=kind switch
+        {
+            0=>new Color(.2f,2.1f,4.8f),
+            1=>new Color(1.8f,.08f,2.8f),
+            _=>new Color(1.9f,1.4f,.12f)
+        };
+        ApplyMaterial(g.GetComponent<Renderer>(),color);
 
         var collider=g.GetComponent<Collider>();
         if(collider!=null) Destroy(collider);
@@ -748,6 +757,17 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         bool nowGameOver=IsGameOver();
         if(nowGameOver)
         {
+            if(shieldTimer>0f && bootstrap!=null &&
+               bootstrap.CancelHitWithShield())
+            {
+                shieldTimer=0f;
+                lastGameOver=false;
+                overdriveFlash=.5f;
+                PlaySfx(powerupClip);
+                Handheld.Vibrate();
+                return;
+            }
+
             if(!lastGameOver)
             {
                 SaveBestScore();
@@ -1026,6 +1046,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         coinCount=0;
         overdriveTimer=0f;
         magnetTimer=0f;
+        shieldTimer=0f;
         combo=0;
         comboTimer=0f;
     }
@@ -1078,6 +1099,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(magnetTimer>0f)
             GUI.Label(new Rect(left,top+118f,260f,26f),
                 "MAGNET "+magnetTimer.ToString("0.0")+"s",subStyle);
+        if(shieldTimer>0f)
+            GUI.Label(new Rect(left,top+140f,260f,26f),
+                "SHIELD "+shieldTimer.ToString("0.0")+"s",subStyle);
+
 
         if(overdriveFlash>0f)
             overdriveFlash-=Time.unscaledDeltaTime;
