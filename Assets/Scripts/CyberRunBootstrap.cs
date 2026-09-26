@@ -39,6 +39,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         Screen.autorotateToPortraitUpsideDown=false;
         Screen.autorotateToLandscapeLeft=false;
         Screen.autorotateToLandscapeRight=false;
+        Screen.sleepTimeout=SleepTimeout.NeverSleep;
         BuildWorld();
     }
 
@@ -413,6 +414,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         if(player!=null)
         {
             SetSliding(false);
+            Physics.SyncTransforms();
             player.position=new Vector3(0,PlayerGroundY,4f);
             player.localScale=playerBaseScale;
             player.rotation=Quaternion.identity;
