@@ -574,7 +574,6 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             Vector3 pos=hazard.localPosition;
             pos.y=1.55f+
                 Mathf.Sin(t*2.1f+phase)*.42f;
-            pos.x+=Mathf.Sin(t*1.15f+phase)*.012f;
             hazard.localPosition=pos;
         }
     }
