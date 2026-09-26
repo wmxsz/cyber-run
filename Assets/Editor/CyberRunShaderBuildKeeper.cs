@@ -23,6 +23,9 @@ public static class CyberRunShaderBuildKeeper
         Add("CyberRun/City",shaders);
         Add("CyberRun/Unlit",shaders);
         Add("CyberRun/Particle",shaders);
+        Add("CyberRun/City",shaders);
+        Add("CyberRun/Road",shaders);
+        Add("CyberRun/Hologram",shaders);
         Add("Universal Render Pipeline/Lit",shaders);
         Add("Universal Render Pipeline/Unlit",shaders);
 
