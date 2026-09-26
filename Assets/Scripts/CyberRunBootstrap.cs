@@ -222,7 +222,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                 yVelocity=11f;
             }
 
-            if(Keyboard.current.downArrowKey.wasPressedThisFrame)
+            if(Keyboard.current.downArrowKey.wasPressedThisFrame && IsGrounded())
                 Slide();
         }
 
@@ -248,7 +248,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                         SetSliding(false);
                         yVelocity=11f;
                     }
-                    else if(delta.y<0f)
+                    else if(delta.y<0f && IsGrounded())
                     {
                         Slide();
                     }
@@ -257,6 +257,13 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                 touchStart=Vector2.zero;
             }
         }
+    }
+
+    bool IsGrounded()
+    {
+        return player!=null
+            && player.position.y<=PlayerGroundY+.02f
+            && Mathf.Abs(yVelocity)<.25f;
     }
 
     void Slide()
