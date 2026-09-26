@@ -1331,92 +1331,163 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         if(!started && !IsGameOver())
         {
-            GUI.color=new Color(.006f,.008f,.025f,.96f);
+            GUI.color=new Color(.003f,.005f,.018f,.97f);
             GUI.DrawTexture(
                 new Rect(0,0,Screen.width,Screen.height),
+                Texture2D.whiteTexture);
+
+            GUI.color=new Color(.05f,.85f,1f,.65f);
+            GUI.DrawTexture(
+                new Rect(Screen.width*.5f-150f,Screen.height*.25f,300f,2f),
+                Texture2D.whiteTexture);
+            GUI.color=new Color(1f,.06f,.55f,.65f);
+            GUI.DrawTexture(
+                new Rect(Screen.width*.5f-95f,Screen.height*.25f+82f,190f,2f),
                 Texture2D.whiteTexture);
             GUI.color=Color.white;
 
             GUI.Label(
-                new Rect(Screen.width*.5f-180f,Screen.height*.28f,360f,60f),
+                new Rect(Screen.width*.5f-190f,Screen.height*.28f,380f,60f),
                 "CYBER RUN",hudStyle);
 
             GUI.Label(
-                new Rect(Screen.width*.5f-180f,Screen.height*.28f+52f,360f,28f),
-                "NEON METROPOLIS",subStyle);
+                new Rect(Screen.width*.5f-190f,Screen.height*.28f+52f,380f,28f),
+                "NEON METROPOLIS // SECTOR 07",subStyle);
 
             GUI.Label(
-                new Rect(Screen.width*.5f-150f,Screen.height*.62f,300f,32f),
+                new Rect(Screen.width*.5f-155f,Screen.height*.62f,310f,32f),
                 "TAP TO START",hudStyle);
 
             GUI.Label(
-                new Rect(Screen.width*.5f-170f,Screen.height*.62f+38f,340f,26f),
-                "SWIPE  /  JUMP  /  SLIDE",subStyle);
+                new Rect(Screen.width*.5f-180f,Screen.height*.62f+38f,360f,26f),
+                "SWIPE  /  JUMP  /  SLIDE  /  SURVIVE",subStyle);
             return;
         }
+
         float left=safe.x+18f;
         float top=Screen.height-safe.yMax+16f;
 
-        string score=hudScore;
-        string meters=hudMeters;
+        GUI.color=new Color(.004f,.009f,.028f,.82f);
+        GUI.DrawTexture(
+            new Rect(left-10f,top-8f,355f,150f),
+            Texture2D.whiteTexture);
+        GUI.color=new Color(.04f,.75f,1f,.85f);
+        GUI.DrawTexture(
+            new Rect(left-10f,top-8f,3f,150f),
+            Texture2D.whiteTexture);
+        GUI.color=new Color(1f,.06f,.55f,.7f);
+        GUI.DrawTexture(
+            new Rect(left-7f,top-8f,260f,2f),
+            Texture2D.whiteTexture);
+        GUI.color=Color.white;
 
         GUI.Label(new Rect(left,top,340f,32f),
-            "CYBER RUN  //  "+meters,hudStyle);
-        GUI.Label(new Rect(left,top+30f,300f,26f),
-            "SCORE "+score+"  BEST "+bestScore,subStyle);
-        GUI.Label(new Rect(left,top+50f,240f,26f),
-            "DATA "+coinCount.ToString("000"),subStyle);
+            "CYBER RUN  //  "+hudMeters,hudStyle);
+        GUI.Label(new Rect(left,top+30f,340f,26f),
+            "SCORE "+hudScore+"  BEST "+bestScore,subStyle);
+        GUI.Label(new Rect(left,top+50f,260f,26f),
+            "DATA "+hudData,subStyle);
 
-        if(overdriveTimer>0f)
+        if(!string.IsNullOrEmpty(hudCombo))
+            GUI.Label(new Rect(left,top+74f,220f,26f),
+                hudCombo,subStyle);
+
+        if(!string.IsNullOrEmpty(hudOverdrive))
             GUI.Label(new Rect(left,top+96f,260f,26f),
-                "OVERCLOCK "+overdriveTimer.ToString("0.0")+"s",subStyle);
+                hudOverdrive,subStyle);
 
-        if(overdriveFlash>0f)
-        {
-            GUI.color=new Color(.05f,.85f,1f,
-                Mathf.Clamp01(overdriveFlash*1.8f));
-            GUI.DrawTexture(
-                new Rect(0,0,Screen.width,Screen.height),
-                Texture2D.whiteTexture);
-            GUI.color=Color.white;
-        }
+        if(!string.IsNullOrEmpty(hudMagnet))
+            GUI.Label(new Rect(left,top+118f,260f,26f),
+                hudMagnet,subStyle);
 
-        if(combo>1&&comboTimer>0f)
-            GUI.Label(new Rect(left,top+74f,220f,28f),
-                "COMBO x"+combo,subStyle);
+        if(!string.IsNullOrEmpty(hudShield))
+            GUI.Label(new Rect(left,top+140f,260f,26f),
+                hudShield,subStyle);
 
         Rect pauseRect=new Rect(
             safe.xMax-78f,Screen.height-safe.yMax+14f,62f,40f);
 
+        Color oldBg=GUI.backgroundColor;
+        GUI.backgroundColor=new Color(.015f,.09f,.16f,.92f);
         if(GUI.Button(pauseRect,paused?"▶":"Ⅱ",buttonStyle))
             SetPaused(!paused);
+        GUI.backgroundColor=oldBg;
 
         if(introTimer>0f&&!paused&&!IsGameOver())
         {
             GUI.Label(
-                new Rect(Screen.width*.5f-150f,Screen.height*.73f,300f,35f),
+                new Rect(Screen.width*.5f-165f,Screen.height*.73f,330f,35f),
                 "SWIPE  /  DODGE  /  SURVIVE",
                 subStyle);
         }
 
         if(IsGameOver())
+        {
+            GUI.color=new Color(.003f,.006f,.02f,.88f);
+            GUI.DrawTexture(
+                new Rect(Screen.width*.5f-175f,Screen.height*.5f-120f,350f,245f),
+                Texture2D.whiteTexture);
+            GUI.color=new Color(1f,.05f,.45f,.85f);
+            GUI.DrawTexture(
+                new Rect(Screen.width*.5f-140f,Screen.height*.5f-120f,280f,3f),
+                Texture2D.whiteTexture);
+            GUI.color=new Color(.05f,.8f,1f,.75f);
+            GUI.DrawTexture(
+                new Rect(Screen.width*.5f-95f,Screen.height*.5f+92f,190f,2f),
+                Texture2D.whiteTexture);
+            GUI.color=Color.white;
+
             GUI.Label(
-                new Rect(Screen.width*.5f-150f,Screen.height*.5f+82f,300f,28f),
+                new Rect(Screen.width*.5f-150f,Screen.height*.5f-82f,300f,40f),
+                "RUN TERMINATED",hudStyle);
+            GUI.Label(
+                new Rect(Screen.width*.5f-150f,Screen.height*.5f-42f,300f,28f),
                 "SCORE "+(DistanceScore+bonusScore).ToString("0000000"),
                 subStyle);
+            GUI.Label(
+                new Rect(Screen.width*.5f-150f,Screen.height*.5f-18f,300f,26f),
+                "BEST "+bestScore.ToString("0000000"),
+                subStyle);
+        }
 
         if(paused)
         {
-            GUI.Box(
-                new Rect(Screen.width*.5f-145f,Screen.height*.5f-75f,290f,150f),
-                "SYSTEM PAUSED",panelStyle);
+            GUI.color=new Color(.003f,.006f,.02f,.9f);
+            GUI.DrawTexture(
+                new Rect(Screen.width*.5f-155f,Screen.height*.5f-82f,310f,165f),
+                Texture2D.whiteTexture);
+            GUI.color=new Color(.05f,.85f,1f,.8f);
+            GUI.DrawTexture(
+                new Rect(Screen.width*.5f-125f,Screen.height*.5f-82f,250f,2f),
+                Texture2D.whiteTexture);
+            GUI.color=Color.white;
+
+            GUI.Label(
+                new Rect(Screen.width*.5f-135f,Screen.height*.5f-62f,270f,34f),
+                "SYSTEM PAUSED",hudStyle);
+
+            Color previousBg=GUI.backgroundColor;
+            GUI.backgroundColor=new Color(.015f,.09f,.16f,.96f);
 
             if(GUI.Button(
-                new Rect(Screen.width*.5f-80f,Screen.height*.5f+5f,160f,44f),
+                new Rect(Screen.width*.5f-80f,Screen.height*.5f+2f,160f,44f),
                 "RESUME",buttonStyle))
             {
                 SetPaused(false);
             }
+
+            GUI.backgroundColor=previousBg;
+        }
+
+        if(overdriveFlash>0f)
+        {
+            GUI.color=new Color(
+                .05f,.85f,1f,
+                Mathf.Clamp01(overdriveFlash*1.8f));
+            GUI.DrawTexture(
+                new Rect(0,0,Screen.width,Screen.height),
+                Texture2D.whiteTexture);
+            GUI.color=Color.white;
         }
     }
 }
