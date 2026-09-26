@@ -707,8 +707,8 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             if(child.name!="MovingLaser") continue;
 
             int chosenLane=cycle<=0
-                ? ((segmentIndex/3)%3)-1
-                : ((cycle+segment.GetInstanceID())%3)-1;
+                ? PositiveModulo(segmentIndex/3,3)-1
+                : PositiveModulo(cycle+segment.GetInstanceID(),3)-1;
             bool collidesWithStatic=false;
 
             for(int i=0;i<2;i++)
@@ -731,6 +731,12 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                 2.5f);
             break;
         }
+    }
+
+    int PositiveModulo(int value,int modulus)
+    {
+        int remainder=value%modulus;
+        return remainder<0 ? remainder+modulus : remainder;
     }
 
     void FollowCamera(float dt)
