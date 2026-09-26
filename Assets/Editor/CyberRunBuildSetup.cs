@@ -14,6 +14,11 @@ public static class CyberRunBuildSetup
 {
     static CyberRunBuildSetup()
     {
+        ConfigureProject();
+    }
+
+    public static void ConfigureProject()
+    {
         PlayerSettings.companyName="CyberRun";
         PlayerSettings.productName="Cyber Run";
         PlayerSettings.bundleVersion="0.1.0";
