@@ -158,7 +158,7 @@ for source, markers, label in [
     (gameplay_visuals, ["CyberRunGameplayVisuals", "StyleObstacles", "StyleCoins", "StylePowerups", "StyleTraffic"], "gameplay visuals"),
     (holo_script, ["CyberRunHolograms", "HologramBillboard", "CyberRun/Hologram"], "holograms"),
     (road_script, ["CyberRunRoadVisual", "CyberRun/Road", "roadShader"], "road visuals"),
-    (city_script, ["CyberRunCityVisual", "CyberRun/City", "CreateRooftopDetails"], "city visuals"),
+    (city_script, ["CyberRunCityVisual", "CyberRun/City", "AddRooftopDetails"], "city visuals"),
 ]:
     for marker in markers:
         if marker not in source:
