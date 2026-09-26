@@ -1392,6 +1392,13 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         runStartDistance=bootstrap!=null
             ? bootstrap.Distance
             : runStartDistance;
+        lastBootstrapDistance=runStartDistance;
+        lastPlayerY=player!=null ? player.position.y : PlayerGroundY;
+        lastPlayerX=player!=null ? player.position.x : 0f;
+        lastCameraX=lastPlayerX;
+        lastWorldZ=player!=null ? player.position.z : 0f;
+        wasSliding=false;
+        laneSfxCooldown=0f;
         bonusScore=0;
         coinCount=0;
         overdriveTimer=0f;
