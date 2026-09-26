@@ -32,7 +32,6 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     AudioSource sfx;
     AudioSource ambience;
     AudioClip coinClip,jumpClip,slideClip,laneClip,powerupClip,crashClip;
-    FieldInfo gameOverField;
 
     long bonusScore;
     int combo;
@@ -665,6 +664,38 @@ public sealed class CyberRunContentSystems : MonoBehaviour
            !IsGameOver())
             SetPaused(!paused);
 
+        bool nowGameOver=IsGameOver();
+        if(nowGameOver)
+        {
+            if(!lastGameOver)
+            {
+                SaveBestScore();
+                PlaySfx(crashClip);
+                Handheld.Vibrate();
+            }
+
+            lastGameOver=true;
+            if(hudRefreshTimer>0f)
+                hudRefreshTimer-=Time.unscaledDeltaTime;
+            else
+            {
+                UpdateHudCache();
+                hudRefreshTimer=.12f;
+            }
+            return;
+        }
+
+        if(lastGameOver)
+        {
+            lastGameOver=false;
+            ResetMetaState();
+            started=true;
+            paused=false;
+            appAutoPaused=false;
+            Time.timeScale=1f;
+            introTimer=2.2f;
+        }
+
         if(introTimer>0f) introTimer-=Time.unscaledDeltaTime;
 
         UpdateSegments();
@@ -680,29 +711,6 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             UpdateHudCache();
             hudRefreshTimer=.12f;
         }
-
-        bool nowGameOver=IsGameOver();
-        if(!lastGameOver && nowGameOver)
-        {
-            long currentScore=DistanceScore+bonusScore;
-            if(currentScore>bestScore)
-            {
-                bestScore=currentScore;
-                PlayerPrefs.SetInt(
-                    "CyberRun_BestScore",
-                    (int)Mathf.Min(bestScore,int.MaxValue));
-                PlayerPrefs.Save();
-            }
-
-            PlaySfx(crashClip);
-            Handheld.Vibrate();
-        }
-        else if(lastGameOver && !nowGameOver)
-        {
-            ResetMetaState();
-            introTimer=2.2f;
-        }
-        lastGameOver=nowGameOver;
 
         if(laneSfxCooldown>0f)
             laneSfxCooldown-=Time.unscaledDeltaTime;
@@ -889,6 +897,18 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             : "";
     }
 
+    void SaveBestScore()
+    {
+        long currentScore=DistanceScore+bonusScore;
+        if(currentScore<=bestScore) return;
+
+        bestScore=currentScore;
+        PlayerPrefs.SetInt(
+            "CyberRun_BestScore",
+            (int)Mathf.Min(bestScore,int.MaxValue));
+        PlayerPrefs.Save();
+    }
+
     void UpdateScore()
     {
         if(comboTimer>0f)
@@ -934,12 +954,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     bool IsGameOver()
     {
-        if(gameOverField==null) return false;
-
-        var bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
-        if(bootstrap==null) return false;
-
-        return (bool)gameOverField.GetValue(bootstrap);
+        return bootstrap!=null && bootstrap.IsGameOver;
     }
 
     void PlaySfx(AudioClip clip)
