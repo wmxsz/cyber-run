@@ -1159,16 +1159,37 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             if(d2<1.75f)
             {
                 Vector3 pos=powerup.transform.position;
+                string powerName=powerup.name;
                 powerup.SetActive(false);
-                overdriveTimer=8f;
-                overdriveFlash=.35f;
+
+                if(powerName=="OverdriveCore")
+                {
+                    overdriveTimer=8f;
+                    overdriveFlash=.35f;
+                }
+                else if(powerName=="MagnetCore")
+                {
+                    magnetTimer=8f;
+                    overdriveFlash=.22f;
+                }
+                else if(powerName=="ShieldCore")
+                {
+                    shieldTimer=18f;
+                    overdriveFlash=.28f;
+                }
+                else
+                {
+                    overdriveFlash=.12f;
+                }
+
                 PlaySfx(powerupClip);
                 Handheld.Vibrate();
 
                 if(collectBurst!=null)
                 {
                     collectBurst.transform.position=pos;
-                    collectBurst.Emit(18);
+                    collectBurst.Emit(
+                        powerName=="ShieldCore" ? 24 : 18);
                 }
             }
         }
