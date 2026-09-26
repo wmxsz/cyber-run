@@ -437,6 +437,11 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             return;
         }
 
+        // ContentSystems owns the start/pause state via Time.timeScale.
+        // Never queue gameplay input while time is stopped.
+        if(Time.timeScale<=.001f)
+            return;
+
         InputFrame();
         float dt=Mathf.Min(Time.deltaTime,.05f);
 
