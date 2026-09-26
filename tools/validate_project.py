@@ -124,8 +124,8 @@ for marker in [
     "PlayerSettings.Android.minSdkVersion=AndroidSdkVersions.AndroidApiLevel26;",
     "PlayerSettings.Android.targetSdkVersion=AndroidSdkVersions.AndroidApiLevel36;",
 
-    'PlayerSettings.bundleVersion="0.3.1";',
-    "PlayerSettings.Android.bundleVersionCode=4;",
+    'PlayerSettings.bundleVersion="0.4.0";',
+    "PlayerSettings.Android.bundleVersionCode=5;",
 ]:
     if marker not in build_setup_version:
         errors.append(f"release version marker missing: {marker}")
@@ -257,6 +257,11 @@ for marker in [
     "StableSeed(segmentIndex,segment.cycle)",
     "vehicleGlows",
     "visualsVisible",
+    "CreateDataGate(",
+    "ConfigureBoostGate(",
+    "UpdateBoostGates()",
+    "TriggerSpeedBurst(",
+    "gateStreak",
     "renderers=root.GetComponentsInChildren<Renderer>(true)",
     "ShadowCastingMode.Off",
     "crashClip",
