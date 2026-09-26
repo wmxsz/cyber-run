@@ -11,7 +11,19 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     readonly List<Collider> obstacles = new();
     readonly List<Transform> movingHazards = new();
     readonly Dictionary<Transform,int> segmentCycles=new();
+    readonly Dictionary<Transform,Transform[]> hazardCache=new();
     static readonly Dictionary<int,Material> materialCache=new();
+    static readonly int[][] HazardLanePatterns=
+    {
+        new[]{-1,1},
+        new[]{0,-1},
+        new[]{1,0},
+        new[]{-1,0},
+        new[]{0,1},
+        new[]{1,-1},
+        new[]{-1,1},
+        new[]{0,1}
+    };
     Transform player;
     Camera cam;
     int lane;
@@ -224,6 +236,19 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         }
 
         segments.Add(root);
+
+        var hazardTransforms=root.GetComponentsInChildren<Transform>(true);
+        var cachedHazards=new List<Transform>(3);
+        for(int h=0;h<hazardTransforms.Length;h++)
+        {
+            var hazard=hazardTransforms[h];
+            if(hazard!=null &&
+               (hazard.name=="JumpObstacle" ||
+                hazard.name=="SlideGate" ||
+                hazard.name=="MovingLaser"))
+                cachedHazards.Add(hazard);
+        }
+        hazardCache[root]=cachedHazards.ToArray();
     }
 
     void CreateRunnerDetails()
@@ -644,14 +669,28 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
     void ReconfigureSegmentObstacles(Transform segment,int cycle)
     {
-        var hazards=new List<Transform>();
-        foreach(var child in segment.GetComponentsInChildren<Transform>(true))
+        if(!hazardCache.TryGetValue(segment,out var cached) ||
+           cached==null || cached.Length<2)
+            return;
+
+        Transform first=null;
+        Transform second=null;
+        Transform movingLaser=null;
+
+        for(int i=0;i<cached.Length;i++)
         {
-            if(child.name=="JumpObstacle"||child.name=="SlideGate")
-                hazards.Add(child);
+            var child=cached[i];
+            if(child==null) continue;
+
+            if(child.name=="MovingLaser")
+                movingLaser=child;
+            else if(first==null)
+                first=child;
+            else if(second==null)
+                second=child;
         }
 
-        if(hazards.Count<2) return;
+        if(first==null||second==null) return;
 
         int difficultyStep=Mathf.FloorToInt(
             distance/1800f);
@@ -659,27 +698,15 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         if(segment.name.StartsWith("Segment_"))
             int.TryParse(segment.name.Substring(8),out segmentIndex);
         int basePattern=cycle<=0
-            ? Mathf.Abs(segmentIndex)%8
-            : Mathf.Abs(
-                segment.GetInstanceID()+cycle*7+difficultyStep*11)%8;
+            ? PositiveModulo(segmentIndex,8)
+            : PositiveModulo(
+                segment.GetInstanceID()+cycle*7+difficultyStep*11,8);
 
-        int[][] lanes=
-        {
-            new[]{-1,1},
-            new[]{0,-1},
-            new[]{1,0},
-            new[]{-1,0},
-            new[]{0,1},
-            new[]{1,-1},
-            new[]{-1,1},
-            new[]{0,1}
-        };
-
-        int[] selected=lanes[basePattern];
+        int[] selected=HazardLanePatterns[basePattern];
 
         for(int i=0;i<2;i++)
         {
-            var hazard=hazards[i];
+            var hazard=i==0 ? first : second;
             if(hazard==null) continue;
 
             float x=selected[i]*LaneWidth;
@@ -692,7 +719,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             int shift=((segment.GetInstanceID()>>2)+cycle)%3-1;
             for(int i=0;i<2;i++)
             {
-                var hazard=hazards[i];
+                var hazard=i==0 ? first : second;
                 float laneX=Mathf.Clamp(
                     (hazard.localPosition.x/LaneWidth)+shift,-1f,1f);
                 hazard.localPosition=new Vector3(
@@ -702,34 +729,24 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             }
         }
 
-        foreach(var child in segment.GetComponentsInChildren<Transform>(true))
+        if(movingLaser!=null)
         {
-            if(child.name!="MovingLaser") continue;
-
             int chosenLane=cycle<=0
                 ? PositiveModulo(segmentIndex/3,3)-1
                 : PositiveModulo(cycle+segment.GetInstanceID(),3)-1;
-            bool collidesWithStatic=false;
-
-            for(int i=0;i<2;i++)
-            {
-                if(Mathf.Abs(
-                    hazards[i].localPosition.x-
-                    chosenLane*LaneWidth)<.01f)
-                {
-                    collidesWithStatic=true;
-                    break;
-                }
-            }
+            bool collidesWithStatic=
+                Mathf.Abs(first.localPosition.x-
+                    chosenLane*LaneWidth)<.01f ||
+                Mathf.Abs(second.localPosition.x-
+                    chosenLane*LaneWidth)<.01f;
 
             if(collidesWithStatic)
                 chosenLane=Mathf.Clamp(chosenLane+1,-1,1);
 
-            child.localPosition=new Vector3(
+            movingLaser.localPosition=new Vector3(
                 chosenLane*LaneWidth,
                 1.55f,
                 2.5f);
-            break;
         }
     }
 
