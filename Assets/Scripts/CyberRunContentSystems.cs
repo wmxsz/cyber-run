@@ -129,6 +129,24 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         bloom.intensity.value=1.15f;
         bloom.threshold.value=.7f;
         bloom.scatter.value=.8f;
+
+        var grading=profile.Add<UnityEngine.Rendering.Universal.ColorAdjustments>();
+        grading.active=true;
+        grading.postExposure.value=.15f;
+        grading.contrast.value=8f;
+        grading.saturation.value=12f;
+        grading.colorFilter.value=new Color(.9f,.97f,1f,1f);
+
+        var tonemapping=profile.Add<UnityEngine.Rendering.Universal.Tonemapping>();
+        tonemapping.active=true;
+        tonemapping.mode.value=
+            UnityEngine.Rendering.Universal.TonemappingMode.ACES;
+
+        var vignette=profile.Add<UnityEngine.Rendering.Universal.Vignette>();
+        vignette.active=true;
+        vignette.intensity.value=.16f;
+        vignette.smoothness.value=.72f;
+
         volume.profile=profile;
 
         if(cam!=null)
