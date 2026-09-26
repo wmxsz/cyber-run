@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using System.IO;
+using UnityEditor.Build;
 
 [InitializeOnLoad]
 public static class CyberRunBuildSetup
@@ -16,7 +17,8 @@ public static class CyberRunBuildSetup
         PlayerSettings.Android.targetArchitectures=AndroidArchitecture.ARM64;
         PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android,ScriptingImplementation.IL2CPP);
         PlayerSettings.Android.minSdkVersion=AndroidSdkVersions.AndroidApiLevel26;
-        PlayerSettings.defaultScreenOrientation=ScreenOrientation.Portrait;
+        PlayerSettings.defaultInterfaceOrientation=UIOrientation.Portrait;
+
         EnsureScene();
     }
 
