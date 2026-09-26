@@ -10,6 +10,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     readonly List<Transform> segments = new();
     readonly List<Collider> obstacles = new();
     readonly List<Transform> movingHazards = new();
+    readonly Dictionary<Transform,int> segmentCycles=new();
     static readonly Dictionary<int,Material> materialCache=new();
     Transform player;
     Camera cam;
@@ -586,7 +587,70 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         foreach(var s in segments)
         {
             if(s.position.z+SegmentLength*.5f<behind)
+            {
                 s.position += Vector3.forward*SegmentLength*SegmentCount;
+
+                if(!segmentCycles.TryGetValue(s,out int cycle))
+                    cycle=0;
+
+                cycle++;
+                segmentCycles[s]=cycle;
+                ReconfigureSegmentObstacles(s,cycle);
+            }
+        }
+    }
+
+    void ReconfigureSegmentObstacles(Transform segment,int cycle)
+    {
+        var hazards=new List<Transform>();
+        foreach(var child in segment.GetComponentsInChildren<Transform>(true))
+        {
+            if(child.name=="JumpObstacle"||child.name=="SlideGate")
+                hazards.Add(child);
+        }
+
+        if(hazards.Count<2) return;
+
+        int basePattern=Mathf.Abs(
+            segment.GetInstanceID()+cycle*7)%8;
+
+        int[][] lanes=
+        {
+            new[]{-1,1},
+            new[]{0,-1},
+            new[]{1,0},
+            new[]{-1,0},
+            new[]{0,1},
+            new[]{1,-1},
+            new[]{-1,1},
+            new[]{0,1}
+        };
+
+        int[] selected=lanes[basePattern];
+
+        for(int i=0;i<2;i++)
+        {
+            var hazard=hazards[i];
+            if(hazard==null) continue;
+
+            float x=selected[i]*LaneWidth;
+            hazard.localPosition=new Vector3(
+                x,hazard.localPosition.y,hazard.localPosition.z);
+        }
+
+        if((cycle&3)==3)
+        {
+            int shift=((segment.GetInstanceID()>>2)+cycle)%3-1;
+            for(int i=0;i<2;i++)
+            {
+                var hazard=hazards[i];
+                float laneX=Mathf.Clamp(
+                    (hazard.localPosition.x/LaneWidth)+shift,-1f,1f);
+                hazard.localPosition=new Vector3(
+                    laneX*LaneWidth,
+                    hazard.localPosition.y,
+                    hazard.localPosition.z);
+            }
         }
     }
 
