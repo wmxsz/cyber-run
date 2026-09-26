@@ -155,6 +155,17 @@ for marker in [
     if marker not in visual_overdrive:
         errors.append(f"visual overdrive marker missing: {marker}")
 
+action_vfx = read("Assets/Scripts/CyberRunActionVFX.cs")
+for marker in [
+    "CyberRunActionVFX",
+    "EmitLaneBurst",
+    "EmitJumpStart",
+    "EmitLanding",
+    "ActionBurst",
+]:
+    if marker not in action_vfx:
+        errors.append(f"action VFX marker missing: {marker}")
+
 music_system = read("Assets/Scripts/CyberRunMusicSystem.cs")
 for marker in [
     "CyberRunMusicSystem",
