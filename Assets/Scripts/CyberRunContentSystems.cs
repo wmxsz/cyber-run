@@ -50,6 +50,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     float lastPlayerX;
     float lastCameraX;
     float lastWorldZ;
+    float lastBootstrapDistance;
     bool lastGameOver;
     bool wasSliding;
     bool paused;
@@ -132,6 +133,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
 
         runStartDistance=bootstrap!=null ? bootstrap.Distance : 0f;
+        lastBootstrapDistance=runStartDistance;
         lastPlayerY=player.position.y;
         lastPlayerX=player.position.x;
         lastCameraX=player.position.x;
@@ -905,6 +907,14 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         if(introTimer>0f) introTimer-=Time.unscaledDeltaTime;
 
+        if(bootstrap!=null)
+        {
+            float currentBootstrapDistance=bootstrap.Distance;
+            if(currentBootstrapDistance+.5f<lastBootstrapDistance)
+                ResetSegmentTracking();
+            lastBootstrapDistance=currentBootstrapDistance;
+        }
+
         if(visualCullTimer>0f)
             visualCullTimer-=Time.unscaledDeltaTime;
         else
@@ -1018,6 +1028,29 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 if(renderer!=null && renderer.enabled!=visible)
                     renderer.enabled=visible;
             }
+        }
+    }
+
+    void ResetSegmentTracking()
+    {
+        nearMissMarker.Clear();
+
+        for(int i=0;i<data.Count;i++)
+        {
+            var segment=data[i];
+            if(segment.root==null) continue;
+
+            segment.cycle=0;
+            segment.lastZ=segment.root.position.z;
+            RebuildCoinPath(segment);
+
+            for(int j=0;j<segment.coins.Count;j++)
+                if(segment.coins[j]!=null)
+                    segment.coins[j].SetActive(true);
+
+            for(int j=0;j<segment.powerups.Count;j++)
+                if(segment.powerups[j]!=null)
+                    segment.powerups[j].SetActive(true);
         }
     }
 
