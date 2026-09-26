@@ -1227,30 +1227,43 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 float z=obstacle.bounds.center.z;
                 float dz=z-playerZ;
 
-                if(dz>10f||dz<-5f) continue;
+                if(dz>12f||dz<-6f)
+                {
+                    nearMissMarker[obstacle]=dz;
+                    continue;
+                }
 
                 if(!nearMissMarker.TryGetValue(
-                    obstacle,out float marker) ||
-                   Mathf.Abs(marker-obstacle.transform.position.z)>50f)
+                    obstacle,out float previousDz))
                 {
-                    nearMissMarker[obstacle]=obstacle.transform.position.z;
+                    nearMissMarker[obstacle]=dz;
+                    continue;
+                }
 
-                    if(dz<-1.2f)
+                if(previousDz>0f && dz<=-1.2f)
+                {
+                    float dx=Mathf.Abs(
+                        obstacle.bounds.center.x-playerX);
+                    float dy=Mathf.Abs(
+                        obstacle.bounds.center.y-playerY);
+
+                    if(dx<1.55f && dy<2.1f)
                     {
-                        float dx=Mathf.Abs(
-                            obstacle.bounds.center.x-playerX);
-                        float dy=Mathf.Abs(
-                            obstacle.bounds.center.y-playerY);
+                        bonusScore+=35L;
+                        combo=Mathf.Min(combo+1,9);
+                        comboTimer=2.4f;
+                        PlaySfx(laneClip);
 
-                        if(dx<1.55f && dy<2.1f)
+                        if(collectBurst!=null)
                         {
-                            bonusScore+=35L;
-                            combo=Mathf.Min(combo+1,9);
-                            comboTimer=2.4f;
-                            PlaySfx(laneClip);
+                            collectBurst.transform.position=
+                                obstacle.bounds.center;
+                            collectBurst.Emit(6);
                         }
                     }
                 }
+
+                nearMissMarker[obstacle]=dz;
             }
         }
     }
