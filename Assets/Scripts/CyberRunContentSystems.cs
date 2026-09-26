@@ -97,6 +97,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     string hudFinalScore="";
     string hudBestScore="";
     Color hudAccent=new Color(.55f,.95f,1f,1f);
+    float visualCullTimer;
+    float visualCacheRefreshTimer;
+    float laneSfxCooldown;
 
     public bool IsOverdriveActive=>overdriveTimer>0f;
     public bool IsMagnetActive=>magnetTimer>0f;
@@ -922,7 +925,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             return false;
         }
 
-        if(touch.phase.ReadValue()==TouchPhase.Canceled)
+        if(touch.phase.ReadValue()==UnityEngine.InputSystem.TouchPhase.Canceled)
         {
             touchStart=Vector2.zero;
             return false;
