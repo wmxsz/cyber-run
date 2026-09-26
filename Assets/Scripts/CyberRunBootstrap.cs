@@ -128,14 +128,54 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
     void CreateRunnerDetails()
     {
-        Cube("ChestGlow",player,new Vector3(.46f,.16f,.08f),
-            new Vector3(0,.15f,.39f),new Color(.1f,.9f,1f));
+        var baseRenderer=player.GetComponent<Renderer>();
+        if(baseRenderer!=null) baseRenderer.enabled=false;
 
-        Cube("Visor",player,new Vector3(.42f,.13f,.08f),
-            new Vector3(0,.55f,.31f),new Color(1f,.08f,.75f));
+        Color suit=new Color(.02f,.035f,.075f);
+        Color cyan=new Color(.05f,1.8f,5f);
+        Color magenta=new Color(1.8f,.06f,3.7f);
+        Color white=new Color(.65f,.85f,1.2f);
 
-        Cube("Core",player,new Vector3(.18f,.32f,.10f),
-            new Vector3(0,-.18f,.38f),new Color(.95f,.15f,.35f));
+        Cube("Torso",player,new Vector3(.56f,.68f,.34f),
+            new Vector3(0,.02f,.02f),suit);
+        Cube("ChestLight",player,new Vector3(.42f,.055f,.055f),
+            new Vector3(0,.18f,.19f),cyan);
+        Cube("Core",player,new Vector3(.14f,.23f,.07f),
+            new Vector3(0,-.05f,.19f),magenta);
+
+        var head=GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        head.name="Head";
+        head.transform.SetParent(player,false);
+        head.transform.localPosition=new Vector3(0,.5f,.02f);
+        head.transform.localScale=new Vector3(.43f,.43f,.43f);
+        ApplyMaterial(head.GetComponent<Renderer>(),suit);
+        var headCollider=head.GetComponent<Collider>();
+        if(headCollider!=null) Destroy(headCollider);
+
+        Cube("Visor",player,new Vector3(.3f,.09f,.04f),
+            new Vector3(0,.54f,.22f),magenta);
+        Cube("VisorGlow",player,new Vector3(.22f,.025f,.025f),
+            new Vector3(0,.54f,.245f),white);
+
+        Cube("ShoulderL",player,new Vector3(.18f,.18f,.32f),
+            new Vector3(-.35f,.16f,.02f),cyan);
+        Cube("ShoulderR",player,new Vector3(.18f,.18f,.32f),
+            new Vector3(.35f,.16f,.02f),magenta);
+
+        Cube("ArmL",player,new Vector3(.14f,.48f,.15f),
+            new Vector3(-.38f,-.12f,.02f),suit);
+        Cube("ArmR",player,new Vector3(.14f,.48f,.15f),
+            new Vector3(.38f,-.12f,.02f),suit);
+
+        Cube("LegL",player,new Vector3(.18f,.5f,.18f),
+            new Vector3(-.16f,-.55f,.01f),suit);
+        Cube("LegR",player,new Vector3(.18f,.5f,.18f),
+            new Vector3(.16f,-.55f,.01f),suit);
+
+        Cube("BootL",player,new Vector3(.22f,.12f,.32f),
+            new Vector3(-.16f,-.82f,.08f),cyan);
+        Cube("BootR",player,new Vector3(.22f,.12f,.32f),
+            new Vector3(.16f,-.82f,.08f),magenta);
     }
 
     static void OverheadFrame(Transform parent)
