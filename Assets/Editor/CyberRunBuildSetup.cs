@@ -26,8 +26,16 @@ public static class CyberRunBuildSetup
         PlayerSettings.Android.targetArchitectures=AndroidArchitecture.ARM64;
         PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android,ScriptingImplementation.IL2CPP);
         PlayerSettings.Android.minSdkVersion=AndroidSdkVersions.AndroidApiLevel26;
+        PlayerSettings.Android.targetSdkVersion=AndroidSdkVersions.AndroidApiLevel35;
         PlayerSettings.Android.bundleVersionCode=1;
         EditorUserBuildSettings.buildAppBundle=false;
+
+        PlayerSettings.SetMobileMTRendering(
+            BuildTarget.Android,true);
+        PlayerSettings.stripUnusedMeshComponents=true;
+        PlayerSettings.SetManagedStrippingLevel(
+            NamedBuildTarget.Android,
+            ManagedStrippingLevel.Medium);
         PlayerSettings.defaultInterfaceOrientation=UIOrientation.Portrait;
 
         PlayerSettings.colorSpace=ColorSpace.Linear;
@@ -41,7 +49,7 @@ public static class CyberRunBuildSetup
             UnityEditor.Build.Il2CppCodeGeneration.OptimizeSpeed);
         PlayerSettings.SetIl2CppCompilerConfiguration(
             NamedBuildTarget.Android,
-            Il2CppCompilerConfiguration.Release);
+            Il2CppCompilerConfiguration.Master);
 
         EnsureRenderPipeline();
         EnsureInputHandling();
