@@ -109,7 +109,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                 : new Vector3(x,.7f,-8f+o*17f);
 
             var obstacle=Cube(slideGate?"SlideGate":"JumpObstacle",root,scale,localPos,
-                slideGate?new Color(1f,.25f,.85f):new Color(1f,.12f,.05f));
+                slideGate?new Color(1f,.25f,.85f):new Color(1f,.12f,.05f),true);
             var obstacleCollider=obstacle.GetComponent<Collider>();
             if(obstacleCollider!=null) obstacles.Add(obstacleCollider);
         }
@@ -143,7 +143,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             new Vector3(0,6f,0),neon);
     }
 
-    static GameObject Cube(string name,Transform parent,Vector3 scale,Vector3 localPos,Color color)
+    static GameObject Cube(string name,Transform parent,Vector3 scale,Vector3 localPos,Color color,bool withCollider=false)
     {
         var g=GameObject.CreatePrimitive(PrimitiveType.Cube);
         g.name=name;
@@ -151,6 +151,14 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         g.transform.localScale=scale;
         g.transform.localPosition=localPos;
         ApplyMaterial(g.GetComponent<Renderer>(), color);
+
+        if(!withCollider)
+        {
+            var unusedCollider=g.GetComponent<Collider>();
+            if(unusedCollider!=null)
+                Object.Destroy(unusedCollider);
+        }
+
         return g;
     }
 
