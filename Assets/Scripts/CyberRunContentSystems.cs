@@ -22,6 +22,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         public readonly List<Collider> obstacles=new();
         public Renderer[] renderers;
         public bool visualsVisible=true;
+        public Transform boostGate;
+        public int boostGateLane;
+        public float boostGateLastDz;
+        public bool boostGateTriggered;
         public int cycle;
         public float lastZ;
     }
@@ -43,7 +47,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     AudioSource sfx;
     AudioSource ambience;
     readonly List<Transform> drones=new();
-    AudioClip coinClip,jumpClip,slideClip,laneClip,powerupClip,crashClip;
+    AudioClip coinClip,jumpClip,slideClip,laneClip,powerupClip,crashClip,gateClip;
 
     long bonusScore;
     int combo;
@@ -331,6 +335,55 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         if((index%4)==0)
             CreateSkyRail(seg.root);
+
+        if(index%4==2)
+        {
+            seg.boostGate=CreateDataGate(seg.root);
+            ConfigureBoostGate(seg);
+        }
+    }
+
+    Transform CreateDataGate(Transform parent)
+    {
+        var root=new GameObject("DataGate").transform;
+        root.SetParent(parent,false);
+
+        Color cyan=new Color(.04f,1.65f,4.8f);
+        Color magenta=new Color(1.7f,.06f,3.8f);
+
+        Cube("DataGateLeft",root,new Vector3(.09f,3.2f,.09f),
+            new Vector3(-1.05f,1.6f,0f),cyan);
+        Cube("DataGateRight",root,new Vector3(.09f,3.2f,.09f),
+            new Vector3(1.05f,1.6f,0f),magenta);
+        Cube("DataGateTop",root,new Vector3(2.18f,.09f,.09f),
+            new Vector3(0,3.18f,0f),cyan);
+        Cube("DataGateCore",root,new Vector3(.14f,.62f,.14f),
+            new Vector3(0,1.65f,.05f),magenta);
+        Cube("DataGateFloor",root,new Vector3(1.55f,.025f,.8f),
+            new Vector3(0,.16f,0f),new Color(.04f,.65f,2.6f));
+
+        root.gameObject.SetActive(true);
+        return root;
+    }
+
+    void ConfigureBoostGate(SegmentData segment)
+    {
+        if(segment.boostGate==null||segment.root==null||player==null) return;
+
+        int segmentIndex=GetSegmentIndex(segment.root.name);
+        uint seed=StableSeed(segmentIndex,segment.cycle+37);
+        segment.boostGateLane=(int)(seed%3u)-1;
+
+        segment.boostGate.localPosition=
+            new Vector3(
+                segment.boostGateLane*LaneWidth,
+                0f,
+                0f);
+
+        segment.boostGateTriggered=false;
+        segment.boostGate.gameObject.SetActive(true);
+        segment.boostGateLastDz=
+            segment.boostGate.position.z-player.position.z;
     }
 
     int GetSegmentIndex(string name)
@@ -540,6 +593,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         laneClip=CreateTone("lane",520f,.045f,.022f);
         powerupClip=CreateSweep("powerup",520f,1200f,.16f,.055f);
         crashClip=CreateSweep("crash",210f,60f,.18f,.06f);
+        gateClip=CreateSweep("gate",760f,1420f,.14f,.05f);
 
         var ambient=CreateAmbience();
         ambience.clip=ambient;
@@ -946,6 +1000,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         }
 
         UpdateSegments();
+        UpdateBoostGates();
         UpdateCoins();
         UpdatePowerups();
         UpdateVehicles();
@@ -1087,6 +1142,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 s.cycle++;
 
                 RebuildCoinPath(s);
+                ConfigureBoostGate(s);
 
                 foreach(var coin in s.coins)
                 {
@@ -1158,6 +1214,57 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         }
     }
 
+    void UpdateBoostGates()
+    {
+        if(bootstrap==null||player==null) return;
+
+        float playerZ=player.position.z;
+        float dt=Time.unscaledDeltaTime;
+
+        for(int i=0;i<data.Count;i++)
+        {
+            var segment=data[i];
+            var gate=segment.boostGate;
+            if(gate==null||!gate.gameObject.activeSelf) continue;
+
+            gate.Rotate(0f,105f*dt,0f,Space.Self);
+
+            float dz=gate.position.z-playerZ;
+            if(!segment.boostGateTriggered &&
+               segment.boostGateLastDz>0f &&
+               dz<=0f)
+            {
+                segment.boostGateTriggered=true;
+                gate.gameObject.SetActive(false);
+
+                float lateral=Mathf.Abs(
+                    player.position.x-gate.position.x);
+                float vertical=Mathf.Abs(
+                    player.position.y-(PlayerGroundY+.55f));
+
+                if(lateral<1.2f&&vertical<2.25f)
+                {
+                    bonusScore+=250L;
+                    combo=Mathf.Min(combo+2,9);
+                    comboTimer=3.8f;
+                    bootstrap.TriggerSpeedBurst(3.2f,2.6f);
+                    overdriveFlash=.34f;
+                    flashColor=new Color(.05f,1.75f,4.8f,1f);
+                    PlaySfx(gateClip);
+
+                    if(collectBurst!=null)
+                    {
+                        collectBurst.transform.position=
+                            gate.position;
+                        collectBurst.Emit(24);
+                    }
+                }
+            }
+
+            segment.boostGateLastDz=dz;
+        }
+    }
+
     static uint StableSeed(int segmentIndex,int cycle)
     {
         unchecked
@@ -1226,6 +1333,12 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(overdriveTimer>0f)
             multiplier*=2;
         bonusScore+=100L*multiplier;
+
+        if(combo==6)
+            bonusScore+=180L;
+        else if(combo==9)
+            bonusScore+=360L;
+
         PlaySfx(coinClip);
 
         if(collectBurst!=null)
@@ -1385,6 +1498,17 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         comboTimer=0f;
         coinCount=0;
         bonusScore=0;
+
+        for(int i=0;i<data.Count;i++)
+        {
+            var segment=data[i];
+            if(segment.boostGate==null) continue;
+
+            segment.boostGateTriggered=false;
+            segment.boostGate.gameObject.SetActive(true);
+            segment.boostGateLastDz=
+                segment.boostGate.position.z-player.position.z;
+        }
     }
 
     void ResetMetaState()
@@ -1447,6 +1571,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         hudHeader="CYBER RUN  //  "+hudMeters+"  ["+hudSector+"]";
         hudScoreLine="SCORE "+hudScore+"  BEST "+bestScore.ToString("0000000");
         hudDataLine="DATA "+hudData+"   SPEED "+hudSpeed;
+        if(bootstrap!=null&&bootstrap.IsSpeedBurstActive)
+            hudDataLine+="   BOOST "+bootstrap.SpeedBurstRemaining.ToString("0.0")+"s";
         hudFinalScore=(DistanceScore+bonusScore).ToString("0000000");
         hudBestScore=bestScore.ToString("0000000");
 
