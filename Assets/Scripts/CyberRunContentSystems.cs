@@ -884,6 +884,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(lastGameOver)
         {
             lastGameOver=false;
+            ResetCollectibles();
             ResetMetaState();
             started=true;
             paused=false;
@@ -1145,6 +1146,38 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             d.localRotation=Quaternion.Euler(
                 0f,Mathf.Sin(time*.8f+phase)*10f,0f);
         }
+    }
+
+    void ResetCollectibles()
+    {
+        nearMissMarker.Clear();
+
+        for(int i=0;i<data.Count;i++)
+        {
+            var segment=data[i];
+
+            for(int j=0;j<segment.coins.Count;j++)
+            {
+                var coin=segment.coins[j];
+                if(coin!=null)
+                    coin.SetActive(true);
+            }
+
+            for(int j=0;j<segment.powerups.Count;j++)
+            {
+                var powerup=segment.powerups[j];
+                if(powerup!=null)
+                    powerup.SetActive(true);
+            }
+        }
+
+        magnetTimer=0f;
+        overdriveTimer=0f;
+        shieldTimer=0f;
+        combo=0;
+        comboTimer=0f;
+        coinCount=0;
+        bonusScore=0;
     }
 
     void ResetMetaState()
