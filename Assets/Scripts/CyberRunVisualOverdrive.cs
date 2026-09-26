@@ -38,7 +38,7 @@ public sealed class CyberRunVisualOverdrive : MonoBehaviour
         for(int i=0;i<renderers.Length;i++)
         {
             var r=renderers[i];
-            if(r==null) continue;
+            if(r==null||!r.enabled) continue;
 
             var ps=r.GetComponent<ParticleSystemRenderer>();
             if(ps!=null) continue;
