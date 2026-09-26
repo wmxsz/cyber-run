@@ -375,8 +375,40 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         int segmentIndex=GetSegmentIndex(segment.root.name);
         uint seed=StableSeed(segmentIndex,segment.cycle+37);
-        segment.boostGateLane=(int)(seed%3u)-1;
+        int desired=(int)(seed%3u)-1;
+        int chosen=desired;
 
+        for(int probe=0;probe<3;probe++)
+        {
+            int candidate=CoinLaneOrder[
+                (PositiveModulo(desired+1,3)+probe)%3];
+            bool blocked=false;
+
+            for(int i=0;i<segment.obstacles.Count;i++)
+            {
+                var obstacle=segment.obstacles[i];
+                if(obstacle==null) continue;
+
+                Vector3 local=segment.root.InverseTransformPoint(
+                    obstacle.bounds.center);
+
+                if(Mathf.Abs(local.z-7f)<5f &&
+                   Mathf.Abs(
+                       local.x-candidate*LaneWidth)<1.35f)
+                {
+                    blocked=true;
+                    break;
+                }
+            }
+
+            if(!blocked)
+            {
+                chosen=candidate;
+                break;
+            }
+        }
+
+        segment.boostGateLane=chosen;
         segment.boostGate.localPosition=
             new Vector3(
                 segment.boostGateLane*LaneWidth,
