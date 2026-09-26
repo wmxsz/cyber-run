@@ -342,6 +342,12 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             return false;
         }
 
+        if(t.phase.ReadValue()==UnityEngine.InputSystem.TouchPhase.Canceled)
+        {
+            touchStart=Vector2.zero;
+            return false;
+        }
+
         if(!t.press.wasReleasedThisFrame) return false;
 
         Vector2 position=t.position.ReadValue();
