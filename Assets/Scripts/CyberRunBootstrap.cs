@@ -57,8 +57,9 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         player.position = new Vector3(0,PlayerGroundY,4);
         player.localScale = new Vector3(.72f,1.05f,.72f);
         playerBaseScale = player.localScale;
-        ApplyMaterial(player.GetComponent<Renderer>(), new Color(.05f,.85f,1f));
+        ApplyMaterial(player.GetComponent<Renderer>(), new Color(.05f,.65f,1f));
         playerCollider = player.GetComponent<CapsuleCollider>();
+        CreateRunnerDetails();
         previousPlayerPosition=player.position;
 
         for(int i=0;i<SegmentCount;i++) CreateSegment(i, 18f+i*SegmentLength);
@@ -81,6 +82,8 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         Cube("Road",root,new Vector3(9,.25f,SegmentLength),Vector3.zero,new Color(.025f,.035f,.06f));
         Strip(root,-4.2f);
         Strip(root,4.2f);
+        LaneStrip(root,-1.35f);
+        LaneStrip(root,1.35f);
 
         for(int side=-1;side<=1;side+=2)
             for(int b=0;b<3;b++)
@@ -89,6 +92,9 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                 Cube("Building",root,new Vector3(2.2f,h,8f),
                     new Vector3(side*(7f+b*2.3f),h*.5f,-10f+b*11f),
                     new Color(.035f,.055f,.11f));
+                Cube("BuildingNeon",root,new Vector3(2.25f,.07f,.16f),
+                    new Vector3(side*(7f+b*2.3f),h-.16f,-10f+b*11f),
+                    (b&1)==0 ? new Color(.05f,.8f,1f) : new Color(.95f,.08f,.65f));
             }
 
         for(int o=0;o<2;o++)
@@ -108,7 +114,33 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             if(obstacleCollider!=null) obstacles.Add(obstacleCollider);
         }
 
+        if((index&1)==0)
+            OverheadFrame(root);
+
         segments.Add(root);
+    }
+
+    void CreateRunnerDetails()
+    {
+        Cube("ChestGlow",player,new Vector3(.46f,.16f,.08f),
+            new Vector3(0,.15f,.39f),new Color(.1f,.9f,1f));
+
+        Cube("Visor",player,new Vector3(.42f,.13f,.08f),
+            new Vector3(0,.55f,.31f),new Color(1f,.08f,.75f));
+
+        Cube("Core",player,new Vector3(.18f,.32f,.10f),
+            new Vector3(0,-.18f,.38f),new Color(.95f,.15f,.35f));
+    }
+
+    static void OverheadFrame(Transform parent)
+    {
+        Color neon=new Color(.9f,.08f,.7f);
+        Cube("FrameLeft",parent,new Vector3(.16f,6f,.16f),
+            new Vector3(-4.65f,3f,0),neon);
+        Cube("FrameRight",parent,new Vector3(.16f,6f,.16f),
+            new Vector3(4.65f,3f,0),neon);
+        Cube("FrameTop",parent,new Vector3(9.3f,.16f,.16f),
+            new Vector3(0,6f,0),neon);
     }
 
     static GameObject Cube(string name,Transform parent,Vector3 scale,Vector3 localPos,Color color)
@@ -142,6 +174,12 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     {
         Cube("NeonStrip",parent,new Vector3(.08f,.08f,SegmentLength),
             new Vector3(x,.18f,0),new Color(.1f,.8f,1f));
+    }
+
+    static void LaneStrip(Transform parent,float x)
+    {
+        Cube("LaneStrip",parent,new Vector3(.035f,.035f,SegmentLength),
+            new Vector3(x,.16f,0),new Color(.05f,.35f,.55f));
     }
 
     void Update()
