@@ -51,6 +51,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     long bonusScore;
     int combo;
+    int gateStreak;
     float comboTimer;
     float runStartDistance;
     float lastPlayerY;
@@ -324,9 +325,6 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         CreateRoadReflections(seg.root,index);
 
-        // Include all content created above in the distance-culling cache.
-        seg.renderers=seg.root.GetComponentsInChildren<Renderer>(true);
-
         if(index%3==0)
             CreateCyberSign(seg.root,new Vector3(-5.45f,4.2f,7f),true);
 
@@ -341,6 +339,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             seg.boostGate=CreateDataGate(seg.root);
             ConfigureBoostGate(seg);
         }
+
+        // Cache every renderer, including late-added route content.
+        seg.renderers=seg.root.GetComponentsInChildren<Renderer>(true);
     }
 
     Transform CreateDataGate(Transform parent)
@@ -1244,10 +1245,14 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
                 if(lateral<1.2f&&vertical<2.25f)
                 {
-                    bonusScore+=250L;
+                    gateStreak++;
+                    int streakBonus=Mathf.Min(gateStreak,5)*70;
+                    bonusScore+=250L+streakBonus;
                     combo=Mathf.Min(combo+2,9);
-                    comboTimer=3.8f;
-                    bootstrap.TriggerSpeedBurst(3.2f,2.6f);
+                    comboTimer=3.8f+Mathf.Min(gateStreak,4)*.25f;
+                    bootstrap.TriggerSpeedBurst(
+                        3.2f+Mathf.Min(gateStreak,3)*.25f,
+                        2.6f+Mathf.Min(gateStreak,3)*.2f);
                     overdriveFlash=.34f;
                     flashColor=new Color(.05f,1.75f,4.8f,1f);
                     PlaySfx(gateClip);
@@ -1258,6 +1263,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                             gate.position;
                         collectBurst.Emit(24);
                     }
+                }
+                else
+                {
+                    gateStreak=0;
                 }
             }
 
@@ -1498,6 +1507,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         comboTimer=0f;
         coinCount=0;
         bonusScore=0;
+        gateStreak=0;
 
         for(int i=0;i<data.Count;i++)
         {
@@ -1530,6 +1540,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         shieldTimer=0f;
         combo=0;
         comboTimer=0f;
+        gateStreak=0;
     }
 
     void UpdateHudCache()
@@ -1571,6 +1582,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         hudHeader="CYBER RUN  //  "+hudMeters+"  ["+hudSector+"]";
         hudScoreLine="SCORE "+hudScore+"  BEST "+bestScore.ToString("0000000");
         hudDataLine="DATA "+hudData+"   SPEED "+hudSpeed;
+        if(gateStreak>1)
+            hudDataLine+="   GATE x"+gateStreak;
         if(bootstrap!=null&&bootstrap.IsSpeedBurstActive)
             hudDataLine+="   BOOST "+bootstrap.SpeedBurstRemaining.ToString("0.0")+"s";
         hudFinalScore=(DistanceScore+bonusScore).ToString("0000000");
