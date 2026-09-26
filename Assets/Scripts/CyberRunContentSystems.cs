@@ -506,17 +506,14 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         renderer.shadowCastingMode=
             UnityEngine.Rendering.ShadowCastingMode.Off;
         renderer.receiveShadows=false;
-        if(projectShader!=null)
+
+        var shader=Shader.Find("CyberRun/Particle");
+        if(shader!=null)
         {
-            int key=ColorKey(new Color(2.3f,1.05f,.08f));
-            if(!materialCache.TryGetValue(key,out var mat)||mat==null)
-            {
-                mat=new Material(projectShader);
-                mat.name="CyberRunMat_CollectBurst";
-                if(mat.HasProperty("_BaseColor"))
-                    mat.SetColor("_BaseColor",new Color(2.3f,1.05f,.08f));
-                materialCache[key]=mat;
-            }
+            var mat=new Material(shader);
+            mat.name="CyberRunParticleBurst";
+            if(mat.HasProperty("_BaseColor"))
+                mat.SetColor("_BaseColor",new Color(2.5f,1.1f,.05f));
             renderer.sharedMaterial=mat;
         }
     }
