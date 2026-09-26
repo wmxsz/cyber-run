@@ -356,7 +356,13 @@ for source, markers, label in [
             errors.append(f"{label} marker missing: {marker}")
 
 surface_shader = read("Assets/Shaders/CyberRunSurface.shader")
-for marker in ['Shader "CyberRun/Surface"', "CyberSurface", "ComputeFogFactor"]:
+for marker in [
+    'Shader "CyberRun/Surface"',
+    "CyberSurface",
+    "ComputeFogFactor",
+    "smoothstep(.455,.5,cell.x)",
+    "smoothstep(.455,.5,cell.y)",
+]:
     if marker not in surface_shader:
         errors.append(f"surface shader marker missing: {marker}")
 
@@ -365,7 +371,12 @@ road_shader = read("Assets/Shaders/CyberRunRoad.shader")
 holo_shader = read("Assets/Shaders/CyberRunHologram.shader")
 for source, markers, label in [
     (skyline_shader, ['Shader "CyberRun/City"', "Hash21"], "city shader"),
-    (road_shader, ['Shader "CyberRun/Road"', "GridDensity"], "road shader"),
+    (road_shader, [
+        'Shader "CyberRun/Road"',
+        "GridDensity",
+        "smoothstep(.44,.5,cell.x)",
+        "smoothstep(.44,.5,cell.y)",
+    ], "road shader"),
     (holo_shader, ['Shader "CyberRun/Hologram"', "Blend SrcAlpha One"], "hologram shader"),
 ]:
     for marker in markers:
