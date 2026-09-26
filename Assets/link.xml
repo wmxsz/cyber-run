@@ -2,5 +2,6 @@
   <assembly fullname="Assembly-CSharp">
     <type fullname="CyberRunBootstrap" preserve="all" />
     <type fullname="CyberRunContentSystems" preserve="all" />
+    <type fullname="CyberRunRunnerAnimator" preserve="all" />
   </assembly>
 </linker>
