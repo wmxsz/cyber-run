@@ -688,7 +688,11 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     void SetupRain()
     {
         var go=new GameObject("CyberRain");
-        go.transform.position=Vector3.zero;
+        if(player!=null)
+        {
+            go.transform.SetParent(player,false);
+            go.transform.localPosition=new Vector3(0,7f,16f);
+        }
         rain=go.AddComponent<ParticleSystem>();
 
         var main=rain.main;
@@ -705,7 +709,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         var shape=rain.shape;
         shape.shapeType=ParticleSystemShapeType.Box;
-        shape.position=new Vector3(0,7f,16f);
+        shape.position=Vector3.zero;
         shape.scale=new Vector3(14f,1f,60f);
         shape.rotation=new Vector3(8f,0f,0f);
 
