@@ -1652,6 +1652,13 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 new Rect(Screen.width*.5f-150f,Screen.height*.5f-18f,300f,26f),
                 "BEST "+bestScore.ToString("0000000"),
                 subStyle);
+
+            if(GUI.Button(
+                new Rect(Screen.width*.5f-85f,Screen.height*.5f+28f,170f,46f),
+                "RESTART",buttonStyle))
+            {
+                bootstrap?.RestartRun();
+            }
         }
 
         if(paused)
