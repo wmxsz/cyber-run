@@ -212,17 +212,20 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         segmentRoots.Sort((a,b)=>a.position.z.CompareTo(b.position.z));
 
         foreach(var root in segmentRoots)
-            data.Add(new SegmentData
+        {
+            var segData=new SegmentData
             {
                 root=root,
                 renderers=root.GetComponentsInChildren<Renderer>(true),
                 lastZ=root.position.z
-            });
-            var segData=data[data.Count-1];
+            };
+            data.Add(segData);
+
             var colliders=root.GetComponentsInChildren<Collider>(true);
             for(int i=0;i<colliders.Length;i++)
                 if(colliders[i]!=null)
                     segData.obstacles.Add(colliders[i]);
+        }
     }
 
     void BuildSegmentContent(SegmentData seg)
@@ -294,6 +297,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         }
 
         CreateRoadReflections(seg.root,index);
+
+        // Include all content created above in the distance-culling cache.
+        seg.renderers=seg.root.GetComponentsInChildren<Renderer>(true);
 
         if(index%3==0)
             CreateCyberSign(seg.root,new Vector3(-5.45f,4.2f,7f),true);
