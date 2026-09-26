@@ -90,6 +90,12 @@ public sealed class CyberRunSectorPalette : MonoBehaviour
         activeSector=sector;
 
         Palette p=palettes[sector%palettes.Length];
+
+        // Late-created segment decorations must join the active palette too.
+        renderers=FindObjectsByType<Renderer>(
+            FindObjectsInactive.Exclude,
+            FindObjectsSortMode.None);
+
         ApplyPalette(p,sector);
     }
 
