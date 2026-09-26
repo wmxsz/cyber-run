@@ -655,8 +655,13 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
         int difficultyStep=Mathf.FloorToInt(
             distance/1800f);
-        int basePattern=Mathf.Abs(
-            segment.GetInstanceID()+cycle*7+difficultyStep*11)%8;
+        int segmentIndex=0;
+        if(segment.name.StartsWith("Segment_"))
+            int.TryParse(segment.name.Substring(8),out segmentIndex);
+        int basePattern=cycle<=0
+            ? Mathf.Abs(segmentIndex)%8
+            : Mathf.Abs(
+                segment.GetInstanceID()+cycle*7+difficultyStep*11)%8;
 
         int[][] lanes=
         {
@@ -701,7 +706,9 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         {
             if(child.name!="MovingLaser") continue;
 
-            int chosenLane=((cycle+segment.GetInstanceID())%3)-1;
+            int chosenLane=cycle<=0
+                ? ((segmentIndex/3)%3)-1
+                : ((cycle+segment.GetInstanceID())%3)-1;
             bool collidesWithStatic=false;
 
             for(int i=0;i<2;i++)
@@ -720,8 +727,8 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
             child.localPosition=new Vector3(
                 chosenLane*LaneWidth,
-                child.localPosition.y,
-                child.localPosition.z);
+                1.55f,
+                2.5f);
             break;
         }
     }
@@ -787,11 +794,19 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             previousPlayerPosition=player.position;
         }
 
+        segmentCycles.Clear();
+
         for(int i=0;i<segments.Count;i++)
         {
             if(segments[i]!=null)
-                segments[i].position=new Vector3(0,0,18f+i*SegmentLength);
+            {
+                segments[i].position=new Vector3(
+                    0,0,18f+i*SegmentLength);
+                ReconfigureSegmentObstacles(segments[i],0);
+            }
         }
+
+        Physics.SyncTransforms();
 
         if(cam!=null)
         {
