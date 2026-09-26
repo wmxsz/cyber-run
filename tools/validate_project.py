@@ -119,6 +119,7 @@ for marker in [
     "ShadowCastingMode.Off",
     "crashClip",
     "Handheld.Vibrate()",
+    "Physics.autoSyncTransforms=false;",
 ]:
     if marker not in content:
         errors.append(f"content marker missing: {marker}")
