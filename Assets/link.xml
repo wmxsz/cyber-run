@@ -14,5 +14,6 @@
     <type fullname="CyberRunIntensityController" preserve="all" />
     <type fullname="CyberRunPowerVFX" preserve="all" />
     <type fullname="CyberRunSectorPalette" preserve="all" />
+    <type fullname="CyberRunMusicSystem" preserve="all" />
   </assembly>
 </linker>
