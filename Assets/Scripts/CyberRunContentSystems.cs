@@ -19,6 +19,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         public readonly List<Transform> vehicles=new();
         public readonly List<Collider> obstacles=new();
         public Renderer[] renderers;
+        public int cycle;
         public float lastZ;
     }
 
@@ -1000,6 +1001,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
             if(s.root.position.z-s.lastZ>SegmentLength*5f)
             {
+                s.cycle++;
+
+                RebuildCoinPath(s);
+
                 foreach(var coin in s.coins)
                 {
                     if(coin!=null) coin.SetActive(true);
@@ -1011,6 +1016,60 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             }
 
             s.lastZ=s.root.position.z;
+        }
+    }
+
+    void RebuildCoinPath(SegmentData segment)
+    {
+        if(segment.coins.Count==0||segment.root==null) return;
+
+        int seed=Mathf.Abs(
+            segment.root.GetInstanceID()+segment.cycle*31);
+        int[] laneOrder={-1,0,1};
+
+        for(int i=0;i<segment.coins.Count;i++)
+        {
+            var coin=segment.coins[i];
+            if(coin==null) continue;
+
+            float z=-13f+i*8.2f;
+            int desired=Mathf.Abs(seed+i*17)%3-1;
+            float y=(i==1||i==2)
+                ? 1.55f+((seed+i)%3)*.16f
+                : 1.35f;
+
+            int chosen=desired;
+            for(int probe=0;probe<3;probe++)
+            {
+                int candidate=laneOrder[
+                    (Array.IndexOf(laneOrder,desired)+probe)%3];
+
+                bool blocked=false;
+                for(int j=0;j<segment.obstacles.Count;j++)
+                {
+                    var obstacle=segment.obstacles[j];
+                    if(obstacle==null) continue;
+
+                    Vector3 local=segment.root.InverseTransformPoint(
+                        obstacle.bounds.center);
+
+                    if(Mathf.Abs(local.z-z)<4.2f &&
+                       Mathf.Abs(local.x-candidate*LaneWidth)<1.35f)
+                    {
+                        blocked=true;
+                        break;
+                    }
+                }
+
+                if(!blocked)
+                {
+                    chosen=candidate;
+                    break;
+                }
+            }
+
+            coin.transform.localPosition=
+                new Vector3(chosen*LaneWidth,y,z);
         }
     }
 
