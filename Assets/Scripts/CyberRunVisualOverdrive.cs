@@ -49,6 +49,8 @@ public sealed class CyberRunVisualOverdrive : MonoBehaviour
 
             // Specialized visual passes own these renderers.
             if(name.Contains("Building",System.StringComparison.Ordinal) ||
+               name=="SkylineTower" ||
+               name=="SkylineBeacon" ||
                name=="Road" ||
                name=="HologramBillboard" ||
                name=="NeonDetail" ||
@@ -56,7 +58,9 @@ public sealed class CyberRunVisualOverdrive : MonoBehaviour
                name.StartsWith("CoinCore",System.StringComparison.Ordinal) ||
                name.StartsWith("PowerRing_",System.StringComparison.Ordinal) ||
                name=="AntennaCore" ||
-               name=="AntennaBeacon")
+               name=="AntennaBeacon" ||
+               name=="NeonAntenna" ||
+               name=="RoadPylon")
                 continue;
 
             Color baseColor=ReadBaseColor(r);
