@@ -21,6 +21,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     readonly List<SegmentData> data=new();
     readonly List<Transform> segmentRoots=new();
+    readonly Dictionary<int,Material> materialCache=new();
+    Shader projectShader;
 
     Transform player;
     Camera cam;
@@ -99,6 +101,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     void SetupEnvironment()
     {
+        projectShader=Shader.Find("CyberRun/Unlit");
+        if(projectShader==null)
+            projectShader=Shader.Find("Universal Render Pipeline/Unlit");
+
         RenderSettings.fog=true;
         RenderSettings.fogMode=FogMode.ExponentialSquared;
         RenderSettings.fogColor=new Color(.008f,.012f,.04f,1f);
@@ -302,17 +308,40 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     void ApplyMaterial(Renderer renderer,Color color)
     {
-        if(renderer==null) return;
-        var shader=Shader.Find("CyberRun/Unlit");
-        if(shader==null) shader=Shader.Find("Universal Render Pipeline/Unlit");
-        if(shader==null) return;
+        if(renderer==null||projectShader==null) return;
 
-        var mat=new Material(shader);
-        if(mat.HasProperty("_BaseColor"))
-            mat.SetColor("_BaseColor",color);
-        if(mat.HasProperty("_Color"))
-            mat.SetColor("_Color",color);
+        int key=ColorKey(color);
+        if(!materialCache.TryGetValue(key,out var mat)||mat==null)
+        {
+            mat=new Material(projectShader);
+            mat.name="CyberRunMat_"+key;
+            if(mat.HasProperty("_BaseColor"))
+                mat.SetColor("_BaseColor",color);
+            if(mat.HasProperty("_Color"))
+                mat.SetColor("_Color",color);
+            materialCache[key]=mat;
+        }
+
         renderer.sharedMaterial=mat;
+        renderer.shadowCastingMode=
+            UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows=false;
+        renderer.lightProbeUsage=
+            UnityEngine.Rendering.LightProbeUsage.Off;
+        renderer.reflectionProbeUsage=
+            UnityEngine.Rendering.ReflectionProbeUsage.Off;
+    }
+
+    int ColorKey(Color color)
+    {
+        int r=Mathf.RoundToInt(color.r*256f);
+        int g=Mathf.RoundToInt(color.g*256f);
+        int b=Mathf.RoundToInt(color.b*256f);
+        int a=Mathf.RoundToInt(color.a*256f);
+        unchecked
+        {
+            return (((r*397)^g)*397^b)*397^a;
+        }
     }
 
     void SetupAudio()
@@ -428,10 +457,22 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         var shader=Shader.Find("CyberRun/Unlit");
         if(shader!=null)
         {
-            var mat=new Material(shader);
-            if(mat.HasProperty("_BaseColor"))
-                mat.SetColor("_BaseColor",new Color(.05f,.8f,1f));
-            renderer.sharedMaterial=mat;
+            if(materialCache.Count>0)
+            {
+                int key=ColorKey(new Color(.05f,.8f,1f));
+                if(!materialCache.TryGetValue(key,out var trailMat)||trailMat==null)
+                {
+                    trailMat=new Material(shader);
+                    trailMat.name="CyberRunMat_Trail";
+                    if(trailMat.HasProperty("_BaseColor"))
+                        trailMat.SetColor("_BaseColor",new Color(.05f,.8f,1f));
+                    materialCache[key]=trailMat;
+                }
+                renderer.sharedMaterial=trailMat;
+            }
+            renderer.shadowCastingMode=
+                UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.receiveShadows=false;
         }
     }
 
