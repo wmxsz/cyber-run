@@ -26,6 +26,7 @@ Shader "CyberRun/Particle"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
@@ -33,6 +34,7 @@ Shader "CyberRun/Particle"
             {
                 float4 positionOS : POSITION;
                 float4 color : COLOR;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -48,6 +50,7 @@ Shader "CyberRun/Particle"
 
             Varyings vert(Attributes IN)
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
                 Varyings OUT;
                 float3 positionWS=TransformObjectToWorld(IN.positionOS.xyz);
                 OUT.positionHCS=TransformWorldToHClip(positionWS);
