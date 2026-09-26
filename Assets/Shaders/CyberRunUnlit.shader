@@ -33,6 +33,7 @@ Shader "CyberRun/Unlit"
             struct Varyings
             {
                 float4 positionHCS : SV_POSITION;
+                float fogFactor : TEXCOORD0;
             };
 
             CBUFFER_START(UnityPerMaterial)
@@ -42,13 +43,16 @@ Shader "CyberRun/Unlit"
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
-                OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
+                float3 positionWS = TransformObjectToWorld(IN.positionOS.xyz);
+                OUT.positionHCS = TransformWorldToHClip(positionWS);
+                OUT.fogFactor = ComputeFogFactor(OUT.positionHCS.z);
                 return OUT;
             }
 
             half4 frag(Varyings IN) : SV_Target
             {
-                return _BaseColor;
+                half3 rgb = MixFog(_BaseColor.rgb, IN.fogFactor);
+                return half4(rgb, _BaseColor.a);
             }
             ENDHLSL
         }
