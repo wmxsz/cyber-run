@@ -19,7 +19,8 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     Vector2 touchStart;
     Vector3 previousPlayerPosition;
     CapsuleCollider playerCollider;
-    float colliderHeight, colliderCenterY;
+    Vector3 playerBaseScale;
+    const float PlayerGroundY = 1.1f;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Boot()
@@ -48,15 +49,11 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
         player = GameObject.CreatePrimitive(PrimitiveType.Capsule).transform;
         player.name = "Runner";
-        player.position = new Vector3(0,1.1f,4);
+        player.position = new Vector3(0,PlayerGroundY,4);
         player.localScale = new Vector3(.72f,1.05f,.72f);
+        playerBaseScale = player.localScale;
         ApplyMaterial(player.GetComponent<Renderer>(), new Color(.05f,.85f,1f));
         playerCollider = player.GetComponent<CapsuleCollider>();
-        if(playerCollider!=null)
-        {
-            colliderHeight=playerCollider.height;
-            colliderCenterY=playerCollider.center.y;
-        }
         previousPlayerPosition=player.position;
 
         for(int i=0;i<SegmentCount;i++) CreateSegment(i, 18f+i*SegmentLength);
@@ -165,9 +162,9 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         float x=Mathf.Lerp(player.position.x,targetX,1f-Mathf.Exp(-14f*dt));
         yVelocity += -28f*dt;
         float y=player.position.y+yVelocity*dt;
-        if(y<1.1f)
+        if(y<PlayerGroundY)
         {
-            y=1.1f;
+            y=PlayerGroundY;
             yVelocity=0;
         }
         player.position=new Vector3(x,y,player.position.z);
@@ -219,7 +216,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                 lane=Mathf.Min(1,lane+1);
 
             if((Keyboard.current.upArrowKey.wasPressedThisFrame||Keyboard.current.spaceKey.wasPressedThisFrame)
-                &&player.position.y<=1.11f)
+                &&player.position.y<=PlayerGroundY+.01f)
             {
                 SetSliding(false);
                 yVelocity=11f;
@@ -246,7 +243,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                     {
                         lane=Mathf.Clamp(lane+(delta.x>0f?1:-1),-1,1);
                     }
-                    else if(delta.y>0f && player.position.y<=1.11f)
+                    else if(delta.y>0f && player.position.y<=PlayerGroundY+.01f)
                     {
                         SetSliding(false);
                         yVelocity=11f;
@@ -271,21 +268,25 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     void SetSliding(bool value)
     {
         sliding=value;
-        if(playerCollider==null) return;
+        if(player==null) return;
 
         if(value)
         {
-            playerCollider.height=colliderHeight*.55f;
-            var center=playerCollider.center;
-            center.y=colliderCenterY*.45f;
-            playerCollider.center=center;
+            float scaleY=playerBaseScale.y*.6f;
+            float yOffset=(playerBaseScale.y-scaleY);
+            var scale=playerBaseScale;
+            scale.y=scaleY;
+            player.localScale=scale;
+            var pos=player.position;
+            pos.y=PlayerGroundY-yOffset;
+            player.position=pos;
         }
         else
         {
-            playerCollider.height=colliderHeight;
-            var center=playerCollider.center;
-            center.y=colliderCenterY;
-            playerCollider.center=center;
+            player.localScale=playerBaseScale;
+            var pos=player.position;
+            if(pos.y<PlayerGroundY) pos.y=PlayerGroundY;
+            player.position=pos;
         }
     }
 
@@ -353,7 +354,8 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         if(player!=null)
         {
             SetSliding(false);
-            player.position=new Vector3(0,1.1f,4f);
+            player.position=new Vector3(0,PlayerGroundY,4f);
+            player.localScale=playerBaseScale;
             player.rotation=Quaternion.identity;
             previousPlayerPosition=player.position;
         }
