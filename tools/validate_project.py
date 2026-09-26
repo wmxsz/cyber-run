@@ -117,6 +117,9 @@ for marker in [
     "runStartDistance",
     "renderers=root.GetComponentsInChildren<Renderer>(true)",
     "ShadowCastingMode.Off",
+    "MovingLaser",
+    "movingHazards",
+    "UpdateMovingHazards()",
     "crashClip",
     "Handheld.Vibrate()",
 ]:
