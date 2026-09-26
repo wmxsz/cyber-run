@@ -1678,6 +1678,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     void OnApplicationPause(bool pause)
     {
+        if(pause && started && !IsGameOver())
+            SaveBestScore();
+
         if(pause && started && !IsGameOver() && !paused)
         {
             appAutoPaused=true;
@@ -1688,6 +1691,12 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             appAutoPaused=false;
             SetPaused(false);
         }
+    }
+
+    void OnApplicationQuit()
+    {
+        if(initialized && started && !IsGameOver())
+            SaveBestScore();
     }
 
     void OnDestroy()
