@@ -84,6 +84,11 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     string hudShield="";
     string hudSpeed="";
     string hudSector="";
+    string hudHeader="";
+    string hudScoreLine="";
+    string hudDataLine="";
+    string hudFinalScore="";
+    string hudBestScore="";
     Color hudAccent=new Color(.55f,.95f,1f,1f);
 
     public bool IsOverdriveActive=>overdriveTimer>0f;
@@ -159,6 +164,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         RenderSettings.ambientLight=new Color(.012f,.018f,.045f);
 
         var volumeGo=new GameObject("CyberRunPostFX");
+        volumeGo.transform.SetParent(transform,false);
         var volume=volumeGo.AddComponent<UnityEngine.Rendering.Volume>();
         volume.isGlobal=true;
         volume.priority=5f;
@@ -1278,7 +1284,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 else
                 {
                     overdriveFlash=.12f;
-                flashColor=new Color(.55f,.7f,1f,1f);
+                    flashColor=new Color(.55f,.7f,1f,1f);
                 }
 
                 PlaySfx(powerupClip);
@@ -1431,6 +1437,11 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         hudSector=GetSectorName(sector);
         hudAccent=GetSectorAccent(sector);
+        hudHeader="CYBER RUN  //  "+hudMeters+"  ["+hudSector+"]";
+        hudScoreLine="SCORE "+hudScore+"  BEST "+bestScore.ToString("0000000");
+        hudDataLine="DATA "+hudData+"   SPEED "+hudSpeed;
+        hudFinalScore=(DistanceScore+bonusScore).ToString("0000000");
+        hudBestScore=bestScore.ToString("0000000");
 
         hudStyle.normal.textColor=hudAccent;
         subStyle.normal.textColor=Color.Lerp(
@@ -1756,11 +1767,11 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         GUI.color=Color.white;
 
         GUI.Label(new Rect(left,top,360f,32f),
-            "CYBER RUN  //  "+hudMeters+"  ["+hudSector+"]",hudStyle);
+            hudHeader,hudStyle);
         GUI.Label(new Rect(left,top+30f,340f,26f),
-            "SCORE "+hudScore+"  BEST "+bestScore,subStyle);
+            hudScoreLine,subStyle);
         GUI.Label(new Rect(left,top+50f,260f,26f),
-            "DATA "+hudData+"   SPEED "+hudSpeed,subStyle);
+            hudDataLine,subStyle);
 
         float scanY=top-7f+
             Mathf.Repeat(Time.unscaledTime*34f,145f);
@@ -1825,11 +1836,11 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 "RUN TERMINATED",hudStyle);
             GUI.Label(
                 new Rect(Screen.width*.5f-150f,Screen.height*.5f-42f,300f,28f),
-                "SCORE "+(DistanceScore+bonusScore).ToString("0000000"),
+                "SCORE "+hudFinalScore,
                 subStyle);
             GUI.Label(
                 new Rect(Screen.width*.5f-150f,Screen.height*.5f-18f,300f,26f),
-                "BEST "+bestScore.ToString("0000000"),
+                "BEST "+hudBestScore,
                 subStyle);
 
             if(GUI.Button(
