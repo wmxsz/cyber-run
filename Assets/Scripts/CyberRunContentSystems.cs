@@ -105,6 +105,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         runStartDistance=bootstrap!=null ? bootstrap.Distance : 0f;
         lastPlayerY=player.position.y;
         lastPlayerX=player.position.x;
+        lastCameraX=player.position.x;
 
         bootstrap=GetComponent<CyberRunBootstrap>();
         if(bootstrap==null)
@@ -1183,7 +1184,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         cam.fieldOfView=Mathf.Lerp(
             cam.fieldOfView,targetFov,1f-Mathf.Exp(-4.5f*Time.unscaledDeltaTime));
 
-        float lateralDelta=player.position.x-lastPlayerX;
+        float lateralDelta=player.position.x-lastCameraX;
         float lateralVelocity=lateralDelta/
             Mathf.Max(.016f,Time.unscaledDeltaTime);
         float targetRoll=Mathf.Clamp(-lateralVelocity*1.8f,-6.5f,6.5f);
