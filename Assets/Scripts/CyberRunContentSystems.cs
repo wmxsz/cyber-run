@@ -1010,6 +1010,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
             if(s.root.position.z-s.lastZ>SegmentLength*5f)
             {
+                Physics.SyncTransforms();
                 s.cycle++;
 
                 RebuildCoinPath(s);
