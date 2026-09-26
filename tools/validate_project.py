@@ -66,7 +66,7 @@ for marker in [
     "SetIl2CppCodeGeneration(",
     "Il2CppCodeGeneration.OptimizeSpeed",
     "SetIl2CppCompilerConfiguration(",
-    "Il2CppCompilerConfiguration.Release",
+    "Il2CppCompilerConfiguration.Master",
 ]:
     if marker not in build_setup:
         errors.append(f"build setup marker missing: {marker}")
