@@ -117,9 +117,6 @@ for marker in [
     "runStartDistance",
     "renderers=root.GetComponentsInChildren<Renderer>(true)",
     "ShadowCastingMode.Off",
-    "MovingLaser",
-    "movingHazards",
-    "UpdateMovingHazards()",
     "crashClip",
     "Handheld.Vibrate()",
 ]:
@@ -304,3 +301,9 @@ print("CYBER RUN STATIC CHECK: PASS")
 print("Unity 6000.6.3f1 / URP 17.6.0 / Input System 1.20.0")
 print("Android ARM64 / IL2CPP configuration markers present")
 print("Runtime reset, touch input, swept collision, project shader and APK build markers present")
+required_runtime.extend([
+    "MovingLaser",
+    "movingHazards",
+    "UpdateMovingHazards()",
+])    
+
