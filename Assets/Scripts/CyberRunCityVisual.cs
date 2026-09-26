@@ -92,18 +92,23 @@ public sealed class CyberRunCityVisual : MonoBehaviour
             if(building==null) continue;
             if(building.name!="Building") continue;
             if((i&1)!=0) continue;
+            if(building.parent==null) continue;
+
+            float height=building.localScale.y;
+            float roofY=building.localPosition.y+height*.5f;
 
             var antenna=new GameObject("NeonAntenna").transform;
-            antenna.SetParent(building,false);
-            antenna.localPosition=new Vector3(0,.62f,0);
-            antenna.localScale=new Vector3(.5f,1.8f,.5f);
+            antenna.SetParent(building.parent,false);
+            antenna.localPosition=building.localPosition+
+                Vector3.up*(height*.5f+1.0f);
+            antenna.localScale=Vector3.one;
 
             var mesh=GameObject.CreatePrimitive(
                 PrimitiveType.Cylinder);
             mesh.name="AntennaCore";
             mesh.transform.SetParent(antenna,false);
-            mesh.transform.localScale=new Vector3(.12f,1f,.12f);
-            mesh.transform.localPosition=Vector3.zero;
+            mesh.transform.localPosition=new Vector3(0,.6f,0);
+            mesh.transform.localScale=new Vector3(.09f,.6f,.09f);
 
             var col=mesh.GetComponent<Collider>();
             if(col!=null) Destroy(col);
@@ -113,19 +118,54 @@ public sealed class CyberRunCityVisual : MonoBehaviour
             {
                 renderer.sharedMaterial=cityMaterial;
                 var block=new MaterialPropertyBlock();
-                block.SetColor("_BaseColor",new Color(.02f,.025f,.06f,1f));
-                block.SetColor("_WindowColor",new Color(
-                    .05f,1.2f,4.3f,1f));
-                block.SetFloat("_WindowStrength",2.2f);
-                block.SetColor("_RimColor",new Color(
-                    1.6f,.05f,3.6f,1f));
-                block.SetFloat("_RimStrength",2f);
-                block.SetFloat("_PulseSpeed",3.5f);
+                Color cyan=new Color(.05f,1.25f,4.3f,1f);
+                Color magenta=new Color(1.7f,.05f,3.6f,1f);
+                Color baseColor=(i&2)==0
+                    ? new Color(.018f,.022f,.055f,1f)
+                    : new Color(.028f,.018f,.05f,1f);
+
+                block.SetColor("_BaseColor",baseColor);
+                block.SetColor("_WindowColor",
+                    (i&2)==0 ? cyan : magenta);
+                block.SetFloat("_WindowStrength",2.15f);
+                block.SetColor("_RimColor",
+                    (i&2)==0 ? cyan : magenta);
+                block.SetFloat("_RimStrength",2.1f);
+                block.SetFloat("_PulseSpeed",3.2f);
                 renderer.SetPropertyBlock(block);
                 renderer.shadowCastingMode=
                     UnityEngine.Rendering.ShadowCastingMode.Off;
                 renderer.receiveShadows=false;
             }
+
+            var beacon=GameObject.CreatePrimitive(
+                PrimitiveType.Sphere);
+            beacon.name="AntennaBeacon";
+            beacon.transform.SetParent(antenna,false);
+            beacon.transform.localPosition=new Vector3(0,1.3f,0);
+            beacon.transform.localScale=Vector3.one*.16f;
+
+            var beaconCol=beacon.GetComponent<Collider>();
+            if(beaconCol!=null) Destroy(beaconCol);
+
+            var beaconRenderer=beacon.GetComponent<Renderer>();
+            if(beaconRenderer!=null && cityMaterial!=null)
+            {
+                beaconRenderer.sharedMaterial=cityMaterial;
+                var block=new MaterialPropertyBlock();
+                Color glow=(i&2)==0 ? cyan : magenta;
+                block.SetColor("_BaseColor",glow);
+                block.SetColor("_WindowColor",glow);
+                block.SetFloat("_WindowStrength",2.5f);
+                block.SetColor("_RimColor",glow);
+                block.SetFloat("_RimStrength",3f);
+                block.SetFloat("_PulseSpeed",4.5f);
+                beaconRenderer.SetPropertyBlock(block);
+                beaconRenderer.shadowCastingMode=
+                    UnityEngine.Rendering.ShadowCastingMode.Off;
+                beaconRenderer.receiveShadows=false;
+            }
         }
     }
+
 }
