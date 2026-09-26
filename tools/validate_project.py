@@ -338,6 +338,11 @@ required_runtime.extend([
     "MovingLaser",
     "movingHazards",
     "UpdateMovingHazards()",
+    "CreateCyberTunnel",
+    "TunnelLeft",
+    "TunnelRight",
+    "TunnelRoof",
+    "TunnelLight",
     "Physics.autoSyncTransforms=false;",
 ])    
 
