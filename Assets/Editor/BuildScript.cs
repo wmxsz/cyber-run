@@ -19,7 +19,6 @@ public static class BuildScript
         });
         if(report.summary.result!=BuildResult.Succeeded)
             throw new System.Exception("Android build failed: "+report.summary.result);
-        
         UnityEngine.Debug.Log("CyberRun Android APK build succeeded: build/CyberRun.apk");
     }
 }
