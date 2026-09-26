@@ -633,6 +633,9 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     void UpdateMovingHazards()
     {
         float t=Time.time;
+        float intensity=Mathf.InverseLerp(11f,21.5f,speed);
+        float frequency=Mathf.Lerp(2.0f,2.65f,intensity);
+        float amplitude=Mathf.Lerp(.34f,.52f,intensity);
 
         for(int i=0;i<movingHazards.Count;i++)
         {
@@ -642,7 +645,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             float phase=hazard.GetInstanceID()*.013f;
             Vector3 pos=hazard.localPosition;
             pos.y=1.55f+
-                Mathf.Sin(t*2.1f+phase)*.42f;
+                Mathf.Sin(t*frequency+phase)*amplitude;
             hazard.localPosition=pos;
         }
     }
