@@ -152,6 +152,17 @@ for marker in [
     if marker not in visual_overdrive:
         errors.append(f"visual overdrive marker missing: {marker}")
 
+power_vfx = read("Assets/Scripts/CyberRunPowerVFX.cs")
+for marker in [
+    "CyberRunPowerVFX",
+    "CyberRun/Surface",
+    "IsOverdriveActive",
+    "IsMagnetActive",
+    "IsShieldActive",
+]:
+    if marker not in power_vfx:
+        errors.append(f"power VFX marker missing: {marker}")
+
 intensity_script = read("Assets/Scripts/CyberRunIntensityController.cs")
 for marker in [
     "CyberRunIntensityController",
