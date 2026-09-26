@@ -9,6 +9,8 @@ Shader "CyberRun/City"
         _RimColor ("Rim Color", Color) = (0.05,0.8,1,1)
         _RimStrength ("Rim Strength", Range(0,5)) = 1.25
         _PulseSpeed ("Pulse Speed", Range(0,8)) = 1.2
+        _TowerScanSpeed ("Tower Scan Speed", Range(0,8)) = 1.4
+        _TowerScanStrength ("Tower Scan Strength", Range(0,2)) = .22
     }
 
     SubShader
@@ -55,6 +57,8 @@ Shader "CyberRun/City"
             float4 _RimColor;
             float _RimStrength;
             float _PulseSpeed;
+            float _TowerScanSpeed;
+            float _TowerScanStrength;
             CBUFFER_END
 
             float Hash21(float2 p)
@@ -100,8 +104,40 @@ Shader "CyberRun/City"
                 float pulse=.72+.28*sin(
                     _Time.y*_PulseSpeed+floor(IN.positionWS.y*2.0));
 
+                float scanCoord=
+                    IN.positionWS.y*.32+
+                    IN.positionWS.x*.055+
+                    IN.positionWS.z*.035+
+                    _Time.y*_TowerScanSpeed;
+
+                float scanWave=.5+.5*sin(scanCoord*6.0);
+                float scanBand=pow(scanWave,18.0);
+
+                float signalPhase=
+                    _Time.y*(.65+_PulseSpeed*.12)+
+                    rnd*12.0+
+                    floor(IN.positionWS.y*1.7);
+
+                float signal=.5+.5*sin(signalPhase);
+                signal=pow(signal,18.0);
+
+                float dataLine=
+                    step(.985,frac(
+                        IN.positionWS.y*.42+
+                        IN.positionWS.z*.035+
+                        _Time.y*.08+
+                        rnd));
+
                 float3 rgb=_BaseColor.rgb;
-                rgb+=_WindowColor.rgb*window*_WindowStrength*pulse;
+                rgb+=_WindowColor.rgb*
+                    window*_WindowStrength*pulse;
+                rgb+=_WindowColor.rgb*
+                    scanBand*_TowerScanStrength*
+                    (0.2+0.8*window);
+                rgb+=_WindowColor.rgb*
+                    signal*.12;
+                rgb+=_WindowColor.rgb*
+                    dataLine*.55;
                 rgb+=_RimColor.rgb*fresnel*_RimStrength;
 
                 rgb=MixFog(rgb,IN.fogFactor);
