@@ -53,6 +53,7 @@ public static class CyberRunBuildSetup
 
         EnsureRenderPipeline();
         EnsureInputHandling();
+        EnsureAppIcon();
         EnsureScene();
     }
 
@@ -94,6 +95,110 @@ public static class CyberRunBuildSetup
         GraphicsSettings.alwaysIncludedShaders=included.ToArray();
         EditorUtility.SetDirty(urp);
         AssetDatabase.SaveAssets();
+    }
+
+    static void EnsureAppIcon()
+    {
+        const string dir="Assets/Generated";
+        const string path=dir+"/CyberRunIcon.png";
+        Directory.CreateDirectory(dir);
+
+        if(!File.Exists(path))
+        {
+            const int size=1024;
+            var tex=new Texture2D(size,size,TextureFormat.RGBA32,false,true);
+            var pixels=new Color[size*size];
+
+            for(int y=0;y<size;y++)
+            for(int x=0;x<size;x++)
+            {
+                float nx=(x-size*.5f)/(size*.5f);
+                float ny=(y-size*.5f)/(size*.5f);
+                float r=Mathf.Sqrt(nx*nx+ny*ny);
+                float glow=Mathf.Clamp01(1f-r);
+
+                Color baseColor=Color.Lerp(
+                    new Color(.003f,.005f,.018f,1f),
+                    new Color(.035f,.02f,.085f,1f),
+                    glow*.9f);
+
+                float cyanGlow=Mathf.Exp(
+                    -Mathf.Pow((nx+.25f)*7f,2f)
+                    -Mathf.Pow((ny-.05f)*7f,2f))*.22f;
+                float magentaGlow=Mathf.Exp(
+                    -Mathf.Pow((nx-.25f)*7f,2f)
+                    -Mathf.Pow((ny+.08f)*7f,2f))*.2f;
+
+                baseColor+=new Color(
+                    magentaGlow,cyanGlow*.8f,
+                    cyanGlow+magentaGlow,0f);
+
+                pixels[y*size+x]=baseColor;
+            }
+
+            tex.SetPixels(pixels);
+
+            DrawIconLine(tex,.18f,.18f,.82f,.18f,new Color(.05f,1f,2.8f,1f),12);
+            DrawIconLine(tex,.82f,.18f,.82f,.82f,new Color(1.8f,.05f,3.2f,1f),12);
+            DrawIconLine(tex,.82f,.82f,.18f,.82f,new Color(.05f,1f,2.8f,1f),12);
+            DrawIconLine(tex,.18f,.82f,.18f,.18f,new Color(1.8f,.05f,3.2f,1f),12);
+
+            // Angular "CR" monogram.
+            DrawIconLine(tex,.34f,.68f,.34f,.34f,new Color(.6f,2.4f,5f,1f),34);
+            DrawIconLine(tex,.34f,.68f,.54f,.68f,new Color(.6f,2.4f,5f,1f),34);
+            DrawIconLine(tex,.34f,.51f,.49f,.51f,new Color(.95f,.15f,3.9f,1f),28);
+            DrawIconLine(tex,.34f,.34f,.54f,.34f,new Color(.95f,.15f,3.9f,1f),34);
+            DrawIconLine(tex,.58f,.34f,.58f,.68f,new Color(1.9f,.08f,3.6f,1f),34);
+            DrawIconLine(tex,.58f,.68f,.78f,.68f,new Color(1.9f,.08f,3.6f,1f),34);
+            DrawIconLine(tex,.58f,.51f,.75f,.51f,new Color(1.9f,.08f,3.6f,1f),26);
+            DrawIconLine(tex,.58f,.34f,.78f,.34f,new Color(1.9f,.08f,3.6f,1f),34);
+
+            File.WriteAllBytes(path,tex.EncodeToPNG());
+            Object.DestroyImmediate(tex);
+            AssetDatabase.ImportAsset(path,ImportAssetOptions.ForceUpdate);
+        }
+
+        var icon=AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        if(icon==null) return;
+
+        var target=NamedBuildTarget.Android;
+        var sizes=PlayerSettings.GetIconSizes(target,IconKind.Application);
+        if(sizes==null||sizes.Length==0) return;
+
+        var icons=new Texture2D[sizes.Length];
+        for(int i=0;i<icons.Length;i++)
+            icons[i]=icon;
+
+        PlayerSettings.SetIcons(target,icons,IconKind.Application);
+    }
+
+    static void DrawIconLine(Texture2D tex,float x1,float y1,float x2,float y2,
+        Color color,int thickness)
+    {
+        int size=tex.width;
+        float sx=x1*size, sy=y1*size;
+        float ex=x2*size, ey=y2*size;
+        int steps=Mathf.CeilToInt(
+            Mathf.Max(Mathf.Abs(ex-sx),Mathf.Abs(ey-sy)));
+
+        if(steps<1) steps=1;
+
+        for(int i=0;i<=steps;i++)
+        {
+            float t=i/(float)steps;
+            int cx=Mathf.RoundToInt(Mathf.Lerp(sx,ex,t));
+            int cy=Mathf.RoundToInt(Mathf.Lerp(sy,ey,t));
+            int radius=Mathf.Max(1,thickness/2);
+
+            for(int yy=-radius;yy<=radius;yy++)
+            for(int xx=-radius;xx<=radius;xx++)
+            {
+                if(xx*xx+yy*yy>radius*radius) continue;
+                int px=cx+xx, py=cy+yy;
+                if(px<0||py<0||px>=size||py>=size) continue;
+                tex.SetPixel(px,py,color);
+            }
+        }
     }
 
     static void EnsureInputHandling()
