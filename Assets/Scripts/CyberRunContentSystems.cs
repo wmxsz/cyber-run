@@ -1488,7 +1488,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     void OnApplicationPause(bool pause)
     {
-        if(pause && started && !IsGameOver())
+        if(pause && started && !IsGameOver() && !paused)
         {
             appAutoPaused=true;
             SetPaused(true);
