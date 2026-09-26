@@ -13,7 +13,8 @@ Version 0.4.0
 - IL2CPP / Master + OptimizeSpeed
 - Android Target API 36
 - 数据跃迁门路线玩法
-- 连续跃迁门连击奖励
+- 连续跃迁门连击奖励与渐增极速
+- Sector 突破奖励与连击推进
 - 短时极速 Burst 与速度线反馈
 - Vulkan → OpenGLES3
 - Linear Color Space
@@ -110,5 +111,7 @@ build/CyberRun.apk
 - 4 套城市分区色彩主题会随距离切换
 - 高速阶段会增强 Bloom、雨幕和色彩强度
 - Overdrive / Magnet / Shield 会显示对应的角色环形 VFX
+- 数据跃迁门会按循环生成不同车道，并主动避开门后临近障碍
+- 连续跃迁门会增加奖励与极速持续时间
 
 核心玩法、赛博城市第一轮成品内容、三类核心道具、动态障碍、动态金币路线、程序化角色与动画、赛博 HUD、音频、粒子、雨幕、远景天际线、全息广告、道路/建筑专用 Shader 和 Android 性能稳定化已经完成。
