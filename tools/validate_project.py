@@ -103,6 +103,8 @@ for marker in [
     "SetPaused(",
     "materialCache",
     "ShadowCastingMode.Off",
+    "crashClip",
+    "Handheld.Vibrate()",
 ]:
     if marker not in content:
         errors.append(f"content marker missing: {marker}")
