@@ -1,0 +1,20 @@
+name: Unity Personal Activation File
+
+on:
+  workflow_dispatch:
+
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Unity activation file
+        id: activation
+        uses: webbertakken/unity-request-manual-activation-file@v1.2
+        with:
+          unityVersion: 6000.6.3f1
+
+      - name: Upload activation file
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unity-6000.6.3f1-activation
+          path: ${{ steps.activation.outputs.filePath }}
