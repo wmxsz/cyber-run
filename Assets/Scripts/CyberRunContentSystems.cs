@@ -29,8 +29,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     Camera cam;
     ParticleSystem trail;
     ParticleSystem collectBurst;
+    ParticleSystem rain;
     AudioSource sfx;
     AudioSource ambience;
+    readonly List<Transform> drones=new();
     AudioClip coinClip,jumpClip,slideClip,laneClip,powerupClip,crashClip;
 
     long bonusScore;
@@ -71,6 +73,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         SetupAudio();
         SetupParticleTrail();
         SetupCollectBurst();
+        SetupRain();
         SetupGuiStyles();
 
         started=false;
@@ -223,6 +226,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             seg.vehicles.Add(car);
         }
 
+        if(index%4==2)
+            drones.Add(CreateDrone(seg.root,
+                new Vector3((index%2==0?-1:1)*5.2f,7.5f,4f)));
+
         if(index%5==0)
         {
             float x=(((index+2)%3)-1)*LaneWidth;
@@ -283,6 +290,25 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             new Vector3(0,.2f,-1.91f),new Color(1f,.06f,.55f));
 
         root.localRotation=Quaternion.Euler(0f,180f,0f);
+        return root;
+    }
+
+    Transform CreateDrone(Transform parent,Vector3 localPos)
+    {
+        var root=new GameObject("SkyDrone").transform;
+        root.SetParent(parent,false);
+        root.localPosition=localPos;
+
+        Color cyan=new Color(.06f,1.6f,4.5f);
+        Color magenta=new Color(1.8f,.05f,3.4f);
+
+        Cube("DroneBody",root,new Vector3(.75f,.22f,1.45f),
+            Vector3.zero,new Color(.02f,.03f,.07f));
+        Cube("DroneLight",root,new Vector3(.9f,.035f,.05f),
+            new Vector3(0,-.14f,0),cyan);
+        Cube("DroneTail",root,new Vector3(.1f,.1f,.45f),
+            new Vector3(0,0,-.85f),magenta);
+
         return root;
     }
 
@@ -576,6 +602,51 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 mat.SetColor("_BaseColor",new Color(2.5f,1.1f,.05f));
             renderer.sharedMaterial=mat;
         }
+    }
+
+    void SetupRain()
+    {
+        var go=new GameObject("CyberRain");
+        go.transform.position=Vector3.zero;
+        rain=go.AddComponent<ParticleSystem>();
+
+        var main=rain.main;
+        main.loop=true;
+        main.startLifetime=1.15f;
+        main.startSpeed=new ParticleSystem.MinMaxCurve(9f,13f);
+        main.startSize=new ParticleSystem.MinMaxCurve(.012f,.026f);
+        main.startColor=new Color(.25f,.55f,1f,.32f);
+        main.maxParticles=140;
+        main.simulationSpace=ParticleSystemSimulationSpace.World;
+
+        var emission=rain.emission;
+        emission.rateOverTime=75f;
+
+        var shape=rain.shape;
+        shape.shapeType=ParticleSystemShapeType.Box;
+        shape.position=new Vector3(0,7f,16f);
+        shape.scale=new Vector3(14f,1f,60f);
+        shape.rotation=new Vector3(8f,0f,0f);
+
+        var renderer=rain.GetComponent<ParticleSystemRenderer>();
+        renderer.renderMode=ParticleSystemRenderMode.Stretch;
+        renderer.lengthScale=2.4f;
+        renderer.velocityScale=.65f;
+        renderer.shadowCastingMode=
+            UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows=false;
+
+        var shader=Shader.Find("CyberRun/Particle");
+        if(shader!=null)
+        {
+            var mat=new Material(shader);
+            mat.name="CyberRunRain";
+            if(mat.HasProperty("_BaseColor"))
+                mat.SetColor("_BaseColor",new Color(.12f,.55f,1.2f,.55f));
+            renderer.sharedMaterial=mat;
+        }
+
+        DontDestroyOnLoad(go);
     }
 
     void SetupGuiStyles()
@@ -883,6 +954,21 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             var glow=v.Find("CarGlow");
             if(glow!=null)
                 glow.localScale=new Vector3(1f,.85f+.25f*pulse,1f);
+        }
+
+        for(int i=0;i<drones.Count;i++)
+        {
+            var d=drones[i];
+            if(d==null) continue;
+
+            float phase=d.GetInstanceID()%100*.11f;
+            var dp=d.localPosition;
+            dp.x=5.5f*Mathf.Sin(time*.55f+phase);
+            dp.y=7.3f+Mathf.Sin(time*1.1f+phase)*.28f;
+            dp.z=Mathf.PingPong(time*.42f+phase*4f,28f)-14f;
+            d.localPosition=dp;
+            d.localRotation=Quaternion.Euler(
+                0f,Mathf.Sin(time*.8f+phase)*10f,0f);
         }
     }
 
