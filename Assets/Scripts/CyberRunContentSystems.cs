@@ -33,6 +33,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     ParticleSystem trail;
     ParticleSystem collectBurst;
     ParticleSystem rain;
+    ParticleSystem speedLines;
     AudioSource sfx;
     AudioSource ambience;
     readonly List<Transform> drones=new();
@@ -79,6 +80,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         SetupParticleTrail();
         SetupCollectBurst();
         SetupRain();
+        SetupSpeedLines();
         SetupGuiStyles();
 
         started=false;
@@ -672,6 +674,48 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         DontDestroyOnLoad(go);
     }
 
+    void SetupSpeedLines()
+    {
+        var go=new GameObject("SpeedLines");
+        go.transform.SetParent(player,false);
+        go.transform.localPosition=new Vector3(0,.15f,2.5f);
+
+        speedLines=go.AddComponent<ParticleSystem>();
+        var main=speedLines.main;
+        main.loop=true;
+        main.startLifetime=.22f;
+        main.startSpeed=new ParticleSystem.MinMaxCurve(11f,19f);
+        main.startSize=new ParticleSystem.MinMaxCurve(.012f,.028f);
+        main.startColor=new Color(.35f,.8f,1f,.24f);
+        main.maxParticles=70;
+        main.simulationSpace=ParticleSystemSimulationSpace.World;
+
+        var emission=speedLines.emission;
+        emission.rateOverTime=0f;
+
+        var shape=speedLines.shape;
+        shape.shapeType=ParticleSystemShapeType.Box;
+        shape.scale=new Vector3(8f,3f,2f);
+
+        var renderer=speedLines.GetComponent<ParticleSystemRenderer>();
+        renderer.renderMode=ParticleSystemRenderMode.Stretch;
+        renderer.lengthScale=3.2f;
+        renderer.velocityScale=.7f;
+        renderer.shadowCastingMode=
+            UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows=false;
+
+        var shader=Shader.Find("CyberRun/Particle");
+        if(shader!=null)
+        {
+            var mat=new Material(shader);
+            mat.name="CyberRunSpeedLines";
+            if(mat.HasProperty("_BaseColor"))
+                mat.SetColor("_BaseColor",new Color(.18f,.7f,1.1f,.42f));
+            renderer.sharedMaterial=mat;
+        }
+    }
+
     void SetupGuiStyles()
     {
         hudStyle=new GUIStyle(GUI.skin.label)
@@ -821,6 +865,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         UpdateVehicles();
         UpdateNearMisses();
         UpdateScore();
+        UpdateSpeedLineIntensity();
 
         if(hudRefreshTimer>0f)
             hudRefreshTimer-=Time.unscaledDeltaTime;
@@ -856,6 +901,18 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         if(!paused)
             UpdateCamera();
+    }
+
+    void UpdateSpeedLineIntensity()
+    {
+        if(speedLines==null||bootstrap==null) return;
+
+        float speed=bootstrap.CurrentSpeed;
+        float amount=Mathf.InverseLerp(13f,19f,speed);
+
+        var emission=speedLines.emission;
+        emission.rateOverTime=Mathf.Lerp(0f,55f,amount);
+        speedLines.gameObject.SetActive(amount>.02f);
     }
 
     void UpdateVisualCulling()
