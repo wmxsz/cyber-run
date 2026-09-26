@@ -199,6 +199,9 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         if((index&1)==0)
             OverheadFrame(root);
 
+        if(index%7==5)
+            CreateCyberTunnel(root,index);
+
         if(index%6==3)
         {
             int hazardLane=((index/3)%3)-1;
@@ -271,6 +274,37 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
         if(player.GetComponent<CyberRunRunnerAnimator>()==null)
             player.gameObject.AddComponent<CyberRunRunnerAnimator>();
+    }
+
+    static void CreateCyberTunnel(Transform parent,int index)
+    {
+        Color frame=(index&1)==0
+            ? new Color(.05f,1.2f,4f)
+            : new Color(1.6f,.05f,3.5f);
+
+        float z=0f;
+
+        Cube("TunnelLeft",parent,
+            new Vector3(.22f,7f,.22f),
+            new Vector3(-4.55f,3.5f,z),frame,true);
+        Cube("TunnelRight",parent,
+            new Vector3(.22f,7f,.22f),
+            new Vector3(4.55f,3.5f,z),frame,true);
+        Cube("TunnelRoof",parent,
+            new Vector3(9.1f,.24f,.22f),
+            new Vector3(0,7f,z),frame,true);
+
+        for(int i=0;i<5;i++)
+        {
+            Color light=(i&1)==0
+                ? new Color(.04f,1.25f,4.2f)
+                : new Color(1.7f,.06f,3.4f);
+
+            Cube("TunnelLight",parent,
+                new Vector3(1.2f,.055f,.10f),
+                new Vector3(-3.4f+i*1.7f,6.72f,-11f+i*5.5f),
+                light);
+        }
     }
 
     static void OverheadFrame(Transform parent)
