@@ -56,6 +56,9 @@ public sealed class CyberRunSkylineProps : MonoBehaviour
     void CreateTower(Transform parent,int side,int seed,int variant)
     {
         float x=side*(14.5f+(seed+variant)%4*3.6f);
+        Color accent=(variant&1)==0
+            ? new Color(.03f,1.05f,3.4f,1f)
+            : new Color(1.4f,.04f,3.2f,1f);
         float z=-14f+variant*9f+(seed%3)*2.5f;
         float h=10f+((seed*17+variant*7)%12);
         float w=2.4f+variant*.35f;
@@ -76,10 +79,6 @@ public sealed class CyberRunSkylineProps : MonoBehaviour
             Color baseColor=(variant&1)==0
                 ? new Color(.012f,.018f,.045f,1f)
                 : new Color(.022f,.012f,.05f,1f);
-            Color accent=(variant&1)==0
-                ? new Color(.03f,1.05f,3.4f,1f)
-                : new Color(1.4f,.04f,3.2f,1f);
-
             block.SetColor("_BaseColor",baseColor);
             block.SetColor("_WindowColor",accent);
             block.SetFloat("_WindowDensity",
