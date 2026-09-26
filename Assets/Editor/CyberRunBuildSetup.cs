@@ -36,6 +36,12 @@ public static class CyberRunBuildSetup
         PlayerSettings.SetGraphicsAPIs(
             BuildTarget.Android,
             new[]{GraphicsDeviceType.Vulkan,GraphicsDeviceType.OpenGLES3});
+        PlayerSettings.SetIl2CppCodeGeneration(
+            NamedBuildTarget.Android,
+            UnityEditor.Build.Il2CppCodeGeneration.OptimizeSpeed);
+        PlayerSettings.SetIl2CppCompilerConfiguration(
+            NamedBuildTarget.Android,
+            Il2CppCompilerConfiguration.Release);
 
         EnsureRenderPipeline();
         EnsureInputHandling();
