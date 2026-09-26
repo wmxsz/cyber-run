@@ -63,6 +63,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     float shieldTimer;
     long bestScore;
     float overdriveFlash;
+    Color flashColor=new Color(.05f,.85f,1f,1f);
 
     GUIStyle hudStyle;
     GUIStyle subStyle;
@@ -1171,20 +1172,24 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 {
                     overdriveTimer=8f;
                     overdriveFlash=.35f;
+                    flashColor=new Color(.05f,1.8f,5f,1f);
                 }
                 else if(powerName=="MagnetCore")
                 {
                     magnetTimer=8f;
                     overdriveFlash=.22f;
+                    flashColor=new Color(1.9f,.05f,3.8f,1f);
                 }
                 else if(powerName=="ShieldCore")
                 {
                     shieldTimer=18f;
                     overdriveFlash=.28f;
+                    flashColor=new Color(2.8f,1.2f,.04f,1f);
                 }
                 else
                 {
                     overdriveFlash=.12f;
+                flashColor=new Color(.55f,.7f,1f,1f);
                 }
 
                 PlaySfx(powerupClip);
@@ -1710,7 +1715,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(overdriveFlash>0f)
         {
             GUI.color=new Color(
-                .05f,.85f,1f,
+                flashColor.r,flashColor.g,flashColor.b,
                 Mathf.Clamp01(overdriveFlash*1.8f));
             GUI.DrawTexture(
                 new Rect(0,0,Screen.width,Screen.height),
