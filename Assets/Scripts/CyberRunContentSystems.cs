@@ -78,6 +78,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     string hudShield="";
     string hudSpeed="";
 
+    public bool IsOverdriveActive=>overdriveTimer>0f;
+    public bool IsMagnetActive=>magnetTimer>0f;
+    public bool IsShieldActive=>shieldTimer>0f;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
