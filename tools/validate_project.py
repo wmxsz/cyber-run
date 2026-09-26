@@ -94,6 +94,9 @@ for marker in [
     "CreateCyberSign(",
     "CreateSkyRail(",
     "CreateRoadReflections(",
+    "MagnetCore",
+    "magnetTimer",
+
     "VolumeProfile",
     "Bloom",
     "AudioListener",
