@@ -79,7 +79,7 @@ public sealed class CyberRunActionVFX : MonoBehaviour
         if(lastPosition.x!=p.x)
         {
             float dx=Mathf.Abs(p.x-lastPosition.x);
-            if(dx>.22f)
+            if(dx>.22f&&laneFlash<=0f)
                 EmitLaneBurst(p,Mathf.Sign(p.x-lastPosition.x));
         }
 
