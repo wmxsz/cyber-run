@@ -22,6 +22,7 @@ public sealed class CyberRunNeonWorld : MonoBehaviour
     CyberRunBootstrap bootstrap;
     Transform runnerAura;
     bool initialized;
+    readonly MaterialPropertyBlock block=new();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
@@ -378,7 +379,7 @@ public sealed class CyberRunNeonWorld : MonoBehaviour
 
             if(part.renderer!=null)
             {
-                var block=new MaterialPropertyBlock();
+                block.Clear();
                 Color color=i%3==0
                     ? new Color(.04f,1.4f,4.8f,1f)
                     : i%3==1
