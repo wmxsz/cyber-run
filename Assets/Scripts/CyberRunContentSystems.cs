@@ -27,6 +27,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     readonly Dictionary<int,Material> materialCache=new();
     readonly Dictionary<Collider,float> nearMissMarker=new();
     Shader projectShader;
+    CyberRunBootstrap bootstrap;
 
     Transform player;
     Camera cam;
@@ -44,8 +45,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     float comboTimer;
     float runStartDistance;
     float lastPlayerY;
+    float lastPlayerX;
     float lastCameraX;
     float lastWorldZ;
+    bool lastGameOver;
     bool wasSliding;
     bool paused;
     bool initialized;
