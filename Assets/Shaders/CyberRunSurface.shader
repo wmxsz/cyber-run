@@ -7,6 +7,11 @@ Shader "CyberRun/Surface"
         _RimColor ("Rim Color", Color) = (0.05,0.8,1,1)
         _RimStrength ("Rim Strength", Range(0,5)) = 1.15
         _PulseSpeed ("Pulse Speed", Range(0,8)) = 1.8
+        _GridColor ("Circuit Color", Color) = (0.02,0.55,1.2,1)
+        _GridDensity ("Circuit Density", Range(0.1,6)) = 1.4
+        _GridStrength ("Circuit Strength", Range(0,2)) = 0.12
+        _ScanSpeed ("Scan Speed", Range(0,8)) = 1.5
+        _ScanStrength ("Scan Strength", Range(0,2)) = 0.08
     }
 
     SubShader
@@ -51,6 +56,11 @@ Shader "CyberRun/Surface"
             float4 _RimColor;
             float _RimStrength;
             float _PulseSpeed;
+            float4 _GridColor;
+            float _GridDensity;
+            float _GridStrength;
+            float _ScanSpeed;
+            float _ScanStrength;
             CBUFFER_END
 
             Varyings vert(Attributes IN)
@@ -68,16 +78,40 @@ Shader "CyberRun/Surface"
             half4 frag(Varyings IN) : SV_Target
             {
                 float3 normalWS=normalize(IN.normalWS);
-                float3 viewDir=normalize(_WorldSpaceCameraPos.xyz-IN.positionWS);
+                float3 viewDir=normalize(
+                    _WorldSpaceCameraPos.xyz-IN.positionWS);
+
                 float fresnel=pow(
                     1.0-saturate(dot(normalWS,viewDir)),3.2);
 
                 float pulse=.65+.35*sin(
                     _Time.y*_PulseSpeed+IN.positionWS.y*.35);
 
+                float2 gridPos=IN.positionWS.xz*_GridDensity;
+                float2 cell=abs(frac(gridPos)-.5);
+                float gridX=smoothstep(.5,.455,cell.x);
+                float gridZ=smoothstep(.5,.455,cell.y);
+                float gridLines=max(gridX,gridZ);
+
+                float scanCoord=
+                    IN.positionWS.y+
+                    IN.positionWS.z*.06+
+                    IN.positionWS.x*.025;
+                float scanWave=.5+.5*sin(
+                    scanCoord*_ScanSpeed+_Time.y*3.6);
+                float scanBand=pow(scanWave,14.0);
+
                 float3 baseRGB=_BaseColor.rgb;
                 float3 glow=baseRGB*(_GlowStrength*pulse);
-                glow+=_RimColor.rgb*(fresnel*_RimStrength);
+
+                glow+=_RimColor.rgb*
+                    (fresnel*_RimStrength);
+
+                glow+=_GridColor.rgb*
+                    gridLines*_GridStrength;
+
+                glow+=_GridColor.rgb*
+                    scanBand*_ScanStrength;
 
                 half3 rgb=baseRGB+glow;
                 rgb=MixFog(rgb,IN.fogFactor);
