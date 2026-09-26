@@ -31,7 +31,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     ParticleSystem collectBurst;
     AudioSource sfx;
     AudioSource ambience;
-    AudioClip coinClip,jumpClip,slideClip,laneClip,powerupClip;
+    AudioClip coinClip,jumpClip,slideClip,laneClip,powerupClip,crashClip;
     FieldInfo gameOverField;
 
     long bonusScore;
@@ -401,6 +401,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         slideClip=CreateTone("slide",180f,.09f,.035f);
         laneClip=CreateTone("lane",520f,.045f,.022f);
         powerupClip=CreateSweep("powerup",520f,1200f,.16f,.055f);
+        crashClip=CreateSweep("crash",210f,60f,.18f,.06f);
 
         var ambient=CreateAmbience();
         ambience.clip=ambient;
@@ -673,6 +674,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                     (int)Mathf.Min(bestScore,int.MaxValue));
                 PlayerPrefs.Save();
             }
+
+            PlaySfx(crashClip);
+            Handheld.Vibrate();
         }
         else if(lastGameOver && !nowGameOver)
         {
