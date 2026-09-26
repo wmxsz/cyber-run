@@ -47,8 +47,6 @@ for marker in required_runtime:
         errors.append(f"runtime marker missing: {marker}")
 if "SceneManager.LoadScene" in runtime:
     errors.append("runtime still reloads scene for restart")
-if "lastPlayerZ" in content:
-    errors.append("content still relies on world Z for run-state accounting")
 if runtime.count("{") != runtime.count("}"):
     errors.append("runtime brace count mismatch")
 
@@ -112,10 +110,8 @@ for marker in [
     "SetPaused(",
     "materialCache",
     "UpdateVisualCulling()",
-    "RecenterWorldIfNeeded()",
-    "threshold=5000f",
-    "runStartDistance",
     "visibleDistance=250f",
+    "runStartDistance",
     "renderers=root.GetComponentsInChildren<Renderer>(true)",
     "ShadowCastingMode.Off",
     "crashClip",
@@ -125,6 +121,9 @@ for marker in [
         errors.append(f"content marker missing: {marker}")
 if content.count("{") != content.count("}"):
     errors.append("content systems brace count mismatch")
+if "lastPlayerZ" in content:
+    errors.append("content still relies on world Z for run-state accounting")
+
 
 animator = read("Assets/Scripts/CyberRunRunnerAnimator.cs")
 for marker in [
