@@ -75,6 +75,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     string hudOverdrive="";
     string hudMagnet="";
     string hudShield="";
+    string hudSpeed="";
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
@@ -1178,6 +1179,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         hudShield=shieldTimer>0f
             ? "SHIELD "+shieldTimer.ToString("0.0")+"s"
             : "";
+
+        hudSpeed=bootstrap!=null
+            ? bootstrap.CurrentSpeed.ToString("0.0")
+            : "0.0";
     }
 
     void SaveBestScore()
@@ -1420,7 +1425,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         GUI.Label(new Rect(left,top+30f,340f,26f),
             "SCORE "+hudScore+"  BEST "+bestScore,subStyle);
         GUI.Label(new Rect(left,top+50f,260f,26f),
-            "DATA "+hudData,subStyle);
+            "DATA "+hudData+"   SPEED "+hudSpeed,subStyle);
 
         if(!string.IsNullOrEmpty(hudCombo))
             GUI.Label(new Rect(left,top+74f,220f,26f),
