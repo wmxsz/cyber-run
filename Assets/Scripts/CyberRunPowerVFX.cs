@@ -123,6 +123,9 @@ public sealed class CyberRunPowerVFX : MonoBehaviour
 
         SetVisible(overdrive,magnet,shield);
 
+        if(!overdrive&&!magnet&&!shield)
+            return;
+
         float t=Time.time;
 
         for(int i=0;i<arcs.Count;i++)
