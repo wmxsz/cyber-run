@@ -1302,27 +1302,56 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             ? bootstrap.CurrentSpeed
             : 0f;
 
-        float targetFov=Mathf.Clamp(67f+speed*.23f,67f,73f);
-        cam.fieldOfView=Mathf.Lerp(
-            cam.fieldOfView,targetFov,1f-Mathf.Exp(-4.5f*Time.unscaledDeltaTime));
+        float targetFov=Mathf.Clamp(
+            67f+speed*.23f,67f,73f);
 
+        cam.fieldOfView=Mathf.Lerp(
+            cam.fieldOfView,
+            targetFov,
+            1f-Mathf.Exp(-4.5f*Time.unscaledDeltaTime));
+    }
+
+    void LateUpdate()
+    {
+        if(!initialized||!started||paused||IsGameOver()||cam==null||player==null)
+            return;
+
+        float dt=Mathf.Max(.008f,Time.unscaledDeltaTime);
         float lateralDelta=player.position.x-lastCameraX;
-        float lateralVelocity=lateralDelta/
-            Mathf.Max(.016f,Time.unscaledDeltaTime);
-        float targetRoll=Mathf.Clamp(-lateralVelocity*1.8f,-6.5f,6.5f);
+        float lateralVelocity=lateralDelta/dt;
+
+        float targetRoll=Mathf.Clamp(
+            -lateralVelocity*1.8f,-6.5f,6.5f);
+
+        float speed=bootstrap!=null
+            ? bootstrap.CurrentSpeed
+            : 0f;
+
         float targetPitch=Mathf.Clamp(
-            (speed-11f)*.28f+(player.position.y-PlayerGroundY)*-1.2f,
-            -3.5f,4f);
+            (speed-11f)*.18f+
+            (player.position.y-PlayerGroundY)*-1.2f,
+            -2.5f,3f);
 
         Vector3 forward=cam.transform.forward;
-        Quaternion look=Quaternion.LookRotation(
-            forward.sqrMagnitude>.01f ? forward : Vector3.forward,
-            Vector3.up);
-        Quaternion desired=look*Quaternion.Euler(targetPitch,0f,targetRoll);
+        if(forward.sqrMagnitude<.01f)
+            forward=Vector3.forward;
+
+        Vector3 flatForward=Vector3.ProjectOnPlane(
+            forward,Vector3.up);
+
+        if(flatForward.sqrMagnitude<.01f)
+            flatForward=Vector3.forward;
+
+        Quaternion baseRotation=Quaternion.LookRotation(
+            flatForward.normalized,Vector3.up);
+
+        Quaternion desired=baseRotation*
+            Quaternion.Euler(targetPitch,0f,targetRoll);
+
         cam.transform.rotation=Quaternion.Slerp(
             cam.transform.rotation,
             desired,
-            1f-Mathf.Exp(-8f*Time.unscaledDeltaTime));
+            1f-Mathf.Exp(-8f*dt));
 
         lastCameraX=player.position.x;
     }
