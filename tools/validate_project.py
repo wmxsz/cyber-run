@@ -138,6 +138,7 @@ for marker in [
     'fullname="Assembly-CSharp"',
     'fullname="CyberRunBootstrap"',
     'fullname="CyberRunContentSystems"',
+    'fullname="CyberRunRunnerAnimator"',
 ]:
     if marker not in link:
         errors.append(f"link marker missing: {marker}")
