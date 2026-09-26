@@ -153,6 +153,17 @@ for marker in [
     if marker not in visual_overdrive:
         errors.append(f"visual overdrive marker missing: {marker}")
 
+intensity_script = read("Assets/Scripts/CyberRunIntensityController.cs")
+for marker in [
+    "CyberRunIntensityController",
+    "Bloom",
+    "ColorAdjustments",
+    "RenderSettings.fogDensity",
+    "CyberRain",
+]:
+    if marker not in intensity_script:
+        errors.append(f"intensity controller marker missing: {marker}")
+
 skyline_script = read("Assets/Scripts/CyberRunSkylineProps.cs")
 street_script = read("Assets/Scripts/CyberRunStreetProps.cs")
 audio_script = read("Assets/Scripts/CyberRunEngineAudio.cs")
