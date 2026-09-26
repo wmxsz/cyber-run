@@ -119,6 +119,14 @@ version = read("ProjectSettings/ProjectVersion.txt")
 if "m_EditorVersion: 6000.6.3f1" not in version:
     errors.append("Unity editor version mismatch")
 
+build_setup_version = read("Assets/Editor/CyberRunBuildSetup.cs")
+for marker in [
+    'PlayerSettings.bundleVersion="0.3.0";',
+    "PlayerSettings.Android.bundleVersionCode=3;",
+]:
+    if marker not in build_setup_version:
+        errors.append(f"release version marker missing: {marker}")
+
 manifest_text = read("Packages/manifest.json")
 try:
     manifest = json.loads(manifest_text)
@@ -483,6 +491,26 @@ for method_name in ["void Update()", "void UpdateScore()", "void UpdateCoins()",
     body = method_body(content, method_name)
     if "GUI." in body:
         errors.append(f"{method_name} contains GUI calls")
+
+def validate_shader_interpolation():
+    literal_smoothstep = re.compile(
+        r"smoothstep\\(\\s*([0-9]+(?:\\.[0-9]*)?)\\s*,\\s*"
+        r"([0-9]+(?:\\.[0-9]*)?)\\s*,"
+    )
+
+    for path in sorted((ROOT / "Assets").rglob("*.shader")):
+        source = path.read_text(encoding="utf-8")
+        for match in literal_smoothstep.finditer(source):
+            edge_a = float(match.group(1))
+            edge_b = float(match.group(2))
+            if edge_a >= edge_b:
+                errors.append(
+                    f"shader smoothstep bounds invalid: "
+                    f"{path.relative_to(ROOT)}:{edge_a}>={edge_b}"
+                )
+
+
+validate_shader_interpolation()
 
 def validate_hot_path_allocations():
     forbidden = [
