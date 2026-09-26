@@ -1075,6 +1075,14 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         hudOverdrive=overdriveTimer>0f
             ? "OVERCLOCK "+overdriveTimer.ToString("0.0")+"s"
             : "";
+
+        hudMagnet=magnetTimer>0f
+            ? "MAGNET "+magnetTimer.ToString("0.0")+"s"
+            : "";
+
+        hudShield=shieldTimer>0f
+            ? "SHIELD "+shieldTimer.ToString("0.0")+"s"
+            : "";
     }
 
     void SaveBestScore()
@@ -1153,18 +1161,13 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         else
             magnetTimer=0f;
 
-        if(magnetTimer>0f)
-            GUI.Label(new Rect(left,top+118f,260f,26f),
-                "MAGNET "+magnetTimer.ToString("0.0")+"s",subStyle);
         if(shieldTimer>0f)
-            GUI.Label(new Rect(left,top+140f,260f,26f),
-                "SHIELD "+shieldTimer.ToString("0.0")+"s",subStyle);
-
+            shieldTimer-=Time.deltaTime;
+        else
+            shieldTimer=0f;
 
         if(overdriveFlash>0f)
             overdriveFlash-=Time.unscaledDeltaTime;
-
-
     }
 
     void UpdateCamera()
@@ -1268,8 +1271,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         float left=safe.x+18f;
         float top=Screen.height-safe.yMax+16f;
 
-        string score=(DistanceScore+bonusScore).ToString("0000000");
-        string meters=Mathf.Max(0f,player.position.z-startZ).ToString("0")+" M";
+        string score=hudScore;
+        string meters=hudMeters;
 
         GUI.Label(new Rect(left,top,340f,32f),
             "CYBER RUN  //  "+meters,hudStyle);
