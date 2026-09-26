@@ -21,6 +21,11 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     CapsuleCollider playerCollider;
     Vector3 playerBaseScale;
     const float PlayerGroundY = 1.1f;
+    public bool IsGameOver => gameOver;
+    public bool IsSliding => sliding;
+    public float CurrentSpeed => speed;
+    public float Distance => distance;
+
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Boot()
