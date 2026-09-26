@@ -62,9 +62,11 @@ public static class CyberRunBuildSetup
         }
 
         var projectUnlit=Shader.Find("CyberRun/Unlit");
+        var projectParticle=Shader.Find("CyberRun/Particle");
         var lit=Shader.Find("Universal Render Pipeline/Lit");
         var unlit=Shader.Find("Universal Render Pipeline/Unlit");
         if(projectUnlit!=null && !included.Contains(projectUnlit)) included.Add(projectUnlit);
+        if(projectParticle!=null && !included.Contains(projectParticle)) included.Add(projectParticle);
         if(lit!=null && !included.Contains(lit)) included.Add(lit);
         if(unlit!=null && !included.Contains(unlit)) included.Add(unlit);
 
