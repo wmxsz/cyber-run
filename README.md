@@ -1,6 +1,6 @@
 # Cyber Run
 
-Version 0.3.1
+Version 0.4.0
 
 赛博朋克风第三人称自动跑酷，目标平台为 Android 64 位。
 
@@ -12,6 +12,9 @@ Version 0.3.1
 - Android ARM64
 - IL2CPP / Master + OptimizeSpeed
 - Android Target API 36
+- 数据跃迁门路线玩法
+- 连续跃迁门连击奖励
+- 短时极速 Burst 与速度线反馈
 - Vulkan → OpenGLES3
 - Linear Color Space
 - Mobile Multithreaded Rendering
