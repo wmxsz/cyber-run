@@ -524,22 +524,17 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
     void OnGUI()
     {
-        GUI.Label(
-            new Rect(24,18,700,40),
-            "CYBER RUN   DIST "+distance.ToString("00000")+"   SPEED "+speed.ToString("0.0"));
+        if(!gameOver) return;
 
-        if(gameOver)
+        GUI.Box(
+            new Rect(Screen.width*.5f-170f,Screen.height*.5f-80f,340f,160f),
+            "RUN TERMINATED");
+
+        if(GUI.Button(
+            new Rect(Screen.width*.5f-85f,Screen.height*.5f+5f,170f,50f),
+            "RESTART"))
         {
-            GUI.Box(
-                new Rect(Screen.width*.5f-170,Screen.height*.5f-80,340,160),
-                "RUN TERMINATED");
-
-            if(GUI.Button(
-                new Rect(Screen.width*.5f-85,Screen.height*.5f+5,170,50),
-                "RESTART"))
-            {
-                Restart();
-            }
+            Restart();
         }
     }
 }
