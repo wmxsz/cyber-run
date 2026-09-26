@@ -27,8 +27,19 @@ public sealed class CyberRunRunnerAnimator : MonoBehaviour
             ? bootstrap.CurrentSpeed
             : 0f;
 
+        bool dead=bootstrap!=null && bootstrap.IsGameOver;
         bool sliding=bootstrap!=null && bootstrap.IsSliding;
         bool airborne=transform.position.y>1.16f;
+
+        if(dead)
+        {
+            if(armL!=null) armL.localRotation=Quaternion.Euler(-6f,0f,-10f);
+            if(armR!=null) armR.localRotation=Quaternion.Euler(14f,0f,10f);
+            if(legL!=null) legL.localRotation=Quaternion.Euler(-8f,0f,0f);
+            if(legR!=null) legR.localRotation=Quaternion.Euler(12f,0f,0f);
+            if(torso!=null) torso.localRotation=Quaternion.Euler(0f,0f,-7f);
+            return;
+        }
 
         float normalized=Mathf.InverseLerp(0f,19f,speed);
         float frequency=Mathf.Lerp(0f,10.5f,normalized);
