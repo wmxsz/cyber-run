@@ -41,7 +41,7 @@ public sealed class CyberRunActionVFX : MonoBehaviour
             material.name="CyberRunActionParticle";
         }
 
-        laneBurst=CreateBurst("LaneBurst",new Color(.05f,1.45f,4.5f,.9f),5,.16f,.9f,2.4f);
+        laneBurst=CreateBurst("ActionBurst",new Color(.05f,1.45f,4.5f,.9f),5,.16f,.9f,2.4f);
         jumpBurst=CreateBurst("JumpBurst",new Color(.95f,.08f,3.8f,.85f),8,.2f,1.15f,2.8f);
         landingBurst=CreateBurst("LandingBurst",new Color(.05f,1.5f,4.8f,.9f),12,.25f,1.4f,3.1f);
         slideSparks=CreateBurst("SlideSparks",new Color(1.8f,.08f,3.8f,.85f),9,.18f,1.8f,3.6f);
