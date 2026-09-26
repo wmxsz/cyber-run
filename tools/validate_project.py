@@ -77,6 +77,52 @@ for marker in [
 if build_script.count("{") != build_script.count("}"):
     errors.append("build script brace count mismatch")
 
+content = read("Assets/Scripts/CyberRunContentSystems.cs")
+for marker in [
+    "public sealed class CyberRunContentSystems",
+    "RuntimeInitializeOnLoadMethod",
+    "CreateCoin(",
+    "CreateHoverCar(",
+    "CreateCyberSign(",
+    "CreateSkyRail(",
+    "CreateRoadReflections(",
+    "VolumeProfile",
+    "Bloom",
+    "AudioListener",
+    "CyberRun_BestScore",
+    "StartScreenTapped()",
+    "StartRun()",
+    "SetPaused(",
+    "materialCache",
+    "ShadowCastingMode.Off",
+]:
+    if marker not in content:
+        errors.append(f"content marker missing: {marker}")
+if content.count("{") != content.count("}"):
+    errors.append("content systems brace count mismatch")
+
+particle = read("Assets/Shaders/CyberRunParticle.shader")
+for marker in [
+    'Shader "CyberRun/Particle"',
+    '"RenderType" = "Transparent"',
+    "Blend SrcAlpha OneMinusSrcAlpha",
+    "#include \"Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl\"",
+    "ComputeFogFactor",
+]:
+    if marker not in particle:
+        errors.append(f"particle shader marker missing: {marker}")
+if particle.count("{") != particle.count("}"):
+    errors.append("particle shader brace count mismatch")
+
+link = read("Assets/link.xml")
+for marker in [
+    'fullname="Assembly-CSharp"',
+    'fullname="CyberRunBootstrap"',
+    'fullname="CyberRunContentSystems"',
+]:
+    if marker not in link:
+        errors.append(f"link marker missing: {marker}")
+
 shader = read("Assets/Shaders/CyberRunUnlit.shader")
 for marker in [
     'Shader "CyberRun/Unlit"',
