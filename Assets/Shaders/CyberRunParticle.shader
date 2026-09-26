@@ -15,7 +15,7 @@ Shader "CyberRun/Particle"
             "RenderPipeline" = "UniversalPipeline"
         }
 
-        Blend SrcAlpha One
+        Blend SrcAlpha OneMinusSrcAlpha
         ZWrite Off
         Cull Off
 
