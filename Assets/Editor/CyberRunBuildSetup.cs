@@ -21,13 +21,13 @@ public static class CyberRunBuildSetup
     {
         PlayerSettings.companyName="CyberRun";
         PlayerSettings.productName="Cyber Run";
-        PlayerSettings.bundleVersion="0.3.1";
+        PlayerSettings.bundleVersion="0.4.0";
         PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android,"com.wmxsz.cyberrun");
         PlayerSettings.Android.targetArchitectures=AndroidArchitecture.ARM64;
         PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android,ScriptingImplementation.IL2CPP);
         PlayerSettings.Android.minSdkVersion=AndroidSdkVersions.AndroidApiLevel26;
         PlayerSettings.Android.targetSdkVersion=AndroidSdkVersions.AndroidApiLevel36;
-        PlayerSettings.Android.bundleVersionCode=4;
+        PlayerSettings.Android.bundleVersionCode=5;
         EditorUserBuildSettings.buildAppBundle=false;
 
         PlayerSettings.SetMobileMTRendering(
