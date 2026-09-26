@@ -66,6 +66,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         Application.targetFrameRate = 60;
         QualitySettings.vSyncCount = 0;
+        Physics.autoSyncTransforms=false;
         Screen.orientation=ScreenOrientation.Portrait;
         Screen.autorotateToPortrait=true;
         Screen.autorotateToPortraitUpsideDown=false;
