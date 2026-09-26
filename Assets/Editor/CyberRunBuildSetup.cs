@@ -30,6 +30,13 @@ public static class CyberRunBuildSetup
         EditorUserBuildSettings.buildAppBundle=false;
         PlayerSettings.defaultInterfaceOrientation=UIOrientation.Portrait;
 
+        PlayerSettings.colorSpace=ColorSpace.Linear;
+        PlayerSettings.SetUseDefaultGraphicsAPIs(
+            BuildTarget.Android,false);
+        PlayerSettings.SetGraphicsAPIs(
+            BuildTarget.Android,
+            new[]{GraphicsDeviceType.Vulkan,GraphicsDeviceType.OpenGLES3});
+
         EnsureRenderPipeline();
         EnsureInputHandling();
         EnsureScene();
