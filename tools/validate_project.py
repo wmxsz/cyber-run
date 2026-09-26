@@ -143,6 +143,39 @@ for marker in [
 if animator.count("{") != animator.count("}"):
     errors.append("runner animator brace count mismatch")
 
+skyline_script = read("Assets/Scripts/CyberRunSkylineProps.cs")
+street_script = read("Assets/Scripts/CyberRunStreetProps.cs")
+audio_script = read("Assets/Scripts/CyberRunEngineAudio.cs")
+gameplay_visuals = read("Assets/Scripts/CyberRunGameplayVisuals.cs")
+holo_script = read("Assets/Scripts/CyberRunHolograms.cs")
+road_script = read("Assets/Scripts/CyberRunRoadVisual.cs")
+city_script = read("Assets/Scripts/CyberRunCityVisual.cs")
+
+for source, markers, label in [
+    (skyline_script, ["CyberRunSkylineProps", "SkylineTower", "SkylineBeacon"], "skyline"),
+    (street_script, ["CyberRunStreetProps", "NeonStreetLamp", "RoadPylon"], "street props"),
+    (audio_script, ["CyberRunEngineAudio", "CyberEngine", "source.pitch"], "engine audio"),
+    (gameplay_visuals, ["CyberRunGameplayVisuals", "StyleObstacles", "StyleCoins", "StylePowerups", "StyleTraffic"], "gameplay visuals"),
+    (holo_script, ["CyberRunHolograms", "HologramBillboard", "CyberRun/Hologram"], "holograms"),
+    (road_script, ["CyberRunRoadVisual", "CyberRun/Road", "roadShader"], "road visuals"),
+    (city_script, ["CyberRunCityVisual", "CyberRun/City", "CreateRooftopDetails"], "city visuals"),
+]:
+    for marker in markers:
+        if marker not in source:
+            errors.append(f"{label} marker missing: {marker}")
+
+skyline_shader = read("Assets/Shaders/CyberRunCity.shader")
+road_shader = read("Assets/Shaders/CyberRunRoad.shader")
+holo_shader = read("Assets/Shaders/CyberRunHologram.shader")
+for source, markers, label in [
+    (skyline_shader, ['Shader "CyberRun/City"', "Hash21"], "city shader"),
+    (road_shader, ['Shader "CyberRun/Road"', "GridDensity"], "road shader"),
+    (holo_shader, ['Shader "CyberRun/Hologram"', "Blend SrcAlpha One"], "hologram shader"),
+]:
+    for marker in markers:
+        if marker not in source:
+            errors.append(f"{label} marker missing: {marker}")
+
 particle = read("Assets/Shaders/CyberRunParticle.shader")
 for marker in [
     'Shader "CyberRun/Particle"',
