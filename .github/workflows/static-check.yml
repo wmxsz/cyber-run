@@ -1,5 +1,9 @@
 name: Cyber Run Static Check
 
+concurrency:
+  group: cyber-run-static-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
