@@ -1,6 +1,6 @@
 # Cyber Run
 
-Version 0.2.0
+Version 0.3.0
 
 赛博朋克风第三人称自动跑酷，目标平台为 Android 64 位。
 
