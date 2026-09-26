@@ -114,6 +114,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             cam.fieldOfView=67f;
             cam.farClipPlane=Mathf.Max(cam.farClipPlane,260f);
             cam.backgroundColor=new Color(.003f,.005f,.015f,1f);
+            if(cam.GetComponent<AudioListener>()==null)
+                cam.gameObject.AddComponent<AudioListener>();
         }
 
         CacheSegments();
@@ -174,6 +176,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             seg.vehicles.Add(car);
         }
 
+        CreateRoadReflections(seg.root,index);
+
         if(index%3==0)
             CreateCyberSign(seg.root,new Vector3(-5.45f,4.2f,7f),true);
 
@@ -224,6 +228,25 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         root.localRotation=Quaternion.Euler(0f,180f,0f);
         return root;
+    }
+
+    void CreateRoadReflections(Transform parent,int index)
+    {
+        Color[] accents=
+        {
+            new Color(.04f,.45f,1.8f),
+            new Color(1.7f,.04f,1.3f),
+            new Color(.05f,1.2f,1.6f)
+        };
+
+        for(int i=0;i<3;i++)
+        {
+            float x=(i-1)*2.1f;
+            float z=-12f+i*11.5f+(index%3)*1.5f;
+            Cube("RoadReflection",parent,
+                new Vector3(.55f,.025f,3.8f),
+                new Vector3(x,.145f,z),accents[(index+i)%accents.Length]);
+        }
     }
 
     void CreateCyberSign(Transform parent,Vector3 localPos,bool cyan)
