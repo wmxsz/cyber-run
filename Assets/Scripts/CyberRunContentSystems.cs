@@ -48,6 +48,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     int coinCount;
     float overdriveTimer;
     long bestScore;
+    float overdriveFlash;
 
     GUIStyle hudStyle;
     GUIStyle subStyle;
@@ -774,7 +775,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 Vector3 pos=powerup.transform.position;
                 powerup.SetActive(false);
                 overdriveTimer=8f;
+                overdriveFlash=.35f;
                 PlaySfx(powerupClip);
+                Handheld.Vibrate();
 
                 if(collectBurst!=null)
                 {
@@ -797,6 +800,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             float phase=s.root.GetInstanceID()%100*.13f;
             var pos=v.localPosition;
             pos.y=1.1f+Mathf.Sin(time*1.7f+phase)*.035f;
+            pos.z=Mathf.PingPong(time*.85f+phase*3f,26f)-13f;
             v.localPosition=pos;
 
             float pulse=.5f+.5f*Mathf.Sin(time*4f+phase);
@@ -828,6 +832,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             overdriveTimer-=Time.deltaTime;
         else
             overdriveTimer=0f;
+
+        if(overdriveFlash>0f)
+            overdriveFlash-=Time.unscaledDeltaTime;
 
         if(player.position.z<lastPlayerZ-20f)
             ResetMetaState();
@@ -952,6 +959,16 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(overdriveTimer>0f)
             GUI.Label(new Rect(left,top+96f,260f,26f),
                 "OVERCLOCK "+overdriveTimer.ToString("0.0")+"s",subStyle);
+
+        if(overdriveFlash>0f)
+        {
+            GUI.color=new Color(.05f,.85f,1f,
+                Mathf.Clamp01(overdriveFlash*1.8f));
+            GUI.DrawTexture(
+                new Rect(0,0,Screen.width,Screen.height),
+                Texture2D.whiteTexture);
+            GUI.color=Color.white;
+        }
 
         if(combo>1&&comboTimer>0f)
             GUI.Label(new Rect(left,top+74f,220f,28f),
