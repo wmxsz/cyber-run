@@ -170,6 +170,8 @@ for marker in [
     "IsOverdriveActive",
     "IsMagnetActive",
     "IsShieldActive",
+    "readonly MaterialPropertyBlock block=new();",
+    "block.Clear();",
 ]:
     if marker not in power_vfx:
         errors.append(f"power VFX marker missing: {marker}")
