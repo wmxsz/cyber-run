@@ -77,6 +77,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         paused=false;
         appAutoPaused=false;
         Time.timeScale=0f;
+        DontDestroyOnLoad(gameObject);
+        UpdateHudCache();
         initialized=true;
     }
 
@@ -601,6 +603,12 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             return false;
         }
 
+        if(touch.phase.ReadValue()==TouchPhase.Canceled)
+        {
+            touchStart=Vector2.zero;
+            return false;
+        }
+
         if(!touch.press.wasReleasedThisFrame) return false;
 
         Vector2 delta=touch.position.ReadValue()-touchStart;
@@ -631,6 +639,12 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             return;
         }
 
+        if(Application.platform==RuntimePlatform.Android &&
+           Keyboard.current!=null &&
+           Keyboard.current.escapeKey.wasPressedThisFrame &&
+           !IsGameOver())
+            SetPaused(!paused);
+
         if(introTimer>0f) introTimer-=Time.unscaledDeltaTime;
 
         UpdateSegments();
@@ -638,6 +652,14 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         UpdatePowerups();
         UpdateVehicles();
         UpdateScore();
+
+        if(hudRefreshTimer>0f)
+            hudRefreshTimer-=Time.unscaledDeltaTime;
+        else
+        {
+            UpdateHudCache();
+            hudRefreshTimer=.12f;
+        }
 
         bool nowGameOver=IsGameOver();
         if(!lastGameOver && nowGameOver)
@@ -826,6 +848,22 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         overdriveTimer=0f;
         combo=0;
         comboTimer=0f;
+    }
+
+    void UpdateHudCache()
+    {
+        hudMeters=Mathf.Max(0f,player.position.z-startZ)
+            .ToString("0")+" M";
+        hudScore=(DistanceScore+bonusScore).ToString("0000000");
+        hudData=coinCount.ToString("000");
+
+        hudCombo=combo>1&&comboTimer>0f
+            ? "COMBO x"+combo
+            : "";
+
+        hudOverdrive=overdriveTimer>0f
+            ? "OVERCLOCK "+overdriveTimer.ToString("0.0")+"s"
+            : "";
     }
 
     void UpdateScore()
