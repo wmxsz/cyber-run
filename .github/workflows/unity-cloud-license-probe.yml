@@ -2,8 +2,6 @@ name: Unity Cloud License Probe
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 
 jobs:
   probe:
