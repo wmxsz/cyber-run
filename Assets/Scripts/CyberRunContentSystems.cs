@@ -39,7 +39,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     long bonusScore;
     int combo;
     float comboTimer;
-    float startZ;
+    float runStartDistance;
     float lastPlayerY;
     bool wasSliding;
     bool paused;
@@ -99,7 +99,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         if(player==null) yield break;
 
-        startZ=player.position.z;
+        runStartDistance=bootstrap!=null ? bootstrap.Distance : 0f;
         lastPlayerY=player.position.y;
         lastPlayerX=player.position.x;
 
@@ -107,7 +107,6 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(bootstrap==null)
             bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
 
-        lastPlayerZ=player.position.z;
         lastGameOver=bootstrap!=null && bootstrap.IsGameOver;
         bestScore=PlayerPrefs.GetInt("CyberRun_BestScore",0);
     }
@@ -1040,8 +1039,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     void ResetMetaState()
     {
-        startZ=player.position.z;
-        lastPlayerZ=player.position.z;
+        runStartDistance=bootstrap!=null
+            ? bootstrap.Distance
+            : runStartDistance;
         bonusScore=0;
         coinCount=0;
         overdriveTimer=0f;
@@ -1053,8 +1053,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     void UpdateHudCache()
     {
-        hudMeters=Mathf.Max(0f,player.position.z-startZ)
-            .ToString("0")+" M";
+        float meters=bootstrap!=null
+            ? Mathf.Max(0f,bootstrap.Distance-runStartDistance)
+            : 0f;
+        hudMeters=meters.ToString("0")+" M";
         hudScore=(DistanceScore+bonusScore).ToString("0000000");
         hudData=coinCount.ToString("000");
 
@@ -1107,10 +1109,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(overdriveFlash>0f)
             overdriveFlash-=Time.unscaledDeltaTime;
 
-        if(player.position.z<lastPlayerZ-20f)
-            ResetMetaState();
 
-        lastPlayerZ=player.position.z;
     }
 
     void UpdateCamera()
@@ -1130,8 +1129,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     {
         get
         {
-            return Math.Max(0L,
-                Mathf.FloorToInt((player.position.z-startZ)*10f));
+            float distance=bootstrap!=null
+                ? bootstrap.Distance-runStartDistance
+                : 0f;
+            return Math.Max(0L,Mathf.FloorToInt(distance*10f));
         }
     }
 
