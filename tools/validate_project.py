@@ -94,6 +94,10 @@ for marker in [
     "CreateCyberSign(",
     "CreateSkyRail(",
     "CreateRoadReflections(",
+    "CreateDrone(",
+    "SetupRain()",
+    "SkyDrone",
+    "CyberRain",
     "MagnetCore",
     "magnetTimer",
 
