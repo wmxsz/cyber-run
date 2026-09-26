@@ -152,6 +152,16 @@ for marker in [
     if marker not in visual_overdrive:
         errors.append(f"visual overdrive marker missing: {marker}")
 
+music_system = read("Assets/Scripts/CyberRunMusicSystem.cs")
+for marker in [
+    "CyberRunMusicSystem",
+    "CreateCyberTrack()",
+    "CyberRun_MainTheme",
+    "source.pitch",
+]:
+    if marker not in music_system:
+        errors.append(f"music system marker missing: {marker}")
+
 sector_palette = read("Assets/Scripts/CyberRunSectorPalette.cs")
 for marker in [
     "CyberRunSectorPalette",
