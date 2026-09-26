@@ -30,6 +30,11 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     public float CurrentSpeed => speed;
     public float Distance => distance;
 
+    public void RestartRun()
+    {
+        Restart();
+    }
+
     public bool CancelHitWithShield()
     {
         if(gameOver)
@@ -789,19 +794,5 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         }
     }
 
-    void OnGUI()
-    {
-        if(!gameOver) return;
 
-        GUI.Box(
-            new Rect(Screen.width*.5f-170f,Screen.height*.5f-80f,340f,160f),
-            "RUN TERMINATED");
-
-        if(GUI.Button(
-            new Rect(Screen.width*.5f-85f,Screen.height*.5f+5f,170f,50f),
-            "RESTART"))
-        {
-            Restart();
-        }
     }
-}
