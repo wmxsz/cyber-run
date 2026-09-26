@@ -13,5 +13,6 @@
     <type fullname="CyberRunRoadVisual" preserve="all" />
     <type fullname="CyberRunIntensityController" preserve="all" />
     <type fullname="CyberRunPowerVFX" preserve="all" />
+    <type fullname="CyberRunSectorPalette" preserve="all" />
   </assembly>
 </linker>
