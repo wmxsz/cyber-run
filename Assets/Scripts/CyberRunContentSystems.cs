@@ -2035,6 +2035,24 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             GUI.Label(new Rect(left,top+140f,260f,26f),
                 hudShield,subStyle);
 
+        if(sectorRewardTimer>0f)
+        {
+            float pulse=.72f+
+                .28f*Mathf.Sin(Time.unscaledTime*8f);
+            Color oldColor=GUI.color;
+            GUI.color=new Color(
+                hudAccent.r,hudAccent.g,hudAccent.b,
+                .55f+.35f*pulse);
+            GUI.Label(
+                new Rect(
+                    Screen.width*.5f-180f,
+                    Screen.height*.5f-78f,
+                    360f,40f),
+                "SECTOR BREAK  //  "+hudSector,
+                hudStyle);
+            GUI.color=oldColor;
+        }
+
         Rect pauseRect=new Rect(
             safe.xMax-78f,Screen.height-safe.yMax+14f,62f,40f);
 
