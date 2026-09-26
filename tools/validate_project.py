@@ -101,7 +101,7 @@ for path in sorted(ROOT.rglob("*")):
     except UnicodeDecodeError:
         continue
     for line_number,line in enumerate(raw.splitlines(),1):
-        if line.endswith((" ","\\t")):
+        if line.endswith((" ","\t")):
             errors.append(f"trailing whitespace: {path.relative_to(ROOT)}:{line_number}")
             break
     if raw.endswith("\n\n"):
@@ -197,6 +197,8 @@ for marker in [
     "SetIl2CppCompilerConfiguration(",
     "Il2CppCompilerConfiguration.Master",
     "AndroidSdkVersions.AndroidApiLevel36",
+    "NewSceneMode.Additive",
+    "EditorSceneManager.CloseScene(scene,true)",
 ]:
     if marker not in build_setup:
         errors.append(f"build setup marker missing: {marker}")
