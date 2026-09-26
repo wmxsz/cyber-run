@@ -64,19 +64,31 @@ public sealed class CyberRunGameplayVisuals : MonoBehaviour
 
             bool jump=obstacle.name=="JumpObstacle";
             bool slide=obstacle.name=="SlideGate";
-            if(!jump&&!slide) continue;
+            bool moving=obstacle.name=="MovingLaser";
+            if(!jump&&!slide&&!moving) continue;
 
             Color glow=jump
                 ? new Color(2.2f,.04f,.28f,1f)
-                : new Color(1.7f,.05f,3.8f,1f);
+                : slide
+                    ? new Color(1.7f,.05f,3.8f,1f)
+                    : new Color(2.4f,.55f,.04f,1f);
 
             AddBar(obstacle,new Vector3(0,.5f,0),
                 jump
                     ? new Vector3(1.02f,.045f,1.07f)
-                    : new Vector3(1.02f,.11f,1.07f),
+                    : moving
+                        ? new Vector3(1.04f,.08f,1.08f)
+                        : new Vector3(1.02f,.11f,1.07f),
                 glow);
 
-            if(jump)
+            if(moving)
+            {
+                AddBar(obstacle,new Vector3(-.48f,0,0),
+                    new Vector3(.055f,.8f,1.08f),glow);
+                AddBar(obstacle,new Vector3(.48f,0,0),
+                    new Vector3(.055f,.8f,1.08f),glow);
+            }
+            else if(jump)
             {
                 AddBar(obstacle,new Vector3(-.47f,0,0),
                     new Vector3(.045f,.85f,1.07f),glow);
