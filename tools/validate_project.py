@@ -152,6 +152,17 @@ for marker in [
     if marker not in visual_overdrive:
         errors.append(f"visual overdrive marker missing: {marker}")
 
+sector_palette = read("Assets/Scripts/CyberRunSectorPalette.cs")
+for marker in [
+    "CyberRunSectorPalette",
+    "palettes",
+    "distance/650f",
+    "ApplyPalette(",
+    "HologramBillboard",
+]:
+    if marker not in sector_palette:
+        errors.append(f"sector palette marker missing: {marker}")
+
 power_vfx = read("Assets/Scripts/CyberRunPowerVFX.cs")
 for marker in [
     "CyberRunPowerVFX",
