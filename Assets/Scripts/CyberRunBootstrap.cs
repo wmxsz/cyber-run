@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
 public sealed class CyberRunBootstrap : MonoBehaviour
@@ -9,6 +8,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     const float SegmentLength = 36f;
     const int SegmentCount = 14;
     readonly List<Transform> segments = new();
+    readonly List<Collider> obstacles = new();
     Transform player;
     Camera cam;
     int lane;
@@ -87,8 +87,17 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         for(int o=0;o<2;o++)
         {
             float x=(((index+o)%3)-1)*LaneWidth;
-            Cube("Obstacle",root,new Vector3(1.8f,1.4f,1.1f),
-                new Vector3(x,.7f,-8f+o*17f),new Color(1f,.12f,.05f));
+            bool slideGate=((index+o)&1)==1;
+            Vector3 scale=slideGate
+                ? new Vector3(1.8f,.4f,1.1f)
+                : new Vector3(1.8f,1.4f,1.1f);
+            Vector3 localPos=slideGate
+                ? new Vector3(x,2.15f,-8f+o*17f)
+                : new Vector3(x,.7f,-8f+o*17f);
+            var obstacle=Cube(slideGate?"SlideGate":"JumpObstacle",root,scale,localPos,
+                slideGate?new Color(1f,.25f,.85f):new Color(1f,.12f,.05f));
+            var obstacleCollider=obstacle.GetComponent<Collider>();
+            if(obstacleCollider!=null) obstacles.Add(obstacleCollider);
         }
         segments.Add(root);
     }
@@ -154,7 +163,11 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         {
             if(Keyboard.current.leftArrowKey.wasPressedThisFrame||Keyboard.current.aKey.wasPressedThisFrame) lane=Mathf.Max(-1,lane-1);
             if(Keyboard.current.rightArrowKey.wasPressedThisFrame||Keyboard.current.dKey.wasPressedThisFrame) lane=Mathf.Min(1,lane+1);
-            if((Keyboard.current.upArrowKey.wasPressedThisFrame||Keyboard.current.spaceKey.wasPressedThisFrame)&&player.position.y<=1.11f) yVelocity=11f;
+            if((Keyboard.current.upArrowKey.wasPressedThisFrame||Keyboard.current.spaceKey.wasPressedThisFrame)&&player.position.y<=1.11f)
+            {
+                SetSliding(false);
+                yVelocity=11f;
+            }
             if(Keyboard.current.downArrowKey.wasPressedThisFrame) Slide();
         }
         if(Touchscreen.current!=null)
@@ -167,7 +180,11 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                 if(d.magnitude>=55f)
                 {
                     if(Mathf.Abs(d.x)>Mathf.Abs(d.y)) lane=Mathf.Clamp(lane+(d.x>0?1:-1),-1,1);
-                    else if(d.y>0f && player.position.y<=1.11f) yVelocity=11f;
+                    else if(d.y>0f && player.position.y<=1.11f)
+                    {
+                        SetSliding(false);
+                        yVelocity=11f;
+                    }
                     else if(d.y<0f) Slide();
                 }
             }
@@ -218,16 +235,45 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
     void Collide()
     {
-        Vector3 p=player.position;
-        foreach(var s in segments)
-            foreach(var o in s.GetComponentsInChildren<Transform>())
-                if(o.name=="Obstacle" && Mathf.Abs(o.position.z-p.z)<1.05f && Mathf.Abs(o.position.x-p.x)<1.25f && p.y<2f)
-                { gameOver=true; return; }
+        if(playerCollider==null) return;
+        Bounds playerBounds=playerCollider.bounds;
+        for(int i=0;i<obstacles.Count;i++)
+        {
+            var obstacle=obstacles[i];
+            if(obstacle!=null && playerBounds.Intersects(obstacle.bounds))
+            {
+                gameOver=true;
+                SetSliding(false);
+                return;
+            }
+        }
     }
 
     void Restart()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        lane=0;
+        speed=11f;
+        distance=0f;
+        yVelocity=0f;
+        gameOver=false;
+        touchStart=Vector2.zero;
+        SetSliding(false);
+
+        if(player!=null)
+        {
+            player.position=new Vector3(0,1.1f,4f);
+            player.rotation=Quaternion.identity;
+        }
+
+        for(int i=0;i<segments.Count;i++)
+            if(segments[i]!=null)
+                segments[i].position=new Vector3(0,0,18f+i*SegmentLength);
+
+        if(cam!=null)
+        {
+            cam.transform.position=new Vector3(0,5,-8);
+            cam.transform.LookAt(new Vector3(0,1.8f,13));
+        }
     }
 
     void OnGUI()
