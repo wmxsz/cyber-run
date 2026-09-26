@@ -6,8 +6,8 @@ Version 0.4.0
 
 ## 技术基线
 
-- Unity 6000.6.3f1
-- URP 17.6.0
+- Unity 6000.3.16f1
+- URP 17.3.0
 - Input System 1.20.0
 - Android ARM64
 - IL2CPP / Master + OptimizeSpeed
