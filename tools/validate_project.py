@@ -158,6 +158,8 @@ required_runtime.extend([
     "TunnelRoof",
     "TunnelLight",
     "Physics.autoSyncTransforms=false;",
+    "segmentCycles.Clear();",
+    "int segmentIndex=0;",
 ])
 for marker in required_runtime:
     if marker not in runtime:
@@ -234,6 +236,8 @@ for marker in [
     "visualCacheRefreshTimer",
     "visibleDistance=250f",
     "runStartDistance",
+    "lastBootstrapDistance",
+    "ResetSegmentTracking()",
     "renderers=root.GetComponentsInChildren<Renderer>(true)",
     "ShadowCastingMode.Off",
     "crashClip",
