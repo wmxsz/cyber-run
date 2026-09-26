@@ -913,6 +913,14 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             visualCullTimer=.25f;
         }
 
+        if(visualCacheRefreshTimer>0f)
+            visualCacheRefreshTimer-=Time.unscaledDeltaTime;
+        else
+        {
+            RefreshSegmentRendererCache();
+            visualCacheRefreshTimer=4f;
+        }
+
         UpdateSegments();
         UpdateCoins();
         UpdatePowerups();
@@ -967,6 +975,18 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         var emission=speedLines.emission;
         emission.rateOverTime=Mathf.Lerp(0f,55f,amount);
         speedLines.gameObject.SetActive(amount>.02f);
+    }
+
+    void RefreshSegmentRendererCache()
+    {
+        for(int i=0;i<data.Count;i++)
+        {
+            var segment=data[i];
+            if(segment.root==null) continue;
+
+            segment.renderers=
+                segment.root.GetComponentsInChildren<Renderer>(true);
+        }
     }
 
     void UpdateVisualCulling()
