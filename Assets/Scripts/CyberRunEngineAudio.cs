@@ -39,7 +39,7 @@ public sealed class CyberRunEngineAudio : MonoBehaviour
         const int rate=22050;
         const float length=2f;
         int samples=(int)(rate*length);
-        var clip=AudioClip.Create("CyberEngine",samples,1,rate,true);
+        var clip=AudioClip.Create("CyberEngine",samples,1,rate,false);
         var data=new float[samples];
 
         for(int i=0;i<samples;i++)
