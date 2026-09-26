@@ -470,6 +470,32 @@ for method_name in ["void Update()", "void UpdateScore()", "void UpdateCoins()",
     if "GUI." in body:
         errors.append(f"{method_name} contains GUI calls")
 
+def validate_hot_path_allocations():
+    forbidden = [
+        "new Material(",
+        "new MaterialPropertyBlock(",
+        "GameObject.CreatePrimitive(",
+        "FindFirstObjectByType<",
+        "FindObjectsByType<",
+        "GameObject.Find(",
+    ]
+
+    for path in sorted((ROOT / "Assets").rglob("*.cs")):
+        source = path.read_text(encoding="utf-8")
+        for signature in ["void Update()", "void LateUpdate()", "void FixedUpdate()"]:
+            body = method_body(source, signature)
+            if not body:
+                continue
+            for token in forbidden:
+                if token in body:
+                    errors.append(
+                        f"hot-path allocation/search: "
+                        f"{path.relative_to(ROOT)}:{signature}:{token}"
+                    )
+
+
+validate_hot_path_allocations()
+
 if errors:
     print("CYBER RUN STATIC CHECK: FAIL")
     for error in errors:
