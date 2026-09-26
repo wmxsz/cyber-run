@@ -78,8 +78,8 @@ Shader "CyberRun/Road"
 
                 float2 grid=IN.positionWS.xz*_GridDensity;
                 float2 cell=abs(frac(grid)-.5);
-                float lineX=smoothstep(.5,.44,cell.x);
-                float lineZ=smoothstep(.5,.44,cell.y);
+                float lineX=smoothstep(.44,.5,cell.x);
+                float lineZ=smoothstep(.44,.5,cell.y);
                 float gridLines=max(lineX,lineZ)*topMask;
 
                 float scan=.5+.5*sin(
