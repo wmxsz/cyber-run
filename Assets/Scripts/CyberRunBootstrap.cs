@@ -28,6 +28,8 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     Camera cam;
     int lane;
     float speed = 11f, distance;
+    float speedBurstTimer;
+    float speedBurstBonus;
     float yVelocity;
     float hitGraceTimer;
     bool gameOver, sliding;
@@ -39,8 +41,17 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     const float PlayerGroundY = 1.1f;
     public bool IsGameOver => gameOver;
     public bool IsSliding => sliding;
-    public float CurrentSpeed => speed;
+    public float CurrentSpeed => speed+speedBurstBonus;
     public float Distance => distance;
+    public bool IsSpeedBurstActive => speedBurstTimer>0f;
+    public float SpeedBurstRemaining => speedBurstTimer;
+
+    public void TriggerSpeedBurst(float bonus,float duration)
+    {
+        if(gameOver) return;
+        speedBurstBonus=Mathf.Max(speedBurstBonus,Mathf.Max(0f,bonus));
+        speedBurstTimer=Mathf.Max(speedBurstTimer,Mathf.Max(0f,duration));
+    }
 
     public void RestartRun()
     {
@@ -454,8 +465,17 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         speed=Mathf.Min(
             21.5f,
             speed+dt*(.1f+difficulty*.045f));
-        distance+=speed*dt;
-        player.position += Vector3.forward*speed*dt;
+
+        if(speedBurstTimer>0f)
+        {
+            speedBurstTimer=Mathf.Max(0f,speedBurstTimer-dt);
+            if(speedBurstTimer<=0f)
+                speedBurstBonus=0f;
+        }
+
+        float activeSpeed=CurrentSpeed;
+        distance+=activeSpeed*dt;
+        player.position += Vector3.forward*activeSpeed*dt;
 
         float targetX=lane*LaneWidth;
         float x=Mathf.Lerp(player.position.x,targetX,1f-Mathf.Exp(-14f*dt));
@@ -638,7 +658,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     void UpdateMovingHazards()
     {
         float t=Time.time;
-        float intensity=Mathf.InverseLerp(11f,21.5f,speed);
+        float intensity=Mathf.InverseLerp(11f,25f,CurrentSpeed);
         float frequency=Mathf.Lerp(2.0f,2.65f,intensity);
         float amplitude=Mathf.Lerp(.34f,.52f,intensity);
 
@@ -819,6 +839,8 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     {
         lane=0;
         speed=11f;
+        speedBurstTimer=0f;
+        speedBurstBonus=0f;
         distance=0f;
         yVelocity=0f;
         gameOver=false;
