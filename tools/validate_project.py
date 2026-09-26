@@ -146,6 +146,15 @@ for marker in [
 if animator.count("{") != animator.count("}"):
     errors.append("runner animator brace count mismatch")
 
+visual_overdrive = read("Assets/Scripts/CyberRunVisualOverdrive.cs")
+for marker in [
+    "CyberRunVisualOverdrive",
+    "Specialized visual passes own these renderers.",
+    "CyberRun/Surface",
+]:
+    if marker not in visual_overdrive:
+        errors.append(f"visual overdrive marker missing: {marker}")
+
 skyline_script = read("Assets/Scripts/CyberRunSkylineProps.cs")
 street_script = read("Assets/Scripts/CyberRunStreetProps.cs")
 audio_script = read("Assets/Scripts/CyberRunEngineAudio.cs")
@@ -166,6 +175,11 @@ for source, markers, label in [
     for marker in markers:
         if marker not in source:
             errors.append(f"{label} marker missing: {marker}")
+
+surface_shader = read("Assets/Shaders/CyberRunSurface.shader")
+for marker in ['Shader "CyberRun/Surface"', "CyberSurface", "ComputeFogFactor"]:
+    if marker not in surface_shader:
+        errors.append(f"surface shader marker missing: {marker}")
 
 skyline_shader = read("Assets/Shaders/CyberRunCity.shader")
 road_shader = read("Assets/Shaders/CyberRunRoad.shader")
@@ -198,6 +212,14 @@ for marker in [
     'fullname="CyberRunBootstrap"',
     'fullname="CyberRunContentSystems"',
     'fullname="CyberRunRunnerAnimator"',
+    'fullname="CyberRunVisualOverdrive"',
+    'fullname="CyberRunCityVisual"',
+    'fullname="CyberRunGameplayVisuals"',
+    'fullname="CyberRunEngineAudio"',
+    'fullname="CyberRunStreetProps"',
+    'fullname="CyberRunSkylineProps"',
+    'fullname="CyberRunHolograms"',
+    'fullname="CyberRunRoadVisual"',
 ]:
     if marker not in link:
         errors.append(f"link marker missing: {marker}")
