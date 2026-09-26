@@ -28,6 +28,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     readonly List<Transform> segmentRoots=new();
     readonly Dictionary<int,Material> materialCache=new();
     readonly Dictionary<Collider,float> nearMissMarker=new();
+    static readonly int[] CoinLaneOrder={-1,0,1};
     Shader projectShader;
     CyberRunBootstrap bootstrap;
 
@@ -1086,9 +1087,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     {
         if(segment.coins.Count==0||segment.root==null) return;
 
-        int seed=Mathf.Abs(
-            segment.root.GetInstanceID()+segment.cycle*31);
-        int[] laneOrder={-1,0,1};
+        int segmentIndex=GetSegmentIndex(segment.root.name);
+        uint seed=StableSeed(segmentIndex,segment.cycle);
 
         for(int i=0;i<segment.coins.Count;i++)
         {
@@ -1096,16 +1096,16 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             if(coin==null) continue;
 
             float z=-13f+i*8.2f;
-            int desired=Mathf.Abs(seed+i*17)%3-1;
+            int desired=(int)((seed+(uint)i*17u)%3u)-1;
             float y=(i==1||i==2)
-                ? 1.55f+((seed+i)%3)*.16f
+                ? 1.55f+((seed+(uint)i)%3u)*.16f
                 : 1.35f;
 
             int chosen=desired;
             for(int probe=0;probe<3;probe++)
             {
-                int candidate=laneOrder[
-                    (Array.IndexOf(laneOrder,desired)+probe)%3];
+                int candidate=CoinLaneOrder[
+                    (PositiveModulo(desired+1,3)+probe)%3];
 
                 bool blocked=false;
                 for(int j=0;j<segment.obstacles.Count;j++)
@@ -1137,6 +1137,25 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             if(i<segment.coinSpawnPositions.Count)
                 segment.coinSpawnPositions[i]=coin.transform.localPosition;
         }
+    }
+
+    static uint StableSeed(int segmentIndex,int cycle)
+    {
+        unchecked
+        {
+            uint hash=(uint)segmentIndex*2654435761u;
+            hash^=(uint)cycle*2246822519u;
+            hash^=hash>>16;
+            hash*=3266489917u;
+            hash^=hash>>13;
+            return hash;
+        }
+    }
+
+    static int PositiveModulo(int value,int modulus)
+    {
+        int remainder=value%modulus;
+        return remainder<0 ? remainder+modulus : remainder;
     }
 
     void UpdateCoins()
