@@ -145,7 +145,10 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     {
         if(gameOver)
         {
-            if(Keyboard.current?.rKey.wasPressedThisFrame == true) Restart();
+            if(Keyboard.current?.rKey.wasPressedThisFrame == true)
+                Restart();
+            else if(IsRestartTapped())
+                Restart();
             return;
         }
 
@@ -174,6 +177,35 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         Recycle();
         FollowCamera(dt);
         Collide(previousPlayerPosition);
+    }
+
+    bool IsRestartTapped()
+    {
+        if(Touchscreen.current==null) return false;
+
+        var t=Touchscreen.current.primaryTouch;
+        if(t.press.wasPressedThisFrame)
+        {
+            touchStart=t.position.ReadValue();
+            return false;
+        }
+
+        if(!t.press.wasReleasedThisFrame) return false;
+
+        Vector2 position=t.position.ReadValue();
+        Vector2 delta=position-touchStart;
+        touchStart=Vector2.zero;
+
+        if(delta.sqrMagnitude>30f*30f) return false;
+
+        Vector2 guiPosition=new Vector2(position.x,Screen.height-position.y);
+        Rect restartRect=new Rect(
+            Screen.width*.5f-85f,
+            Screen.height*.5f+5f,
+            170f,
+            50f);
+
+        return restartRect.Contains(guiPosition);
     }
 
     void InputFrame()
