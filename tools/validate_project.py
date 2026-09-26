@@ -92,6 +92,23 @@ def validate_source_structure(path, source):
 
 validate_python_syntax()
 
+TEXT_EXTENSIONS={".py",".cs",".shader",".yml",".yaml",".json",".txt",".md",".meta",".asset",".unity",".gitignore"}
+for path in sorted(ROOT.rglob("*")):
+    if not path.is_file() or ".git" in path.parts or path.suffix.lower() not in TEXT_EXTENSIONS:
+        continue
+    try:
+        raw=path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    for line_number,line in enumerate(raw.splitlines(),1):
+        if line.endswith((" ","\\t")):
+            errors.append(f"trailing whitespace: {path.relative_to(ROOT)}:{line_number}")
+            break
+    if raw.endswith("\n\n"):
+        errors.append(f"multiple blank lines at EOF: {path.relative_to(ROOT)}")
+    if raw and not raw.endswith("\n"):
+        errors.append(f"missing final newline: {path.relative_to(ROOT)}")
+
 for py in sorted((ROOT / "tools").glob("*.py")):
     _ = read(f"tools/{py.name}")
 
@@ -459,4 +476,3 @@ print("CYBER RUN STATIC CHECK: PASS")
 print("Unity 6000.6.3f1 / URP 17.6.0 / Input System 1.20.0")
 print("Android ARM64 / IL2CPP configuration markers present")
 print("Runtime reset, touch input, swept collision, project shader and APK build markers present")
-
