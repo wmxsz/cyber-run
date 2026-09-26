@@ -120,14 +120,15 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     static void ApplyMaterial(Renderer renderer, Color color)
     {
         if(!renderer) return;
-        Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
+        Shader shader = Shader.Find("CyberRun/Unlit");
+        if(shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
         if(shader == null) shader = Shader.Find("Universal Render Pipeline/Lit");
         if(shader == null) shader = Shader.Find("Sprites/Default");
         if(shader == null) return;
 
         var mat = new Material(shader);
-        mat.color = color;
         if(mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
+        else if(mat.HasProperty("_Color")) mat.SetColor("_Color", color);
         if(mat.HasProperty("_EmissionColor")) mat.SetColor("_EmissionColor", color * 0.35f);
         renderer.sharedMaterial = mat;
     }
