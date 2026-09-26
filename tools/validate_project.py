@@ -220,6 +220,19 @@ if "CreatePrimitive(" in content_update or "new Material(" in content_update:
     errors.append("content Update contains object creation")
 
 
+
+if "startZ" in content:
+    errors.append("content still contains stale startZ reference")
+if "FieldInfo" in content or "BindingFlags" in content or "System.Reflection" in content:
+    errors.append("content systems contains stale reflection references")
+if "left" in method_body(content, "void UpdateScore()") or "top" in method_body(content, "void UpdateScore()"):
+    errors.append("UpdateScore contains GUI-only layout identifiers")
+
+for method_name in ["void Update()", "void UpdateScore()", "void UpdateCoins()", "void UpdatePowerups()", "void UpdateVehicles()"]:
+    body = method_body(content, method_name)
+    if "GUI." in body:
+        errors.append(f"{method_name} contains GUI calls")
+
 if errors:
     print("CYBER RUN STATIC CHECK: FAIL")
     for error in errors:
