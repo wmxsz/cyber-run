@@ -26,7 +26,7 @@ public static class CyberRunBuildSetup
         PlayerSettings.Android.targetArchitectures=AndroidArchitecture.ARM64;
         PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android,ScriptingImplementation.IL2CPP);
         PlayerSettings.Android.minSdkVersion=AndroidSdkVersions.AndroidApiLevel26;
-        PlayerSettings.Android.targetSdkVersion=AndroidSdkVersions.AndroidApiLevel35;
+        PlayerSettings.Android.targetSdkVersion=AndroidSdkVersions.AndroidApiLevel36;
         PlayerSettings.Android.bundleVersionCode=3;
         EditorUserBuildSettings.buildAppBundle=false;
 
