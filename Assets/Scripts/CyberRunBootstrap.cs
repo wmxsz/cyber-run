@@ -420,7 +420,10 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         if(hitGraceTimer>0f)
             hitGraceTimer=Mathf.Max(0f,hitGraceTimer-dt);
 
-        speed=Mathf.Min(19f,speed+dt*.1f);
+        float difficulty=Mathf.Clamp01(distance/1800f);
+        speed=Mathf.Min(
+            21.5f,
+            speed+dt*(.1f+difficulty*.045f));
         distance+=speed*dt;
         player.position += Vector3.forward*speed*dt;
 
@@ -650,8 +653,10 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
         if(hazards.Count<2) return;
 
+        int difficultyStep=Mathf.FloorToInt(
+            distance/1800f);
         int basePattern=Mathf.Abs(
-            segment.GetInstanceID()+cycle*7)%8;
+            segment.GetInstanceID()+cycle*7+difficultyStep*11)%8;
 
         int[][] lanes=
         {
