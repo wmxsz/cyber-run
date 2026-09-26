@@ -18,6 +18,22 @@ jobs:
           key: Library-Android-${{ hashFiles('Packages/manifest.json','ProjectSettings/ProjectVersion.txt') }}
           restore-keys: |
             Library-Android-
+      - name: Probe Unity CLI cloud licensing
+        shell: bash
+        env:
+          UNITY_NO_CONSENT_PROMPT: "1"
+          UNITY_NO_CLI_INVOKED_TELEMETRY: "1"
+        run: |
+          set -e
+          curl -fsSL https://unity.com/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.local/bin:$PATH"
+          unity --version
+          set +e
+          unity auth status --format json
+          unity license status --format json
+          echo "CLI probe complete; continuing to GameCI build."
+
       - name: Build Android APK
         uses: game-ci/unity-builder@v5
         env:
