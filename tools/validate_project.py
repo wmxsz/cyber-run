@@ -161,6 +161,47 @@ for marker in [
 if shader.count("{") != shader.count("}"):
     errors.append("shader brace count mismatch")
 
+
+def method_body(text, signature):
+    start=text.find(signature)
+    if start<0:
+        return ""
+    brace=text.find("{", start)
+    if brace<0:
+        return ""
+    depth=0
+    for i in range(brace,len(text)):
+        if text[i]=="{":
+            depth+=1
+        elif text[i]=="}":
+            depth-=1
+            if depth==0:
+                return text[start:i+1]
+    return ""
+
+content_update = method_body(content, "void Update()")
+for forbidden in [
+    "new Material(",
+    "GameObject.CreatePrimitive(",
+    "FindFirstObjectByType<",
+    "FindObjectsByType<",
+]:
+    if forbidden in content_update:
+        errors.append(f"content Update contains hot-path allocation/search: {forbidden}")
+
+base_update = method_body(runtime, "void Update()")
+for forbidden in [
+    "new Material(",
+    "GameObject.CreatePrimitive(",
+    "FindFirstObjectByType<",
+    "FindObjectsByType<",
+]:
+    if forbidden in base_update:
+        errors.append(f"bootstrap Update contains hot-path allocation/search: {forbidden}")
+
+if "FieldInfo" in content or "BindingFlags" in content or "using System.Reflection" in content:
+    errors.append("content systems still contains reflection state access")
+
 if errors:
     print("CYBER RUN STATIC CHECK: FAIL")
     for error in errors:
