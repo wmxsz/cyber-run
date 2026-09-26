@@ -52,7 +52,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     long bonusScore;
     int combo;
     int gateStreak;
+    int lastSector=-1;
     float comboTimer;
+    float sectorRewardTimer;
     float runStartDistance;
     float lastPlayerY;
     float lastPlayerX;
@@ -1002,6 +1004,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         UpdateSegments();
         UpdateBoostGates();
+        UpdateSectorMilestones();
         UpdateCoins();
         UpdatePowerups();
         UpdateVehicles();
@@ -1213,6 +1216,47 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             if(i<segment.coinSpawnPositions.Count)
                 segment.coinSpawnPositions[i]=coin.transform.localPosition;
         }
+    }
+
+    void UpdateSectorMilestones()
+    {
+        if(bootstrap==null||player==null) return;
+
+        int sector=Mathf.Max(
+            0,
+            Mathf.FloorToInt(bootstrap.Distance/650f));
+
+        if(lastSector<0)
+        {
+            lastSector=sector;
+            return;
+        }
+
+        if(sector>lastSector)
+        {
+            int crossed=sector-lastSector;
+            lastSector=sector;
+
+            long reward=450L+
+                Mathf.Min(sector,5)*100L;
+            bonusScore+=reward;
+            combo=Mathf.Min(combo+2,9);
+            comboTimer=4.2f;
+            sectorRewardTimer=2.1f;
+            overdriveFlash=.28f;
+            flashColor=GetSectorAccent(sector);
+            PlaySfx(powerupClip);
+
+            if(collectBurst!=null)
+            {
+                collectBurst.transform.position=
+                    player.position+Vector3.up*.7f;
+                collectBurst.Emit(30+crossed*4);
+            }
+        }
+
+        if(sectorRewardTimer>0f)
+            sectorRewardTimer-=Time.unscaledDeltaTime;
     }
 
     void UpdateBoostGates()
@@ -1508,6 +1552,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         coinCount=0;
         bonusScore=0;
         gateStreak=0;
+        lastSector=-1;
+        sectorRewardTimer=0f;
 
         for(int i=0;i<data.Count;i++)
         {
@@ -1541,6 +1587,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         combo=0;
         comboTimer=0f;
         gateStreak=0;
+        lastSector=-1;
+        sectorRewardTimer=0f;
     }
 
     void UpdateHudCache()
@@ -1584,6 +1632,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         hudDataLine="DATA "+hudData+"   SPEED "+hudSpeed;
         if(gateStreak>1)
             hudDataLine+="   GATE x"+gateStreak;
+        if(sectorRewardTimer>0f)
+            hudDataLine+="   SECTOR BREAK +BONUS";
         if(bootstrap!=null&&bootstrap.IsSpeedBurstActive)
             hudDataLine+="   BOOST "+bootstrap.SpeedBurstRemaining.ToString("0.0")+"s";
         hudFinalScore=(DistanceScore+bonusScore).ToString("0000000");
