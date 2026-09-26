@@ -59,6 +59,10 @@ for marker in [
     "property.intValue=2;",
     "CyberRun/Unlit",
     "GraphicsSettings.defaultRenderPipeline=urp;",
+    "PlayerSettings.colorSpace=ColorSpace.Linear;",
+    "PlayerSettings.SetGraphicsAPIs(",
+    "GraphicsDeviceType.Vulkan",
+    "GraphicsDeviceType.OpenGLES3",
 ]:
     if marker not in build_setup:
         errors.append(f"build setup marker missing: {marker}")
@@ -100,6 +104,21 @@ for marker in [
         errors.append(f"content marker missing: {marker}")
 if content.count("{") != content.count("}"):
     errors.append("content systems brace count mismatch")
+
+animator = read("Assets/Scripts/CyberRunRunnerAnimator.cs")
+for marker in [
+    "public sealed class CyberRunRunnerAnimator",
+    "CyberRunBootstrap",
+    "ArmL",
+    "ArmR",
+    "LegL",
+    "LegR",
+    "LateUpdate()",
+]:
+    if marker not in animator:
+        errors.append(f"animator marker missing: {marker}")
+if animator.count("{") != animator.count("}"):
+    errors.append("runner animator brace count mismatch")
 
 particle = read("Assets/Shaders/CyberRunParticle.shader")
 for marker in [
