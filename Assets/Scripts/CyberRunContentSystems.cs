@@ -560,6 +560,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             alignment=TextAnchor.UpperLeft
         };
 
+        hudStyle.normal.textColor=new Color(.55f,.95f,1f);
+        subStyle.normal.textColor=new Color(.55f,.7f,.9f);
+
         buttonStyle=new GUIStyle(GUI.skin.button)
         {
             fontSize=14,
@@ -947,15 +950,15 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             "DATA "+coinCount.ToString("000"),subStyle);
 
         if(overdriveTimer>0f)
-            GUI.Label(new Rect(left,top+72f,260f,26f),
+            GUI.Label(new Rect(left,top+96f,260f,26f),
                 "OVERCLOCK "+overdriveTimer.ToString("0.0")+"s",subStyle);
 
         if(combo>1&&comboTimer>0f)
-            GUI.Label(new Rect(left,top+50f,220f,28f),
+            GUI.Label(new Rect(left,top+74f,220f,28f),
                 "COMBO x"+combo,subStyle);
 
         Rect pauseRect=new Rect(
-            safe.xMax-78f,safe.y+14f,62f,40f);
+            safe.xMax-78f,Screen.height-safe.yMax+14f,62f,40f);
 
         if(GUI.Button(pauseRect,paused?"▶":"Ⅱ",buttonStyle))
             SetPaused(!paused);
