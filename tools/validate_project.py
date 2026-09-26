@@ -478,6 +478,31 @@ if "FieldInfo" in content or "BindingFlags" in content or "using System.Reflecti
 if "CreatePrimitive(" in content_update or "new Material(" in content_update:
     errors.append("content Update contains object creation")
 
+for helper_name in [
+    "void UpdateCoins()",
+    "void UpdatePowerups()",
+    "void UpdateVehicles()",
+    "void UpdateVisualCulling()",
+    "void UpdateSpeedLineIntensity()",
+]:
+    body = method_body(content, helper_name)
+    for token in [
+        "new Material(",
+        "new MaterialPropertyBlock(",
+        "GameObject.CreatePrimitive(",
+        "FindFirstObjectByType<",
+        "FindObjectsByType<",
+        "GameObject.Find(",
+        "Transform.Find(",
+        "GetComponent<",
+        "GetComponentsInChildren<",
+        "GetComponents<",
+    ]:
+        if token in body:
+            errors.append(
+                f"{helper_name} contains hot-path allocation/search: {token}"
+            )
+
 
 
 if "startZ" in content:
@@ -520,6 +545,10 @@ def validate_hot_path_allocations():
         "FindFirstObjectByType<",
         "FindObjectsByType<",
         "GameObject.Find(",
+        "Transform.Find(",
+        "GetComponent<",
+        "GetComponentsInChildren<",
+        "GetComponents<",
     ]
 
     for path in sorted((ROOT / "Assets").rglob("*.cs")):
