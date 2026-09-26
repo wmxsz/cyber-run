@@ -769,6 +769,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         gameOver=false;
         sliding=false;
         slideTimer=0f;
+        hitGraceTimer=0f;
         touchStart=Vector2.zero;
 
         if(player!=null)
