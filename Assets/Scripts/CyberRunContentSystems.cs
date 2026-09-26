@@ -67,6 +67,15 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     GUIStyle buttonStyle;
     GUIStyle panelStyle;
 
+    float hudRefreshTimer;
+    string hudMeters="";
+    string hudScore="";
+    string hudData="";
+    string hudCombo="";
+    string hudOverdrive="";
+    string hudMagnet="";
+    string hudShield="";
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
