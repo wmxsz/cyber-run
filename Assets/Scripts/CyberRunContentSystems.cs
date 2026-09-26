@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 public sealed class CyberRunContentSystems : MonoBehaviour
@@ -444,6 +443,26 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         UpdateCoins();
         UpdateVehicles();
         UpdateScore();
+
+        bool nowGameOver=IsGameOver();
+        if(!lastGameOver && nowGameOver)
+        {
+            long currentScore=DistanceScore+bonusScore;
+            if(currentScore>bestScore)
+            {
+                bestScore=currentScore;
+                PlayerPrefs.SetInt(
+                    "CyberRun_BestScore",
+                    (int)Mathf.Min(bestScore,int.MaxValue));
+                PlayerPrefs.Save();
+            }
+        }
+        else if(lastGameOver && !nowGameOver)
+        {
+            ResetMetaState();
+            introTimer=2.2f;
+        }
+        lastGameOver=nowGameOver;
 
         float y=player.position.y;
         if(lastPlayerY<=PlayerGroundY+.03f && y>PlayerGroundY+.08f)
