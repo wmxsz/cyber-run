@@ -326,6 +326,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         if(sliding && (slideTimer-=dt)<=0) SetSliding(false);
 
         Recycle();
+        RecenterWorldIfNeeded();
         FollowCamera(dt);
         Collide(previousPlayerPosition);
     }
@@ -459,6 +460,27 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             if(pos.y<PlayerGroundY) pos.y=PlayerGroundY;
             player.position=pos;
         }
+    }
+
+    void RecenterWorldIfNeeded()
+    {
+        const float threshold=5000f;
+        const float shift=4000f;
+
+        if(player==null || player.position.z<threshold) return;
+
+        player.position-=Vector3.forward*shift;
+
+        for(int i=0;i<segments.Count;i++)
+        {
+            if(segments[i]!=null)
+                segments[i].position-=Vector3.forward*shift;
+        }
+
+        if(cam!=null)
+            cam.transform.position-=Vector3.forward*shift;
+
+        previousPlayerPosition=player.position;
     }
 
     void Recycle()
