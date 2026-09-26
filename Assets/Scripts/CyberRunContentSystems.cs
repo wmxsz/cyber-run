@@ -15,6 +15,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     {
         public Transform root;
         public readonly List<GameObject> coins=new();
+        public readonly List<GameObject> powerups=new();
         public readonly List<Transform> vehicles=new();
         public float lastZ;
     }
@@ -30,7 +31,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     ParticleSystem collectBurst;
     AudioSource sfx;
     AudioSource ambience;
-    AudioClip coinClip,jumpClip,slideClip,laneClip;
+    AudioClip coinClip,jumpClip,slideClip,laneClip,powerupClip;
     FieldInfo gameOverField;
 
     long bonusScore;
@@ -45,6 +46,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     bool appAutoPaused;
     float introTimer=4f;
     int coinCount;
+    float overdriveTimer;
     long bestScore;
 
     GUIStyle hudStyle;
@@ -193,6 +195,14 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             seg.vehicles.Add(car);
         }
 
+        if(index%5==0)
+        {
+            float x=(((index+2)%3)-1)*LaneWidth;
+            var powerup=CreatePowerup(seg.root,
+                new Vector3(x,1.45f,12f));
+            seg.powerups.Add(powerup);
+        }
+
         CreateRoadReflections(seg.root,index);
 
         if(index%3==0)
@@ -245,6 +255,22 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         root.localRotation=Quaternion.Euler(0f,180f,0f);
         return root;
+    }
+
+    GameObject CreatePowerup(Transform parent,Vector3 localPos)
+    {
+        var g=GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        g.name="OverdriveCore";
+        g.transform.SetParent(parent,false);
+        g.transform.localPosition=localPos;
+        g.transform.localScale=Vector3.one*.42f;
+
+        ApplyMaterial(g.GetComponent<Renderer>(),
+            new Color(.2f,2.1f,4.8f));
+
+        var collider=g.GetComponent<Collider>();
+        if(collider!=null) Destroy(collider);
+        return g;
     }
 
     void CreateRoadReflections(Transform parent,int index)
@@ -364,6 +390,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         jumpClip=CreateSweep("jump",320f,700f,.11f,.045f);
         slideClip=CreateTone("slide",180f,.09f,.035f);
         laneClip=CreateTone("lane",520f,.045f,.022f);
+        powerupClip=CreateSweep("powerup",520f,1200f,.16f,.055f);
 
         var ambient=CreateAmbience();
         ambience.clip=ambient;
@@ -597,6 +624,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         UpdateSegments();
         UpdateCoins();
+        UpdatePowerups();
         UpdateVehicles();
         UpdateScore();
 
@@ -661,6 +689,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 {
                     if(coin!=null) coin.SetActive(true);
                 }
+                foreach(var powerup in s.powerups)
+                {
+                    if(powerup!=null) powerup.SetActive(true);
+                }
             }
 
             s.lastZ=s.root.position.z;
@@ -700,6 +732,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         combo=Mathf.Min(combo+1,9);
         comboTimer=3.2f;
         int multiplier=1+Mathf.Min(combo/3,3);
+        if(overdriveTimer>0f)
+            multiplier*=2;
         bonusScore+=100L*multiplier;
         PlaySfx(coinClip);
 
@@ -707,6 +741,44 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         {
             collectBurst.transform.position=position;
             collectBurst.Emit(10);
+        }
+    }
+
+    void UpdatePowerups()
+    {
+        float playerZ=player.position.z;
+        float time=Time.time;
+
+        foreach(var s in data)
+        foreach(var powerup in s.powerups)
+        {
+            if(powerup==null||!powerup.activeSelf) continue;
+
+            float dz=Mathf.Abs(powerup.transform.position.z-playerZ);
+            if(dz>90f) continue;
+
+            powerup.transform.Rotate(
+                0f,240f*Time.deltaTime,0f,Space.Self);
+            float pulse=1f+.12f*Mathf.Sin(time*5.5f);
+            powerup.transform.localScale=Vector3.one*.42f*pulse;
+
+            float dx=powerup.transform.position.x-player.position.x;
+            float dy=powerup.transform.position.y-player.position.y;
+            float d2=dx*dx+dy*dy+dz*dz;
+
+            if(d2<1.75f)
+            {
+                Vector3 pos=powerup.transform.position;
+                powerup.SetActive(false);
+                overdriveTimer=8f;
+                PlaySfx(powerupClip);
+
+                if(collectBurst!=null)
+                {
+                    collectBurst.transform.position=pos;
+                    collectBurst.Emit(18);
+                }
+            }
         }
     }
 
@@ -737,6 +809,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         lastPlayerZ=player.position.z;
         bonusScore=0;
         coinCount=0;
+        overdriveTimer=0f;
         combo=0;
         comboTimer=0f;
     }
@@ -747,6 +820,11 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             comboTimer-=Time.deltaTime;
         else
             combo=0;
+
+        if(overdriveTimer>0f)
+            overdriveTimer-=Time.deltaTime;
+        else
+            overdriveTimer=0f;
 
         if(player.position.z<lastPlayerZ-20f)
             ResetMetaState();
@@ -867,6 +945,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             "SCORE "+score+"  BEST "+bestScore,subStyle);
         GUI.Label(new Rect(left,top+50f,240f,26f),
             "DATA "+coinCount.ToString("000"),subStyle);
+
+        if(overdriveTimer>0f)
+            GUI.Label(new Rect(left,top+72f,260f,26f),
+                "OVERCLOCK "+overdriveTimer.ToString("0.0")+"s",subStyle);
 
         if(combo>1&&comboTimer>0f)
             GUI.Label(new Rect(left,top+50f,220f,28f),
