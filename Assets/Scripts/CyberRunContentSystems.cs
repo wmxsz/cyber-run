@@ -105,15 +105,15 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         if(player==null) yield break;
 
+        bootstrap=GetComponent<CyberRunBootstrap>();
+        if(bootstrap==null)
+            bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
+
         runStartDistance=bootstrap!=null ? bootstrap.Distance : 0f;
         lastPlayerY=player.position.y;
         lastPlayerX=player.position.x;
         lastCameraX=player.position.x;
         lastWorldZ=player.position.z;
-
-        bootstrap=GetComponent<CyberRunBootstrap>();
-        if(bootstrap==null)
-            bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
 
         lastGameOver=bootstrap!=null && bootstrap.IsGameOver;
         bestScore=PlayerPrefs.GetInt("CyberRun_BestScore",0);
