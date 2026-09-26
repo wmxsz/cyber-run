@@ -17,6 +17,8 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     bool gameOver, sliding;
     float slideTimer;
     Vector2 touchStart;
+    CapsuleCollider playerCollider;
+    float colliderHeight, colliderCenterY;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Boot()
@@ -48,6 +50,12 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         player.position = new Vector3(0,1.1f,4);
         player.localScale = new Vector3(.72f,1.05f,.72f);
         ApplyMaterial(player.GetComponent<Renderer>(), new Color(.05f,.85f,1f));
+        playerCollider = player.GetComponent<CapsuleCollider>();
+        if(playerCollider!=null)
+        {
+            colliderHeight=playerCollider.height;
+            colliderCenterY=playerCollider.center.y;
+        }
 
         for(int i=0;i<SegmentCount;i++) CreateSegment(i, 18f+i*SegmentLength);
 
@@ -56,7 +64,9 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         cam.tag = "MainCamera";
         cam.fieldOfView = 68f;
         cam.nearClipPlane = .05f;
-        cam.farClipPlane = 220f;
+        cam.farClipPlane = 240f;
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.backgroundColor = new Color(.005f,.008f,.02f,1f);
         cam.transform.position = new Vector3(0,5,-8);
     }
 
@@ -132,7 +142,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         if(y<1.1f){y=1.1f;yVelocity=0;}
         player.position=new Vector3(x,y,player.position.z);
 
-        if(sliding && (slideTimer-=dt)<=0) sliding=false;
+        if(sliding && (slideTimer-=dt)<=0) SetSliding(false);
         Recycle();
         FollowCamera(dt);
         Collide();
@@ -164,7 +174,31 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         }
     }
 
-    void Slide(){sliding=true;slideTimer=.7f;}
+    void Slide()
+    {
+        slideTimer=.7f;
+        SetSliding(true);
+    }
+
+    void SetSliding(bool value)
+    {
+        sliding=value;
+        if(playerCollider==null) return;
+        if(value)
+        {
+            playerCollider.height=colliderHeight*.55f;
+            var center=playerCollider.center;
+            center.y=colliderCenterY*.45f;
+            playerCollider.center=center;
+        }
+        else
+        {
+            playerCollider.height=colliderHeight;
+            var center=playerCollider.center;
+            center.y=colliderCenterY;
+            playerCollider.center=center;
+        }
+    }
 
     void Recycle()
     {
