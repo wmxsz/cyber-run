@@ -47,8 +47,16 @@ public sealed class CyberRunVisualOverdrive : MonoBehaviour
 
             string name=r.gameObject.name;
 
-            // CityVisual owns building renderers and applies the animated window shader.
-            if(name.Contains("Building",System.StringComparison.Ordinal))
+            // Specialized visual passes own these renderers.
+            if(name.Contains("Building",System.StringComparison.Ordinal) ||
+               name=="Road" ||
+               name=="HologramBillboard" ||
+               name=="NeonDetail" ||
+               name.StartsWith("CoinHalo",System.StringComparison.Ordinal) ||
+               name.StartsWith("CoinCore",System.StringComparison.Ordinal) ||
+               name.StartsWith("PowerRing_",System.StringComparison.Ordinal) ||
+               name=="AntennaCore" ||
+               name=="AntennaBeacon")
                 continue;
 
             Color baseColor=ReadBaseColor(r);
