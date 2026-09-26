@@ -15,5 +15,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Validate CI Python
+        run: python3 -m py_compile tools/*.py
+
+      - name: Validate latest commit formatting
+        run: git diff --check HEAD^ HEAD
+
       - name: Validate project
         run: python3 tools/validate_project.py
