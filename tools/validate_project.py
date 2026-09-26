@@ -82,7 +82,7 @@ for marker in [
     'Shader "CyberRun/Unlit"',
     '"RenderPipeline" = "UniversalPipeline"',
     "#include \"Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl\"",
-    "TransformObjectToHClip",
+    "TransformWorldToHClip",
 ]:
     if marker not in shader:
         errors.append(f"shader marker missing: {marker}")
