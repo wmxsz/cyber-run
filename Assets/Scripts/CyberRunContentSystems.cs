@@ -43,6 +43,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     float comboTimer;
     float runStartDistance;
     float lastPlayerY;
+    float lastCameraX;
     bool wasSliding;
     bool paused;
     bool initialized;
@@ -1181,6 +1182,26 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         float targetFov=Mathf.Clamp(67f+speed*.23f,67f,73f);
         cam.fieldOfView=Mathf.Lerp(
             cam.fieldOfView,targetFov,1f-Mathf.Exp(-4.5f*Time.unscaledDeltaTime));
+
+        float lateralDelta=player.position.x-lastPlayerX;
+        float lateralVelocity=lateralDelta/
+            Mathf.Max(.016f,Time.unscaledDeltaTime);
+        float targetRoll=Mathf.Clamp(-lateralVelocity*1.8f,-6.5f,6.5f);
+        float targetPitch=Mathf.Clamp(
+            (speed-11f)*.28f+(player.position.y-PlayerGroundY)*-1.2f,
+            -3.5f,4f);
+
+        Vector3 forward=cam.transform.forward;
+        Quaternion look=Quaternion.LookRotation(
+            forward.sqrMagnitude>.01f ? forward : Vector3.forward,
+            Vector3.up);
+        Quaternion desired=look*Quaternion.Euler(targetPitch,0f,targetRoll);
+        cam.transform.rotation=Quaternion.Slerp(
+            cam.transform.rotation,
+            desired,
+            1f-Mathf.Exp(-8f*Time.unscaledDeltaTime));
+
+        lastCameraX=player.position.x;
     }
 
     long DistanceScore
