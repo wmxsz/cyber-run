@@ -22,12 +22,14 @@ Shader "CyberRun/Unlit"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             struct Attributes
             {
                 float4 positionOS : POSITION;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -42,6 +44,7 @@ Shader "CyberRun/Unlit"
 
             Varyings vert(Attributes IN)
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
                 Varyings OUT;
                 float3 positionWS = TransformObjectToWorld(IN.positionOS.xyz);
                 OUT.positionHCS = TransformWorldToHClip(positionWS);
