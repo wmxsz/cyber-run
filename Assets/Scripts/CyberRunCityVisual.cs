@@ -114,13 +114,15 @@ public sealed class CyberRunCityVisual : MonoBehaviour
             var col=mesh.GetComponent<Collider>();
             if(col!=null) Destroy(col);
 
+            Color cyan=new Color(.05f,1.25f,4.3f,1f);
+            Color magenta=new Color(1.7f,.05f,3.6f,1f);
+
             var renderer=mesh.GetComponent<Renderer>();
             if(renderer!=null && cityMaterial!=null)
             {
                 renderer.sharedMaterial=cityMaterial;
                 var block=new MaterialPropertyBlock();
-                Color cyan=new Color(.05f,1.25f,4.3f,1f);
-                Color magenta=new Color(1.7f,.05f,3.6f,1f);
+
                 Color baseColor=(i&2)==0
                     ? new Color(.018f,.022f,.055f,1f)
                     : new Color(.028f,.018f,.05f,1f);
@@ -155,6 +157,7 @@ public sealed class CyberRunCityVisual : MonoBehaviour
                 beaconRenderer.sharedMaterial=cityMaterial;
                 var block=new MaterialPropertyBlock();
                 Color glow=(i&2)==0 ? cyan : magenta;
+
                 block.SetColor("_BaseColor",glow);
                 block.SetColor("_WindowColor",glow);
                 block.SetFloat("_WindowStrength",2.5f);
@@ -168,5 +171,4 @@ public sealed class CyberRunCityVisual : MonoBehaviour
             }
         }
     }
-
 }
