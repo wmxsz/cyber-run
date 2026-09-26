@@ -314,19 +314,6 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             player.position+Vector3.up*.7f+Vector3.forward*9f);
     }
 
-    bool TouchRestartPressed()
-    {
-        if(Touchscreen.current==null) return false;
-
-        var t=Touchscreen.current.primaryTouch;
-        if(!t.press.wasReleasedThisFrame) return false;
-
-        Vector2 delta=t.position.ReadValue()-touchStart;
-        bool tap=delta.magnitude<40f;
-        touchStart=Vector2.zero;
-        return tap;
-    }
-
     void Collide(Vector3 previousPosition)
     {
         if(playerCollider==null) return;
