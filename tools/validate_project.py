@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import re
+import ast
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,6 +13,90 @@ def read(path):
         errors.append(f"missing: {path}")
         return ""
     return p.read_text(encoding="utf-8")
+
+def validate_python_syntax():
+    for path in sorted((ROOT / "tools").glob("*.py")):
+        try:
+            ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        except SyntaxError as exc:
+            errors.append(f"python syntax invalid: {path}: {exc}")
+
+def validate_source_structure(path, source):
+    stack=[]
+    pairs={"}":"{",")":"(","]":"["}
+    i=0
+    in_string=None
+    in_char=False
+    line_comment=False
+    block_comment=False
+    escape=False
+    while i<len(source):
+        c=source[i]
+        n=source[i+1] if i+1<len(source) else ""
+        if line_comment:
+            if c=="\n": line_comment=False
+            i+=1
+            continue
+        if block_comment:
+            if c=="*" and n=="/":
+                block_comment=False
+                i+=2
+                continue
+            i+=1
+            continue
+        if in_string:
+            if escape:
+                escape=False
+            elif c=="\\":
+                escape=True
+            elif c==in_string:
+                in_string=None
+            i+=1
+            continue
+        if in_char:
+            if escape:
+                escape=False
+            elif c=="\\":
+                escape=True
+            elif c=="'":
+                in_char=False
+            i+=1
+            continue
+        if c=="/" and n=="/":
+            line_comment=True
+            i+=2
+            continue
+        if c=="/" and n=="*":
+            block_comment=True
+            i+=2
+            continue
+        if c=='"':
+            in_string='"'
+            i+=1
+            continue
+        if c=="'":
+            in_char=True
+            i+=1
+            continue
+        if c in "({[":
+            stack.append(c)
+        elif c in "})]":
+            if not stack or stack[-1]!=pairs[c]:
+                errors.append(f"source delimiter mismatch: {path}")
+                return
+            stack.pop()
+        i+=1
+    if in_string or in_char or block_comment or stack:
+        errors.append(f"source structure incomplete: {path}")
+
+
+validate_python_syntax()
+
+for py in sorted((ROOT / "tools").glob("*.py")):
+    _ = read(f"tools/{py.name}")
+
+for cs in sorted((ROOT / "Assets").rglob("*.cs")):
+    validate_source_structure(cs.relative_to(ROOT), cs.read_text(encoding="utf-8"))
 
 version = read("ProjectSettings/ProjectVersion.txt")
 if "m_EditorVersion: 6000.6.3f1" not in version:
@@ -42,8 +127,22 @@ required_runtime = [
     "18f+i*SegmentLength",
     'Shader.Find("CyberRun/Unlit")',
 ]
+required_runtime.extend([
+    "float difficulty=Mathf.Clamp01(distance/1800f);",
+    "speed+dt*(.1f+difficulty*.045f)",
+    "21.5f",
+    "difficultyStep=Mathf.FloorToInt(",
+    "MovingLaser",
+    "movingHazards",
+    "UpdateMovingHazards()",
+    "CreateCyberTunnel",
+    "TunnelLeft",
+    "TunnelRight",
+    "TunnelRoof",
+    "TunnelLight",
+    "Physics.autoSyncTransforms=false;",
+])
 for marker in required_runtime:
-required_runtime.extend(["float difficulty=Mathf.Clamp01(distance/1800f);","speed+dt*(.1f+difficulty*.045f)","21.5f","difficultyStep=Mathf.FloorToInt("])
     if marker not in runtime:
         errors.append(f"runtime marker missing: {marker}")
 if "SceneManager.LoadScene" in runtime:
@@ -360,15 +459,4 @@ print("CYBER RUN STATIC CHECK: PASS")
 print("Unity 6000.6.3f1 / URP 17.6.0 / Input System 1.20.0")
 print("Android ARM64 / IL2CPP configuration markers present")
 print("Runtime reset, touch input, swept collision, project shader and APK build markers present")
-required_runtime.extend([
-    "MovingLaser",
-    "movingHazards",
-    "UpdateMovingHazards()",
-    "CreateCyberTunnel",
-    "TunnelLeft",
-    "TunnelRight",
-    "TunnelRoof",
-    "TunnelLight",
-    "Physics.autoSyncTransforms=false;",
-])    
 
