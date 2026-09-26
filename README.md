@@ -1,6 +1,6 @@
 # Cyber Run
 
-Version 0.3.0
+Version 0.3.1
 
 赛博朋克风第三人称自动跑酷，目标平台为 Android 64 位。
 
@@ -11,6 +11,7 @@ Version 0.3.0
 - Input System 1.20.0
 - Android ARM64
 - IL2CPP / Master + OptimizeSpeed
+- Android Target API 36
 - Vulkan → OpenGLES3
 - Linear Color Space
 - Mobile Multithreaded Rendering
