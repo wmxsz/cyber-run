@@ -115,7 +115,8 @@ public sealed class CyberRunVisualOverdrive : MonoBehaviour
         if(name.Contains("Neon",System.StringComparison.Ordinal) ||
            name.Contains("Frame",System.StringComparison.Ordinal) ||
            name.Contains("Sign",System.StringComparison.Ordinal) ||
-           name.Contains("SkyRail",System.StringComparison.Ordinal))
+           name.Contains("SkyRail",System.StringComparison.Ordinal) ||
+           name.Contains("DataGate",System.StringComparison.Ordinal))
             return "NEON";
 
         if(name.Contains("Obstacle",System.StringComparison.Ordinal) ||
