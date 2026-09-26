@@ -113,6 +113,8 @@ for marker in [
     "SetPaused(",
     "materialCache",
     "UpdateVisualCulling()",
+    "RefreshSegmentRendererCache()",
+    "visualCacheRefreshTimer",
     "visibleDistance=250f",
     "runStartDistance",
     "renderers=root.GetComponentsInChildren<Renderer>(true)",
