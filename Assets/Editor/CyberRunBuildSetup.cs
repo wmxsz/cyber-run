@@ -31,7 +31,7 @@ public static class CyberRunBuildSetup
         EditorUserBuildSettings.buildAppBundle=false;
 
         PlayerSettings.SetMobileMTRendering(
-            BuildTarget.Android,true);
+            NamedBuildTarget.Android,true);
         PlayerSettings.stripUnusedMeshComponents=true;
         PlayerSettings.SetManagedStrippingLevel(
             NamedBuildTarget.Android,
