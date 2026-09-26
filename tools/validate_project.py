@@ -545,6 +545,33 @@ for method_name in ["void Update()", "void UpdateScore()", "void UpdateCoins()",
     if "GUI." in body:
         errors.append(f"{method_name} contains GUI calls")
 
+def validate_known_compile_hazards():
+    touch_phase_re = re.compile(r"(?<![A-Za-z0-9_.])TouchPhase\\.")
+
+    for path in sorted((ROOT / "Assets").rglob("*.cs")):
+        source = path.read_text(encoding="utf-8")
+        if "using UnityEngine.InputSystem;" in source and touch_phase_re.search(source):
+            errors.append(
+                f"unqualified TouchPhase with Input System import: {path.relative_to(ROOT)}"
+            )
+
+    content_source = read("Assets/Scripts/CyberRunContentSystems.cs")
+    for field in [
+        "float visualCullTimer;",
+        "float visualCacheRefreshTimer;",
+        "float laneSfxCooldown;",
+    ]:
+        if field not in content_source:
+            errors.append(f"content state field missing: {field}")
+
+    skyline_source = read("Assets/Scripts/CyberRunSkylineProps.cs")
+    tower_body = method_body(skyline_source, "void CreateTower(")
+    if '"_WindowColor",accent' in tower_body and "Color accent=" not in tower_body:
+        errors.append("skyline tower accent is used without a local declaration")
+
+
+validate_known_compile_hazards()
+
 def validate_shader_interpolation():
     literal_smoothstep = re.compile(
         r"smoothstep\(\s*([0-9]+(?:\.[0-9]*)?)\s*,\s*"
