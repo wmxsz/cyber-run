@@ -47,7 +47,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         player.name = "Runner";
         player.position = new Vector3(0,1.1f,4);
         player.localScale = new Vector3(.72f,1.05f,.72f);
-        player.GetComponent<Renderer>().material.color = new Color(.05f,.85f,1f);
+        ApplyMaterial(player.GetComponent<Renderer>(), new Color(.05f,.85f,1f));
 
         for(int i=0;i<SegmentCount;i++) CreateSegment(i, 18f+i*SegmentLength);
 
@@ -88,8 +88,20 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         var g=GameObject.CreatePrimitive(PrimitiveType.Cube);
         g.name=name; g.transform.SetParent(parent,false);
         g.transform.localScale=scale; g.transform.localPosition=localPos;
-        g.GetComponent<Renderer>().material.color=color;
+        ApplyMaterial(g.GetComponent<Renderer>(), color);
         return g;
+    }
+
+    static void ApplyMaterial(Renderer renderer, Color color)
+    {
+        if(!renderer) return;
+        Shader shader = Shader.Find("Standard");
+        if(shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
+        if(shader == null) shader = Shader.Find("Sprites/Default");
+        if(shader == null) return;
+        var mat = new Material(shader);
+        mat.color = color;
+        renderer.sharedMaterial = mat;
     }
 
     static void Strip(Transform parent,float x)
