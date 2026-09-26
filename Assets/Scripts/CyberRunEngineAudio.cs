@@ -61,6 +61,14 @@ public sealed class CyberRunEngineAudio : MonoBehaviour
     {
         if(source==null||bootstrap==null) return;
 
+        if(Time.timeScale<=.001f)
+        {
+            source.volume=Mathf.MoveTowards(
+                source.volume,0f,
+                Time.unscaledDeltaTime*.18f);
+            return;
+        }
+
         float speed=bootstrap.CurrentSpeed;
         float normalized=Mathf.InverseLerp(11f,19f,speed);
 
