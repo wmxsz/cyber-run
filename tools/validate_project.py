@@ -121,8 +121,8 @@ if "m_EditorVersion: 6000.6.3f1" not in version:
 
 build_setup_version = read("Assets/Editor/CyberRunBuildSetup.cs")
 for marker in [
-    'PlayerSettings.bundleVersion="0.3.0";',
-    "PlayerSettings.Android.bundleVersionCode=3;",
+    'PlayerSettings.bundleVersion="0.3.1";',
+    "PlayerSettings.Android.bundleVersionCode=4;",
 ]:
     if marker not in build_setup_version:
         errors.append(f"release version marker missing: {marker}")
@@ -196,6 +196,7 @@ for marker in [
     "Il2CppCodeGeneration.OptimizeSpeed",
     "SetIl2CppCompilerConfiguration(",
     "Il2CppCompilerConfiguration.Master",
+    "AndroidSdkVersions.AndroidApiLevel36",
 ]:
     if marker not in build_setup:
         errors.append(f"build setup marker missing: {marker}")
