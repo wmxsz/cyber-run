@@ -17,6 +17,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         public readonly List<GameObject> coins=new();
         public readonly List<GameObject> powerups=new();
         public readonly List<Transform> vehicles=new();
+        public readonly List<Collider> obstacles=new();
         public Renderer[] renderers;
         public float lastZ;
     }
@@ -24,6 +25,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     readonly List<SegmentData> data=new();
     readonly List<Transform> segmentRoots=new();
     readonly Dictionary<int,Material> materialCache=new();
+    readonly Dictionary<Collider,float> nearMissMarker=new();
     Shader projectShader;
 
     Transform player;
@@ -197,6 +199,11 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 renderers=root.GetComponentsInChildren<Renderer>(true),
                 lastZ=root.position.z
             });
+            var segData=data[data.Count-1];
+            var colliders=root.GetComponentsInChildren<Collider>(true);
+            for(int i=0;i<colliders.Length;i++)
+                if(colliders[i]!=null)
+                    segData.obstacles.Add(colliders[i]);
     }
 
     void BuildSegmentContent(SegmentData seg)
@@ -810,6 +817,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         UpdateCoins();
         UpdatePowerups();
         UpdateVehicles();
+        UpdateNearMisses();
         UpdateScore();
 
         if(hudRefreshTimer>0f)
@@ -1079,6 +1087,53 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             "CyberRun_BestScore",
             (int)Mathf.Min(bestScore,int.MaxValue));
         PlayerPrefs.Save();
+    }
+
+    void UpdateNearMisses()
+    {
+        float playerZ=player.position.z;
+        float playerX=player.position.x;
+        float playerY=player.position.y;
+
+        for(int i=0;i<data.Count;i++)
+        {
+            var seg=data[i];
+            if(seg.obstacles.Count==0) continue;
+
+            for(int j=0;j<seg.obstacles.Count;j++)
+            {
+                var obstacle=seg.obstacles[j];
+                if(obstacle==null) continue;
+
+                float z=obstacle.bounds.center.z;
+                float dz=z-playerZ;
+
+                if(dz>10f||dz<-5f) continue;
+
+                if(!nearMissMarker.TryGetValue(
+                    obstacle,out float marker) ||
+                   Mathf.Abs(marker-obstacle.transform.position.z)>50f)
+                {
+                    nearMissMarker[obstacle]=obstacle.transform.position.z;
+
+                    if(dz<-1.2f)
+                    {
+                        float dx=Mathf.Abs(
+                            obstacle.bounds.center.x-playerX);
+                        float dy=Mathf.Abs(
+                            obstacle.bounds.center.y-playerY);
+
+                        if(dx<1.55f && dy<2.1f)
+                        {
+                            bonusScore+=35L;
+                            combo=Mathf.Min(combo+1,9);
+                            comboTimer=2.4f;
+                            PlaySfx(laneClip);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     void UpdateScore()
