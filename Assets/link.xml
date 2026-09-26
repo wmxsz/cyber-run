@@ -3,5 +3,9 @@
     <type fullname="CyberRunBootstrap" preserve="all" />
     <type fullname="CyberRunContentSystems" preserve="all" />
     <type fullname="CyberRunRunnerAnimator" preserve="all" />
+    <type fullname="CyberRunVisualOverdrive" preserve="all" />
+    <type fullname="CyberRunCityVisual" preserve="all" />
+    <type fullname="CyberRunGameplayVisuals" preserve="all" />
+    <type fullname="CyberRunShaderBuildKeeper" preserve="all" />
   </assembly>
 </linker>
