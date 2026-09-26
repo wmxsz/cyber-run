@@ -27,6 +27,9 @@ public sealed class CyberRunRunnerAnimator : MonoBehaviour
             ? bootstrap.CurrentSpeed
             : 0f;
 
+        bool sliding=bootstrap!=null && bootstrap.IsSliding;
+        bool airborne=transform.position.y>1.16f;
+
         float normalized=Mathf.InverseLerp(0f,19f,speed);
         float frequency=Mathf.Lerp(0f,10.5f,normalized);
 
@@ -36,29 +39,40 @@ public sealed class CyberRunRunnerAnimator : MonoBehaviour
         float swing=Mathf.Sin(phase);
         float swingOpposite=Mathf.Sin(phase+Mathf.PI);
 
+        float armSwing=sliding ? 10f : airborne ? 18f : 28f;
+        float legSwing=sliding ? 7f : airborne ? 12f : 22f;
+
         if(armL!=null)
-            armL.localRotation=Quaternion.Euler(swing*28f,0f,0f);
+            armL.localRotation=Quaternion.Euler(swing*armSwing,0f,0f);
         if(armR!=null)
-            armR.localRotation=Quaternion.Euler(swingOpposite*28f,0f,0f);
+            armR.localRotation=Quaternion.Euler(swingOpposite*armSwing,0f,0f);
         if(legL!=null)
-            legL.localRotation=Quaternion.Euler(swingOpposite*22f,0f,0f);
+            legL.localRotation=Quaternion.Euler(swingOpposite*legSwing,0f,0f);
         if(legR!=null)
-            legR.localRotation=Quaternion.Euler(swing*22f,0f,0f);
+            legR.localRotation=Quaternion.Euler(swing*legSwing,0f,0f);
 
         if(torso!=null)
         {
-            torso.localPosition=torsoBase+
-                Vector3.up*(Mathf.Abs(swing)*.028f*normalized);
-            torso.localRotation=
-                Quaternion.Euler(5f+normalized*8f,0f,-swing*1.7f*normalized);
+            float bob=sliding
+                ? -.055f
+                : airborne
+                    ? .045f
+                    : Mathf.Abs(swing)*.028f*normalized;
+            torso.localPosition=torsoBase+Vector3.up*bob;
+            torso.localRotation=Quaternion.Euler(
+                sliding ? 18f : airborne ? -4f : 5f+normalized*8f,
+                0f,
+                -swing*1.7f*normalized);
         }
 
         if(head!=null)
         {
-            head.localPosition=headBase+
-                Vector3.up*(Mathf.Abs(swing)*.012f);
-            head.localRotation=
-                Quaternion.Euler(0f,-swing*2.2f*normalized,0f);
+            float headBob=sliding ? -.035f : airborne ? .035f : Mathf.Abs(swing)*.012f;
+            head.localPosition=headBase+Vector3.up*headBob;
+            head.localRotation=Quaternion.Euler(
+                sliding ? -10f : airborne ? 4f : 0f,
+                -swing*2.2f*normalized,
+                0f);
         }
     }
 }
