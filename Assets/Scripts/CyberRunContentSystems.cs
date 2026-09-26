@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public sealed class CyberRunContentSystems : MonoBehaviour
 {
@@ -473,6 +474,12 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(Touchscreen.current==null) return false;
 
         var touch=Touchscreen.current.primaryTouch;
+        if(touch.press.wasPressedThisFrame)
+        {
+            touchStart=touch.position.ReadValue();
+            return false;
+        }
+
         if(!touch.press.wasReleasedThisFrame) return false;
 
         Vector2 delta=touch.position.ReadValue()-touchStart;
