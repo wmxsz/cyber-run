@@ -1186,6 +1186,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                     Mathf.Clamp01((7f+pull*12f)*Time.deltaTime));
                 dx=coin.transform.position.x-player.position.x;
                 dy=coin.transform.position.y-player.position.y;
+                dz=coin.transform.position.z-player.position.z;
             }
 
             float d2=dz*dz+dx*dx+dy*dy;
