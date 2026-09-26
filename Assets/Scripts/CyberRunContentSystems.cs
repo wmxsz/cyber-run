@@ -230,22 +230,44 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         int index=GetSegmentIndex(seg.root.name);
 
+        int coinPattern=index%6;
         for(int i=0;i<CoinsPerSegment;i++)
         {
             float z=-13f+i*8.2f;
-            int pattern=(index+i)%5;
-            int lane=pattern switch
+            int lane;
+            float y;
+
+            switch(coinPattern)
             {
-                0=>-1,
-                1=>0,
-                2=>1,
-                3=>(i&1)==0?-1:1,
-                _=>0
-            };
+                case 0:
+                    lane=new[]{-1,0,1,0}[i];
+                    y=new[]{1.35f,1.45f,1.35f,1.55f}[i];
+                    break;
+                case 1:
+                    lane=new[]{1,1,0,-1}[i];
+                    y=new[]{1.35f,1.65f,1.85f,1.35f}[i];
+                    break;
+                case 2:
+                    lane=new[]{-1,-1,0,1}[i];
+                    y=new[]{1.35f,1.8f,1.95f,1.55f}[i];
+                    break;
+                case 3:
+                    lane=new[]{0,1,1,0}[i];
+                    y=new[]{1.35f,1.55f,1.9f,1.45f}[i];
+                    break;
+                case 4:
+                    lane=new[]{1,0,-1,-1}[i];
+                    y=new[]{1.35f,1.55f,1.85f,1.35f}[i];
+                    break;
+                default:
+                    lane=new[]{-1,0,0,1}[i];
+                    y=new[]{1.45f,1.8f,1.95f,1.45f}[i];
+                    break;
+            }
 
             var coin=CreateCoin(
                 seg.root,
-                new Vector3(lane*LaneWidth,1.35f,z));
+                new Vector3(lane*LaneWidth,y,z));
             seg.coins.Add(coin);
         }
 
