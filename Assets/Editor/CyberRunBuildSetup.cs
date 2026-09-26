@@ -264,8 +264,11 @@ public static class CyberRunBuildSetup
         Directory.CreateDirectory("Assets/Scenes");
         if(!File.Exists(path))
         {
-            var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
+            var scene=EditorSceneManager.NewScene(
+                NewSceneSetup.EmptyScene,
+                NewSceneMode.Additive);
             EditorSceneManager.SaveScene(scene,path);
+            EditorSceneManager.CloseScene(scene,true);
         }
         EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene(path,true)};
     }
