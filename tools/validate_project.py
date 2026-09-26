@@ -160,6 +160,8 @@ required_runtime.extend([
     "Physics.autoSyncTransforms=false;",
     "segmentCycles.Clear();",
     "int segmentIndex=0;",
+    "if(Time.timeScale<=.001f)",
+    "PatternIndex(segmentIndex,cycle,difficultyStep)",
 ])
 for marker in required_runtime:
     if marker not in runtime:
@@ -238,6 +240,7 @@ for marker in [
     "runStartDistance",
     "lastBootstrapDistance",
     "ResetSegmentTracking()",
+    "StableSeed(segmentIndex,segment.cycle)",
     "renderers=root.GetComponentsInChildren<Renderer>(true)",
     "ShadowCastingMode.Off",
     "crashClip",
