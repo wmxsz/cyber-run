@@ -173,6 +173,11 @@ required_runtime.extend([
     "int segmentIndex=0;",
     "if(Time.timeScale<=.001f)",
     "PatternIndex(segmentIndex,cycle,difficultyStep)",
+    "CurrentSpeed",
+    "speedBurstTimer",
+    "speedBurstBonus",
+    "SpeedBurstRemaining",
+    "TriggerSpeedBurst("
 ])
 for marker in required_runtime:
     if marker not in runtime:
