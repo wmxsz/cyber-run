@@ -261,6 +261,9 @@ for marker in [
     "ShadowCastingMode.Off",
     "crashClip",
     "Handheld.Vibrate()",
+    "OnApplicationQuit()",
+    "vehicleGlows",
+    "visualsVisible",
 ]:
     if marker not in content:
         errors.append(f"content marker missing: {marker}")
