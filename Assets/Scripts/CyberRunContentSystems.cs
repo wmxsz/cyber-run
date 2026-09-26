@@ -134,6 +134,13 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             cam.fieldOfView=67f;
             cam.farClipPlane=Mathf.Max(cam.farClipPlane,260f);
             cam.backgroundColor=new Color(.003f,.005f,.015f,1f);
+            cam.allowHDR=true;
+
+            var additional=cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+            if(additional==null)
+                additional=cam.gameObject.AddComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+            additional.renderPostProcessing=true;
+
             if(cam.GetComponent<AudioListener>()==null)
                 cam.gameObject.AddComponent<AudioListener>();
         }
