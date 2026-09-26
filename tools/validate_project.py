@@ -63,6 +63,10 @@ for marker in [
     "PlayerSettings.SetGraphicsAPIs(",
     "GraphicsDeviceType.Vulkan",
     "GraphicsDeviceType.OpenGLES3",
+    "SetIl2CppCodeGeneration(",
+    "Il2CppCodeGeneration.OptimizeSpeed",
+    "SetIl2CppCompilerConfiguration(",
+    "Il2CppCompilerConfiguration.Release",
 ]:
     if marker not in build_setup:
         errors.append(f"build setup marker missing: {marker}")
