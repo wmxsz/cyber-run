@@ -45,6 +45,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     float runStartDistance;
     float lastPlayerY;
     float lastCameraX;
+    float lastWorldZ;
     bool wasSliding;
     bool paused;
     bool initialized;
@@ -108,6 +109,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         lastPlayerY=player.position.y;
         lastPlayerX=player.position.x;
         lastCameraX=player.position.x;
+        lastWorldZ=player.position.z;
 
         bootstrap=GetComponent<CyberRunBootstrap>();
         if(bootstrap==null)
@@ -1158,6 +1160,11 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     void UpdateNearMisses()
     {
+        if(Mathf.Abs(player.position.z-lastWorldZ)>1000f)
+            nearMissMarker.Clear();
+
+        lastWorldZ=player.position.z;
+
         float playerZ=player.position.z;
         float playerX=player.position.x;
         float playerY=player.position.y;
