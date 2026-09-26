@@ -89,8 +89,8 @@ Shader "CyberRun/Surface"
 
                 float2 gridPos=IN.positionWS.xz*_GridDensity;
                 float2 cell=abs(frac(gridPos)-.5);
-                float gridX=smoothstep(.5,.455,cell.x);
-                float gridZ=smoothstep(.5,.455,cell.y);
+                float gridX=smoothstep(.455,.5,cell.x);
+                float gridZ=smoothstep(.455,.5,cell.y);
                 float gridLines=max(gridX,gridZ);
 
                 float scanCoord=
