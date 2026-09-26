@@ -39,7 +39,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     bool paused;
     bool initialized;
     float introTimer=4f;
-    float ambientTime;
+    int coinCount;
+    long bestScore;
 
     GUIStyle hudStyle;
     GUIStyle subStyle;
@@ -80,12 +81,13 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         startZ=player.position.z;
         lastPlayerY=player.position.y;
 
-        var bootstrap=GetComponent<CyberRunBootstrap>();
+        bootstrap=GetComponent<CyberRunBootstrap>();
         if(bootstrap==null)
             bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
 
-        gameOverField=typeof(CyberRunBootstrap).GetField(
-            "gameOver",BindingFlags.Instance|BindingFlags.NonPublic);
+        lastPlayerZ=player.position.z;
+        lastGameOver=bootstrap!=null && bootstrap.IsGameOver;
+        bestScore=PlayerPrefs.GetInt("CyberRun_BestScore",0);
     }
 
     void SetupEnvironment()
@@ -95,6 +97,18 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         RenderSettings.fogColor=new Color(.008f,.012f,.04f,1f);
         RenderSettings.fogDensity=.0065f;
         RenderSettings.ambientLight=new Color(.012f,.018f,.045f);
+
+        var volumeGo=new GameObject("CyberRunPostFX");
+        var volume=volumeGo.AddComponent<UnityEngine.Rendering.Volume>();
+        volume.isGlobal=true;
+        volume.priority=5f;
+        var profile=ScriptableObject.CreateInstance<UnityEngine.Rendering.VolumeProfile>();
+        var bloom=profile.Add<UnityEngine.Rendering.Universal.Bloom>();
+        bloom.active=true;
+        bloom.intensity.value=1.15f;
+        bloom.threshold.value=.7f;
+        bloom.scatter.value=.8f;
+        volume.profile=profile;
 
         if(cam!=null)
         {
@@ -189,7 +203,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         g.transform.localScale=new Vector3(.34f,.09f,.34f);
 
         ApplyMaterial(g.GetComponent<Renderer>(),
-            new Color(1f,.62f,.05f));
+            new Color(2.3f,1.05f,.08f));
 
         var collider=g.GetComponent<Collider>();
         if(collider!=null) Destroy(collider);
@@ -219,7 +233,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         root.SetParent(parent,false);
         root.localPosition=localPos;
 
-        Color main=cyan?new Color(.05f,.85f,1f):new Color(.95f,.08f,.7f);
+        Color main=cyan?new Color(.05f,1.8f,5f):new Color(1.8f,.08f,3.8f);
 
         Cube("SignFrame",root,new Vector3(2.8f,1.5f,.08f),
             Vector3.zero,new Color(.015f,.02f,.055f));
@@ -233,7 +247,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     void CreateSkyRail(Transform parent)
     {
-        Color rail=new Color(.15f,.55f,1f);
+        Color rail=new Color(.08f,1.2f,4.2f);
         Cube("SkyRail",parent,new Vector3(.16f,.16f,SegmentLength),
             new Vector3(-3.9f,6.3f,0),rail);
         Cube("SkyRailTop",parent,new Vector3(8f,.12f,.12f),
@@ -483,6 +497,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             if(dz<1.1f&&dx<.82f&&dy<1.15f)
             {
                 coin.SetActive(false);
+                coinCount++;
                 CollectCoin();
             }
         }
@@ -507,14 +522,25 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             if(v==null) continue;
 
             float phase=s.root.GetInstanceID()%100*.13f;
-            v.localPosition+=Vector3.forward*
-                Mathf.Sin(time*.7f+phase)*.0025f;
+            var pos=v.localPosition;
+            pos.y=1.1f+Mathf.Sin(time*1.7f+phase)*.035f;
+            v.localPosition=pos;
 
             float pulse=.5f+.5f*Mathf.Sin(time*4f+phase);
             var glow=v.Find("CarGlow");
             if(glow!=null)
                 glow.localScale=new Vector3(1f,.85f+.25f*pulse,1f);
         }
+    }
+
+    void ResetMetaState()
+    {
+        startZ=player.position.z;
+        lastPlayerZ=player.position.z;
+        bonusScore=0;
+        coinCount=0;
+        combo=0;
+        comboTimer=0f;
     }
 
     void UpdateScore()
@@ -524,20 +550,19 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         else
             combo=0;
 
-        if(player.position.z<startZ-5f)
-        {
-            startZ=player.position.z;
-            bonusScore=0;
-            combo=0;
-        }
+        if(player.position.z<lastPlayerZ-20f)
+            ResetMetaState();
+
+        lastPlayerZ=player.position.z;
     }
 
     void UpdateCamera()
     {
         if(cam==null) return;
 
-        float speed=Mathf.Max(0f,
-            (player.position.z-startZ)/Mathf.Max(.01f,Time.unscaledTime));
+        float speed=bootstrap!=null
+            ? bootstrap.CurrentSpeed
+            : 0f;
 
         float targetFov=Mathf.Clamp(67f+speed*.23f,67f,73f);
         cam.fieldOfView=Mathf.Lerp(
@@ -593,7 +618,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         var safe=Screen.safeArea;
         float left=safe.x+18f;
-        float top=safe.y+16f;
+        float top=Screen.height-safe.yMax+16f;
 
         string score=(DistanceScore+bonusScore).ToString("0000000");
         string meters=Mathf.Max(0f,player.position.z-startZ).ToString("0")+" M";
@@ -601,7 +626,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         GUI.Label(new Rect(left,top,340f,32f),
             "CYBER RUN  //  "+meters,hudStyle);
         GUI.Label(new Rect(left,top+30f,300f,26f),
-            "SCORE "+score,subStyle);
+            "SCORE "+score+"  BEST "+bestScore,subStyle);
+        GUI.Label(new Rect(left,top+50f,240f,26f),
+            "DATA "+coinCount.ToString("000"),subStyle);
 
         if(combo>1&&comboTimer>0f)
             GUI.Label(new Rect(left,top+50f,220f,28f),
@@ -620,6 +647,12 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 "SWIPE  /  DODGE  /  SURVIVE",
                 subStyle);
         }
+
+        if(IsGameOver())
+            GUI.Label(
+                new Rect(Screen.width*.5f-150f,Screen.height*.5f+82f,300f,28f),
+                "SCORE "+(DistanceScore+bonusScore).ToString("0000000"),
+                subStyle);
 
         if(paused)
         {
