@@ -233,6 +233,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                 mat.SetColor("_Color",color);
             if(mat.HasProperty("_EmissionColor"))
                 mat.SetColor("_EmissionColor",color*.35f);
+            mat.enableInstancing=true;
             materialCache[key]=mat;
         }
 
