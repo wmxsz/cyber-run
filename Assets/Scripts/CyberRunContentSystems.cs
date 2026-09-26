@@ -358,6 +358,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 mat.SetColor("_BaseColor",color);
             if(mat.HasProperty("_Color"))
                 mat.SetColor("_Color",color);
+            mat.enableInstancing=true;
             materialCache[key]=mat;
         }
 
