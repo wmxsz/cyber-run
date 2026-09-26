@@ -474,9 +474,9 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         Vector2 guiPosition=new Vector2(position.x,Screen.height-position.y);
         Rect restartRect=new Rect(
             Screen.width*.5f-85f,
-            Screen.height*.5f+5f,
+            Screen.height*.5f+28f,
             170f,
-            50f);
+            46f);
 
         return restartRect.Contains(guiPosition);
     }
