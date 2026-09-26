@@ -702,8 +702,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             int.TryParse(segment.name.Substring(8),out segmentIndex);
         int basePattern=cycle<=0
             ? PositiveModulo(segmentIndex,8)
-            : PositiveModulo(
-                segment.GetInstanceID()+cycle*7+difficultyStep*11,8);
+            : PatternIndex(segmentIndex,cycle,difficultyStep);
 
         int[] selected=HazardLanePatterns[basePattern];
 
@@ -719,7 +718,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
         if((cycle&3)==3)
         {
-            int shift=((segment.GetInstanceID()>>2)+cycle)%3-1;
+            int shift=PatternIndex(segmentIndex,cycle,3)%3-1;
             for(int i=0;i<2;i++)
             {
                 var hazard=i==0 ? first : second;
@@ -736,7 +735,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         {
             int chosenLane=cycle<=0
                 ? PositiveModulo(segmentIndex/3,3)-1
-                : PositiveModulo(cycle+segment.GetInstanceID(),3)-1;
+                : PatternIndex(segmentIndex,cycle,5)%3-1;
             bool collidesWithStatic=
                 Mathf.Abs(first.localPosition.x-
                     chosenLane*LaneWidth)<.01f ||
@@ -753,10 +752,23 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         }
     }
 
-    int PositiveModulo(int value,int modulus)
+    static int PositiveModulo(int value,int modulus)
     {
         int remainder=value%modulus;
         return remainder<0 ? remainder+modulus : remainder;
+    }
+
+    static int PatternIndex(int segmentIndex,int cycle,int salt)
+    {
+        unchecked
+        {
+            uint hash=(uint)segmentIndex*73856093u;
+            hash^=(uint)cycle*19349663u;
+            hash^=(uint)salt*83492791u;
+            hash^=hash>>13;
+            hash*=1274126177u;
+            return (int)(hash%8u);
+        }
     }
 
     void FollowCamera(float dt)
