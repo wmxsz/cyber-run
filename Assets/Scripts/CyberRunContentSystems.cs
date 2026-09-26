@@ -46,6 +46,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     float introTimer=4f;
     int coinCount;
     float overdriveTimer;
+    float magnetTimer;
     long bestScore;
     float overdriveFlash;
 
@@ -225,8 +226,9 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(index%5==0)
         {
             float x=(((index+2)%3)-1)*LaneWidth;
-            var powerup=CreatePowerup(seg.root,
-                new Vector3(x,1.45f,12f));
+            bool overdrive=(index/5)%2==0;
+            var powerup=CreatePowerup(
+                seg.root,new Vector3(x,1.45f,12f),overdrive);
             seg.powerups.Add(powerup);
         }
 
@@ -284,16 +286,18 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         return root;
     }
 
-    GameObject CreatePowerup(Transform parent,Vector3 localPos)
+    GameObject CreatePowerup(Transform parent,Vector3 localPos,bool overdrive)
     {
         var g=GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        g.name="OverdriveCore";
+        g.name=overdrive?"OverdriveCore":"MagnetCore";
         g.transform.SetParent(parent,false);
         g.transform.localPosition=localPos;
         g.transform.localScale=Vector3.one*.42f;
 
         ApplyMaterial(g.GetComponent<Renderer>(),
-            new Color(.2f,2.1f,4.8f));
+            overdrive
+                ? new Color(.2f,2.1f,4.8f)
+                : new Color(1.8f,.08f,2.8f));
 
         var collider=g.GetComponent<Collider>();
         if(collider!=null) Destroy(collider);
@@ -777,6 +781,18 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
             float dx=coin.transform.position.x-player.position.x;
             float dy=coin.transform.position.y-player.position.y;
+
+            if(magnetTimer>0f && dz<18f)
+            {
+                float pull=1f-Mathf.Clamp01(dz/18f);
+                Vector3 target=player.position+Vector3.up*.22f;
+                coin.transform.position=Vector3.Lerp(
+                    coin.transform.position,target,
+                    Mathf.Clamp01((7f+pull*12f)*Time.deltaTime));
+                dx=coin.transform.position.x-player.position.x;
+                dy=coin.transform.position.y-player.position.y;
+            }
+
             float d2=dz*dz+dx*dx+dy*dy;
 
             coin.transform.Rotate(0f,210f*Time.deltaTime,0f,Space.Self);
@@ -877,6 +893,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         bonusScore=0;
         coinCount=0;
         overdriveTimer=0f;
+        magnetTimer=0f;
         combo=0;
         comboTimer=0f;
     }
@@ -920,6 +937,15 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             overdriveTimer-=Time.deltaTime;
         else
             overdriveTimer=0f;
+
+        if(magnetTimer>0f)
+            magnetTimer-=Time.deltaTime;
+        else
+            magnetTimer=0f;
+
+        if(magnetTimer>0f)
+            GUI.Label(new Rect(left,top+118f,260f,26f),
+                "MAGNET "+magnetTimer.ToString("0.0")+"s",subStyle);
 
         if(overdriveFlash>0f)
             overdriveFlash-=Time.unscaledDeltaTime;
