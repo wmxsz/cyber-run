@@ -27,9 +27,10 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     Transform player;
     Camera cam;
     ParticleSystem trail;
+    ParticleSystem collectBurst;
     AudioSource sfx;
     AudioSource ambience;
-    AudioClip coinClip,jumpClip,slideClip;
+    AudioClip coinClip,jumpClip,slideClip,laneClip;
     FieldInfo gameOverField;
 
     long bonusScore;
@@ -66,6 +67,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         SetupEnvironment();
         SetupAudio();
         SetupParticleTrail();
+        SetupCollectBurst();
         SetupGuiStyles();
 
         started=false;
@@ -89,6 +91,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         startZ=player.position.z;
         lastPlayerY=player.position.y;
+        lastPlayerX=player.position.x;
 
         bootstrap=GetComponent<CyberRunBootstrap>();
         if(bootstrap==null)
@@ -360,6 +363,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         coinClip=CreateTone("coin",880f,.075f,.055f);
         jumpClip=CreateSweep("jump",320f,700f,.11f,.045f);
         slideClip=CreateTone("slide",180f,.09f,.035f);
+        laneClip=CreateTone("lane",520f,.045f,.022f);
 
         var ambient=CreateAmbience();
         ambience.clip=ambient;
@@ -476,6 +480,47 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         }
     }
 
+    void SetupCollectBurst()
+    {
+        var go=new GameObject("CollectBurst");
+        go.transform.SetParent(transform,false);
+        collectBurst=go.AddComponent<ParticleSystem>();
+
+        var main=collectBurst.main;
+        main.loop=false;
+        main.startLifetime=.3f;
+        main.startSpeed=new ParticleSystem.MinMaxCurve(.9f,2.2f);
+        main.startSize=new ParticleSystem.MinMaxCurve(.025f,.07f);
+        main.startColor=new Color(1f,.55f,.04f,1f);
+        main.maxParticles=48;
+        main.simulationSpace=ParticleSystemSimulationSpace.World;
+
+        var emission=collectBurst.emission;
+        emission.enabled=false;
+
+        var shape=collectBurst.shape;
+        shape.shapeType=ParticleSystemShapeType.Sphere;
+        shape.radius=.08f;
+
+        var renderer=collectBurst.GetComponent<ParticleSystemRenderer>();
+        renderer.shadowCastingMode=
+            UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows=false;
+        if(projectShader!=null)
+        {
+            int key=ColorKey(new Color(2.3f,1.05f,.08f));
+            if(!materialCache.TryGetValue(key,out var mat)||mat==null)
+            {
+                mat=new Material(projectShader);
+                mat.name="CyberRunMat_CollectBurst";
+                if(mat.HasProperty("_BaseColor"))
+                    mat.SetColor("_BaseColor",new Color(2.3f,1.05f,.08f));
+                materialCache[key]=mat;
+            }
+            renderer.sharedMaterial=mat;
+        }
+    }
+
     void SetupGuiStyles()
     {
         hudStyle=new GUIStyle(GUI.skin.label)
@@ -578,6 +623,19 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         }
         lastGameOver=nowGameOver;
 
+        if(laneSfxCooldown>0f)
+            laneSfxCooldown-=Time.unscaledDeltaTime;
+
+        if(Mathf.Abs(player.position.x-lastPlayerX)>.08f &&
+           laneSfxCooldown<=0f &&
+           bootstrap!=null &&
+           Mathf.Abs(bootstrap.CurrentSpeed)>0f)
+        {
+            PlaySfx(laneClip);
+            laneSfxCooldown=.16f;
+        }
+        lastPlayerX=player.position.x;
+
         float y=player.position.y;
         if(lastPlayerY<=PlayerGroundY+.03f && y>PlayerGroundY+.08f)
             PlaySfx(jumpClip);
@@ -622,27 +680,37 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             if(coin==null||!coin.activeSelf) continue;
 
             float dz=Mathf.Abs(coin.transform.position.z-playerZ);
-            float dx=Mathf.Abs(coin.transform.position.x-player.position.x);
-            float dy=Mathf.Abs(coin.transform.position.y-player.position.y);
+            if(dz>90f) continue;
+
+            float dx=coin.transform.position.x-player.position.x;
+            float dy=coin.transform.position.y-player.position.y;
+            float d2=dz*dz+dx*dx+dy*dy;
 
             coin.transform.Rotate(0f,210f*Time.deltaTime,0f,Space.Self);
 
-            if(dz<1.1f&&dx<.82f&&dy<1.15f)
+            if(d2<1.45f)
             {
+                Vector3 burstPosition=coin.transform.position;
                 coin.SetActive(false);
                 coinCount++;
-                CollectCoin();
+                CollectCoin(burstPosition);
             }
         }
     }
 
-    void CollectCoin()
+    void CollectCoin(Vector3 position)
     {
         combo=Mathf.Min(combo+1,9);
         comboTimer=3.2f;
         int multiplier=1+Mathf.Min(combo/3,3);
         bonusScore+=100L*multiplier;
         PlaySfx(coinClip);
+
+        if(collectBurst!=null)
+        {
+            collectBurst.transform.position=position;
+            collectBurst.Emit(10);
+        }
     }
 
     void UpdateVehicles()
