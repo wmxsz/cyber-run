@@ -121,6 +121,9 @@ if "m_EditorVersion: 6000.6.3f1" not in version:
 
 build_setup_version = read("Assets/Editor/CyberRunBuildSetup.cs")
 for marker in [
+    "PlayerSettings.Android.minSdkVersion=AndroidSdkVersions.AndroidApiLevel26;",
+    "PlayerSettings.Android.targetSdkVersion=AndroidSdkVersions.AndroidApiLevel36;",
+
     'PlayerSettings.bundleVersion="0.3.1";',
     "PlayerSettings.Android.bundleVersionCode=4;",
 ]:
@@ -252,6 +255,8 @@ for marker in [
     "lastBootstrapDistance",
     "ResetSegmentTracking()",
     "StableSeed(segmentIndex,segment.cycle)",
+    "vehicleGlows",
+    "visualsVisible",
     "renderers=root.GetComponentsInChildren<Renderer>(true)",
     "ShadowCastingMode.Off",
     "crashClip",
@@ -421,6 +426,12 @@ for marker in [
     'fullname="CyberRunSkylineProps"',
     'fullname="CyberRunHolograms"',
     'fullname="CyberRunRoadVisual"',
+    'fullname="CyberRunIntensityController"',
+    'fullname="CyberRunPowerVFX"',
+    'fullname="CyberRunSectorPalette"',
+    'fullname="CyberRunMusicSystem"',
+    'fullname="CyberRunActionVFX"',
+    'fullname="CyberRunNeonWorld"',
 ]:
     if marker not in link:
         errors.append(f"link marker missing: {marker}")
