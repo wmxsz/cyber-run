@@ -116,7 +116,7 @@ for cs in sorted((ROOT / "Assets").rglob("*.cs")):
     validate_source_structure(cs.relative_to(ROOT), cs.read_text(encoding="utf-8"))
 
 version = read("ProjectSettings/ProjectVersion.txt")
-if "m_EditorVersion: 6000.6.3f1" not in version:
+if "m_EditorVersion: 6000.3.16f1" not in version:
     errors.append("Unity editor version mismatch")
 
 build_setup_version = read("Assets/Editor/CyberRunBuildSetup.cs")
@@ -136,7 +136,7 @@ try:
     deps = manifest.get("dependencies", {})
     if deps.get("com.unity.inputsystem") != "1.20.0":
         errors.append("Input System version mismatch")
-    if deps.get("com.unity.render-pipelines.universal") != "17.6.0":
+    if deps.get("com.unity.render-pipelines.universal") != "17.3.0":
         errors.append("URP version mismatch")
 except json.JSONDecodeError as exc:
     errors.append(f"manifest JSON invalid: {exc}")
@@ -546,7 +546,7 @@ for method_name in ["void Update()", "void UpdateScore()", "void UpdateCoins()",
         errors.append(f"{method_name} contains GUI calls")
 
 def validate_known_compile_hazards():
-    touch_phase_re = re.compile(r"(?<![A-Za-z0-9_.])TouchPhase\\.")
+    touch_phase_re = re.compile(r"(?<![A-Za-z0-9_.])TouchPhase\.")
 
     for path in sorted((ROOT / "Assets").rglob("*.cs")):
         source = path.read_text(encoding="utf-8")
@@ -629,6 +629,6 @@ if errors:
     sys.exit(1)
 
 print("CYBER RUN STATIC CHECK: PASS")
-print("Unity 6000.6.3f1 / URP 17.6.0 / Input System 1.20.0")
+print("Unity 6000.3.16f1 / URP 17.3.0 / Input System 1.20.0")
 print("Android ARM64 / IL2CPP configuration markers present")
 print("Runtime reset, touch input, swept collision, project shader and APK build markers present")
