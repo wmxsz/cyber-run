@@ -6,6 +6,8 @@ public sealed class CyberRunPowerVFX : MonoBehaviour
 {
     CyberRunContentSystems content;
     Transform player;
+    Shader surfaceShader;
+    Material sharedMaterial;
 
     sealed class Arc
     {
@@ -38,6 +40,14 @@ public sealed class CyberRunPowerVFX : MonoBehaviour
 
         if(player==null||content==null)
             yield break;
+
+        surfaceShader=Shader.Find("CyberRun/Surface");
+        if(surfaceShader!=null)
+        {
+            sharedMaterial=new Material(surfaceShader);
+            sharedMaterial.name="CyberRunPowerShared";
+            sharedMaterial.enableInstancing=true;
+        }
 
         CreateArcs(
             new Color(.05f,1.7f,5f,1f),
@@ -84,6 +94,14 @@ public sealed class CyberRunPowerVFX : MonoBehaviour
             if(col!=null) Destroy(col);
 
             var renderer=g.GetComponent<Renderer>();
+            if(renderer!=null && sharedMaterial!=null)
+            {
+                renderer.sharedMaterial=sharedMaterial;
+                renderer.shadowCastingMode=
+                    UnityEngine.Rendering.ShadowCastingMode.Off;
+                renderer.receiveShadows=false;
+            }
+
             arcs.Add(new Arc
             {
                 transform=g.transform,
