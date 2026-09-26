@@ -176,6 +176,9 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             new Vector3(-.16f,-.82f,.08f),cyan);
         Cube("BootR",player,new Vector3(.22f,.12f,.32f),
             new Vector3(.16f,-.82f,.08f),magenta);
+
+        if(player.GetComponent<CyberRunRunnerAnimator>()==null)
+            player.gameObject.AddComponent<CyberRunRunnerAnimator>();
     }
 
     static void OverheadFrame(Transform parent)
