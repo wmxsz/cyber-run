@@ -494,8 +494,8 @@ for method_name in ["void Update()", "void UpdateScore()", "void UpdateCoins()",
 
 def validate_shader_interpolation():
     literal_smoothstep = re.compile(
-        r"smoothstep\\(\\s*([0-9]+(?:\\.[0-9]*)?)\\s*,\\s*"
-        r"([0-9]+(?:\\.[0-9]*)?)\\s*,"
+        r"smoothstep\(\s*([0-9]+(?:\.[0-9]*)?)\s*,\s*"
+        r"([0-9]+(?:\.[0-9]*)?)\s*,"
     )
 
     for path in sorted((ROOT / "Assets").rglob("*.shader")):
