@@ -1629,6 +1629,17 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 Texture2D.whiteTexture);
             GUI.color=Color.white;
 
+            float startPulse=.65f+
+                .35f*Mathf.Sin(Time.unscaledTime*2.4f);
+            GUI.color=new Color(
+                .05f, .85f, 1f, .16f+.14f*startPulse);
+            GUI.DrawTexture(
+                new Rect(0,
+                    Mathf.Repeat(Time.unscaledTime*62f,Screen.height),
+                    Screen.width,2f),
+                Texture2D.whiteTexture);
+            GUI.color=Color.white;
+
             GUI.Label(
                 new Rect(Screen.width*.5f-190f,Screen.height*.28f,380f,60f),
                 "CYBER RUN",hudStyle);
@@ -1644,6 +1655,14 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             GUI.Label(
                 new Rect(Screen.width*.5f-180f,Screen.height*.62f+38f,360f,26f),
                 "SWIPE  /  JUMP  /  SLIDE  /  SURVIVE",subStyle);
+
+            float pulseWidth=150f+80f*startPulse;
+            GUI.color=new Color(.05f,.85f,1f,.28f);
+            GUI.DrawTexture(
+                new Rect(Screen.width*.5f-pulseWidth*.5f,
+                    Screen.height*.62f+66f,pulseWidth,1f),
+                Texture2D.whiteTexture);
+            GUI.color=Color.white;
             return;
         }
 
@@ -1670,6 +1689,15 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             "SCORE "+hudScore+"  BEST "+bestScore,subStyle);
         GUI.Label(new Rect(left,top+50f,260f,26f),
             "DATA "+hudData+"   SPEED "+hudSpeed,subStyle);
+
+        float scanY=top-7f+
+            Mathf.Repeat(Time.unscaledTime*34f,145f);
+        GUI.color=new Color(
+            hudAccent.r,hudAccent.g,hudAccent.b,.10f);
+        GUI.DrawTexture(
+            new Rect(left-8f,scanY,330f,1f),
+            Texture2D.whiteTexture);
+        GUI.color=Color.white;
 
         if(!string.IsNullOrEmpty(hudCombo))
             GUI.Label(new Rect(left,top+74f,220f,26f),
