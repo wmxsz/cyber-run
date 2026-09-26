@@ -83,10 +83,18 @@ public static class CyberRunBuildSetup
                     included.Add(existing[i]);
         }
 
+        var projectSurface=Shader.Find("CyberRun/Surface");
+        var projectCity=Shader.Find("CyberRun/City");
+        var projectRoad=Shader.Find("CyberRun/Road");
+        var projectHologram=Shader.Find("CyberRun/Hologram");
         var projectUnlit=Shader.Find("CyberRun/Unlit");
         var projectParticle=Shader.Find("CyberRun/Particle");
         var lit=Shader.Find("Universal Render Pipeline/Lit");
         var unlit=Shader.Find("Universal Render Pipeline/Unlit");
+        if(projectSurface!=null && !included.Contains(projectSurface)) included.Add(projectSurface);
+        if(projectCity!=null && !included.Contains(projectCity)) included.Add(projectCity);
+        if(projectRoad!=null && !included.Contains(projectRoad)) included.Add(projectRoad);
+        if(projectHologram!=null && !included.Contains(projectHologram)) included.Add(projectHologram);
         if(projectUnlit!=null && !included.Contains(projectUnlit)) included.Add(projectUnlit);
         if(projectParticle!=null && !included.Contains(projectParticle)) included.Add(projectParticle);
         if(lit!=null && !included.Contains(lit)) included.Add(lit);
