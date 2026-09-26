@@ -15,6 +15,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     int lane;
     float speed = 11f, distance;
     float yVelocity;
+    float hitGraceTimer;
     bool gameOver, sliding;
     float slideTimer;
     Vector2 touchStart;
@@ -39,9 +40,12 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             {
                 player.position=new Vector3(
                     player.position.x,PlayerGroundY+.02f,player.position.z);
+                player.position+=Vector3.forward*2.6f;
                 player.localScale=playerBaseScale;
                 previousPlayerPosition=player.position;
+                Physics.SyncTransforms();
             }
+            hitGraceTimer=.75f;
             return true;
         }
         return false;
@@ -355,6 +359,9 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
         previousPlayerPosition=player.position;
 
+        if(hitGraceTimer>0f)
+            hitGraceTimer=Mathf.Max(0f,hitGraceTimer-dt);
+
         speed=Mathf.Min(19f,speed+dt*.1f);
         distance+=speed*dt;
         player.position += Vector3.forward*speed*dt;
@@ -563,7 +570,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
     void Collide(Vector3 previousPosition)
     {
-        if(playerCollider==null) return;
+        if(playerCollider==null||hitGraceTimer>0f) return;
 
         Physics.SyncTransforms();
 
