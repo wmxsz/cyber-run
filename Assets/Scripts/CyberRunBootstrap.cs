@@ -9,6 +9,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     const int SegmentCount = 14;
     readonly List<Transform> segments = new();
     readonly List<Collider> obstacles = new();
+    static readonly Dictionary<int,Material> materialCache=new();
     Transform player;
     Camera cam;
     int lane;
