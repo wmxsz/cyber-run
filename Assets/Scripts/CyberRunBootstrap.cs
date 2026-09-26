@@ -213,18 +213,48 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
     static void ApplyMaterial(Renderer renderer, Color color)
     {
-        if(!renderer) return;
-        Shader shader = Shader.Find("CyberRun/Unlit");
-        if(shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
-        if(shader == null) shader = Shader.Find("Universal Render Pipeline/Lit");
-        if(shader == null) shader = Shader.Find("Sprites/Default");
-        if(shader == null) return;
+        if(renderer==null) return;
 
-        var mat = new Material(shader);
-        if(mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
-        else if(mat.HasProperty("_Color")) mat.SetColor("_Color", color);
-        if(mat.HasProperty("_EmissionColor")) mat.SetColor("_EmissionColor", color * 0.35f);
-        renderer.sharedMaterial = mat;
+        int key=ColorKey(color);
+        if(!materialCache.TryGetValue(key,out var mat)||mat==null)
+        {
+            Shader shader=Shader.Find("CyberRun/Unlit");
+            if(shader==null) shader=Shader.Find("Universal Render Pipeline/Unlit");
+            if(shader==null) shader=Shader.Find("Universal Render Pipeline/Lit");
+            if(shader==null) shader=Shader.Find("Sprites/Default");
+            if(shader==null) return;
+
+            mat=new Material(shader);
+            mat.name="CyberRunBaseMat_"+key;
+            if(mat.HasProperty("_BaseColor"))
+                mat.SetColor("_BaseColor",color);
+            else if(mat.HasProperty("_Color"))
+                mat.SetColor("_Color",color);
+            if(mat.HasProperty("_EmissionColor"))
+                mat.SetColor("_EmissionColor",color*.35f);
+            materialCache[key]=mat;
+        }
+
+        renderer.sharedMaterial=mat;
+        renderer.shadowCastingMode=
+            UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows=false;
+        renderer.lightProbeUsage=
+            UnityEngine.Rendering.LightProbeUsage.Off;
+        renderer.reflectionProbeUsage=
+            UnityEngine.Rendering.ReflectionProbeUsage.Off;
+    }
+
+    static int ColorKey(Color color)
+    {
+        int r=Mathf.RoundToInt(color.r*256f);
+        int g=Mathf.RoundToInt(color.g*256f);
+        int b2=Mathf.RoundToInt(color.b*256f);
+        int a2=Mathf.RoundToInt(color.a*256f);
+        unchecked
+        {
+            return (((r*397)^g)*397^b2)*397^a2;
+        }
     }
 
     static void Strip(Transform parent,float x)
