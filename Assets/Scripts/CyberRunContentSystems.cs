@@ -79,6 +79,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     string hudMagnet="";
     string hudShield="";
     string hudSpeed="";
+    string hudSector="";
+    Color hudAccent=new Color(.55f,.95f,1f,1f);
 
     public bool IsOverdriveActive=>overdriveTimer>0f;
     public bool IsMagnetActive=>magnetTimer>0f;
@@ -1328,6 +1330,18 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         hudSpeed=bootstrap!=null
             ? bootstrap.CurrentSpeed.ToString("0.0")
             : "0.0";
+
+        int sector=bootstrap!=null
+            ? Mathf.Max(0,Mathf.FloorToInt(
+                bootstrap.Distance/650f))
+            : 0;
+
+        hudSector=GetSectorName(sector);
+        hudAccent=GetSectorAccent(sector);
+
+        hudStyle.normal.textColor=hudAccent;
+        subStyle.normal.textColor=Color.Lerp(
+            hudAccent,Color.white,.35f);
     }
 
     void SaveBestScore()
@@ -1495,6 +1509,28 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         lastCameraX=player.position.x;
     }
 
+    string GetSectorName(int sector)
+    {
+        switch(sector%4)
+        {
+            case 0: return "NEXUS";
+            case 1: return "VIOLET";
+            case 2: return "GOLDLINE";
+            default: return "SYNTHWAVE";
+        }
+    }
+
+    Color GetSectorAccent(int sector)
+    {
+        switch(sector%4)
+        {
+            case 0: return new Color(.45f,1f,2.8f,1f);
+            case 1: return new Color(1.7f,.18f,3.8f,1f);
+            case 2: return new Color(2.6f,1.1f,.05f,1f);
+            default: return new Color(.15f,2f,2.4f,1f);
+        }
+    }
+
     long DistanceScore
     {
         get
@@ -1607,8 +1643,8 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             Texture2D.whiteTexture);
         GUI.color=Color.white;
 
-        GUI.Label(new Rect(left,top,340f,32f),
-            "CYBER RUN  //  "+hudMeters,hudStyle);
+        GUI.Label(new Rect(left,top,360f,32f),
+            "CYBER RUN  //  "+hudMeters+"  ["+hudSector+"]",hudStyle);
         GUI.Label(new Rect(left,top+30f,340f,26f),
             "SCORE "+hudScore+"  BEST "+bestScore,subStyle);
         GUI.Label(new Rect(left,top+50f,260f,26f),
