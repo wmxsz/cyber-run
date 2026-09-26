@@ -17,6 +17,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         public readonly List<GameObject> coins=new();
         public readonly List<GameObject> powerups=new();
         public readonly List<Transform> vehicles=new();
+        public Renderer[] renderers;
         public float lastZ;
     }
 
@@ -190,7 +191,12 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         segmentRoots.Sort((a,b)=>a.position.z.CompareTo(b.position.z));
 
         foreach(var root in segmentRoots)
-            data.Add(new SegmentData{root=root,lastZ=root.position.z});
+            data.Add(new SegmentData
+            {
+                root=root,
+                renderers=root.GetComponentsInChildren<Renderer>(true),
+                lastZ=root.position.z
+            });
     }
 
     void BuildSegmentContent(SegmentData seg)
@@ -773,6 +779,14 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         if(introTimer>0f) introTimer-=Time.unscaledDeltaTime;
 
+        if(visualCullTimer>0f)
+            visualCullTimer-=Time.unscaledDeltaTime;
+        else
+        {
+            UpdateVisualCulling();
+            visualCullTimer=.25f;
+        }
+
         UpdateSegments();
         UpdateCoins();
         UpdatePowerups();
@@ -813,6 +827,38 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         if(!paused)
             UpdateCamera();
+    }
+
+    void UpdateVisualCulling()
+    {
+        float playerZ=player.position.z;
+        const float visibleDistance=250f;
+        const float hysteresis=24f;
+
+        for(int i=0;i<data.Count;i++)
+        {
+            var s=data[i];
+            if(s.root==null||s.renderers==null) continue;
+
+            float dz=Mathf.Abs(s.root.position.z-playerZ);
+            bool visible=dz<visibleDistance;
+            bool currentlyEnabled=true;
+
+            if(s.renderers.Length>0 && s.renderers[0]!=null)
+                currentlyEnabled=s.renderers[0].enabled;
+
+            if(currentlyEnabled && dz>visibleDistance+hysteresis)
+                visible=false;
+            else if(!currentlyEnabled && dz<visibleDistance)
+                visible=true;
+
+            for(int j=0;j<s.renderers.Length;j++)
+            {
+                var renderer=s.renderers[j];
+                if(renderer!=null && renderer.enabled!=visible)
+                    renderer.enabled=visible;
+            }
+        }
     }
 
     void UpdateSegments()
