@@ -12,7 +12,7 @@ public sealed class CyberRunIntensityController : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunIntensityController>()!=null) return;
+        if(FindAnyObjectByType<CyberRunIntensityController>()!=null) return;
 
         var go=new GameObject("CyberRunIntensityController");
         go.AddComponent<CyberRunIntensityController>();
@@ -25,7 +25,7 @@ public sealed class CyberRunIntensityController : MonoBehaviour
         yield return null;
         yield return null;
 
-        bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
+        bootstrap=FindAnyObjectByType<CyberRunBootstrap>();
         var post=GameObject.Find("CyberRunPostFX");
 
         if(post!=null)
