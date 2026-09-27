@@ -61,6 +61,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     float lastCameraX;
     float lastWorldZ;
     float lastBootstrapDistance;
+    int lastBootstrapResetVersion=-1;
     bool lastGameOver;
     bool wasSliding;
     bool paused;
@@ -152,6 +153,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         runStartDistance=bootstrap!=null ? bootstrap.Distance : 0f;
         lastBootstrapDistance=runStartDistance;
+        lastBootstrapResetVersion=bootstrap!=null ? bootstrap.ResetVersion : -1;
         lastPlayerY=player.position.y;
         lastPlayerX=player.position.x;
         lastCameraX=player.position.x;
@@ -1016,8 +1018,13 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         if(bootstrap!=null)
         {
             float currentBootstrapDistance=bootstrap.Distance;
-            if(currentBootstrapDistance+.5f<lastBootstrapDistance)
+            int currentResetVersion=bootstrap.ResetVersion;
+            if(currentResetVersion!=lastBootstrapResetVersion ||
+               currentBootstrapDistance+.5f<lastBootstrapDistance)
+            {
                 ResetSegmentTracking();
+                lastBootstrapResetVersion=currentResetVersion;
+            }
             lastBootstrapDistance=currentBootstrapDistance;
         }
 
