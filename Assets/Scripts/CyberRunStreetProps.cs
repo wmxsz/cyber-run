@@ -10,7 +10,7 @@ public sealed class CyberRunStreetProps : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunStreetProps>()!=null) return;
+        if(FindAnyObjectByType<CyberRunStreetProps>()!=null) return;
 
         var go=new GameObject("CyberRunStreetProps");
         go.AddComponent<CyberRunStreetProps>();
