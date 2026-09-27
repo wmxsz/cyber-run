@@ -155,6 +155,11 @@ public sealed class CyberRunContentSystems : MonoBehaviour
         runStartDistance=bootstrap!=null ? bootstrap.Distance : 0f;
         lastBootstrapDistance=runStartDistance;
         lastBootstrapResetVersion=bootstrap!=null ? bootstrap.ResetVersion : -1;
+        if(bootstrap!=null)
+        {
+            bootstrap.SegmentRecycled += OnSegmentRecycled;
+            bootstrap.RunReset += OnRunReset;
+        }
         lastPlayerY=player.position.y;
         lastPlayerX=player.position.x;
         lastCameraX=player.position.x;
@@ -1029,19 +1034,6 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             return;
         }
 
-        if(bootstrap!=null)
-        {
-            float currentBootstrapDistance=bootstrap.Distance;
-            int currentResetVersion=bootstrap.ResetVersion;
-            if(currentResetVersion!=lastBootstrapResetVersion ||
-               currentBootstrapDistance+.5f<lastBootstrapDistance)
-            {
-                ResetSegmentTracking();
-                lastBootstrapResetVersion=currentResetVersion;
-            }
-            lastBootstrapDistance=currentBootstrapDistance;
-        }
-
         if(visualCullTimer>0f)
             visualCullTimer-=Time.unscaledDeltaTime;
         else
@@ -1198,31 +1190,40 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     void UpdateSegments()
     {
+        // Segment lifecycle is owned by CyberRunBootstrap.
+        // ContentSystems consumes the explicit recycle event instead of inferring movement.
+    }
+
+    void OnSegmentRecycled(Transform root,int cycle)
+    {
         for(int i=0;i<data.Count;i++)
         {
             var s=data[i];
-            if(s.root==null) continue;
+            if(s.root!=root) continue;
 
-            if(s.root.position.z-s.lastZ>SegmentLength*5f)
-            {
-                Physics.SyncTransforms();
-                s.cycle++;
+            s.cycle=cycle;
+            s.lastZ=root.position.z;
+            RebuildCoinPath(s);
+            ConfigureBoostGate(s);
 
-                RebuildCoinPath(s);
-                ConfigureBoostGate(s);
+            foreach(var coin in s.coins)
+                if(coin!=null) coin.SetActive(true);
 
-                foreach(var coin in s.coins)
-                {
-                    if(coin!=null) coin.SetActive(true);
-                }
-                foreach(var powerup in s.powerups)
-                {
-                    if(powerup!=null) powerup.SetActive(true);
-                }
-            }
-
-            s.lastZ=s.root.position.z;
+            foreach(var powerup in s.powerups)
+                if(powerup!=null) powerup.SetActive(true);
+            return;
         }
+    }
+
+    void OnRunReset()
+    {
+        ResetSegmentTracking();
+        ResetCollectibles();
+        ResetMetaState();
+        lastBootstrapResetVersion=bootstrap!=null ? bootstrap.ResetVersion : -1;
+        lastBootstrapDistance=bootstrap!=null ? bootstrap.Distance : 0f;
+        lastGameOver=false;
+        nearMissMarker.Clear();
     }
 
     void RebuildCoinPath(SegmentData segment)
@@ -1954,6 +1955,11 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
     void OnDestroy()
     {
+        if(bootstrap!=null)
+        {
+            bootstrap.SegmentRecycled -= OnSegmentRecycled;
+            bootstrap.RunReset -= OnRunReset;
+        }
         if(paused)
             Time.timeScale=1f;
     }
