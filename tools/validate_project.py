@@ -450,3 +450,197 @@ for marker in [
     'fullname="CyberRunEngineAudio"',
     'fullname="CyberRunStreetProps"',
     'fullname="CyberRunSkylineProps"',
+    'fullname="CyberRunHolograms"',
+    'fullname="CyberRunRoadVisual"',
+    'fullname="CyberRunIntensityController"',
+    'fullname="CyberRunPowerVFX"',
+    'fullname="CyberRunSectorPalette"',
+    'fullname="CyberRunMusicSystem"',
+    'fullname="CyberRunActionVFX"',
+    'fullname="CyberRunNeonWorld"',
+]:
+    if marker not in link:
+        errors.append(f"link marker missing: {marker}")
+
+shader = read("Assets/Shaders/CyberRunUnlit.shader")
+for marker in [
+    'Shader "CyberRun/Unlit"',
+    '"RenderPipeline" = "UniversalPipeline"',
+    "#include \"Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl\"",
+    "TransformWorldToHClip",
+]:
+    if marker not in shader:
+        errors.append(f"shader marker missing: {marker}")
+if shader.count("{") != shader.count("}"):
+    errors.append("shader brace count mismatch")
+
+
+def method_body(text, signature):
+    start=text.find(signature)
+    if start<0:
+        return ""
+    brace=text.find("{", start)
+    if brace<0:
+        return ""
+    depth=0
+    for i in range(brace,len(text)):
+        if text[i]=="{":
+            depth+=1
+        elif text[i]=="}":
+            depth-=1
+            if depth==0:
+                return text[start:i+1]
+    return ""
+
+content_update = method_body(content, "void Update()")
+for forbidden in [
+    "new Material(",
+    "GameObject.CreatePrimitive(",
+    "FindFirstObjectByType<",
+    "FindObjectsByType<",
+]:
+    if forbidden in content_update:
+        errors.append(f"content Update contains hot-path allocation/search: {forbidden}")
+
+base_update = method_body(runtime, "void Update()")
+for forbidden in [
+    "new Material(",
+    "GameObject.CreatePrimitive(",
+    "FindFirstObjectByType<",
+    "FindObjectsByType<",
+]:
+    if forbidden in base_update:
+        errors.append(f"bootstrap Update contains hot-path allocation/search: {forbidden}")
+
+if "FieldInfo" in content or "BindingFlags" in content or "using System.Reflection" in content:
+    errors.append("content systems still contains reflection state access")
+
+if "CreatePrimitive(" in content_update or "new Material(" in content_update:
+    errors.append("content Update contains object creation")
+
+for helper_name in [
+    "void UpdateCoins()",
+    "void UpdatePowerups()",
+    "void UpdateVehicles()",
+    "void UpdateVisualCulling()",
+    "void UpdateSpeedLineIntensity()",
+]:
+    body = method_body(content, helper_name)
+    for token in [
+        "new Material(",
+        "new MaterialPropertyBlock(",
+        "GameObject.CreatePrimitive(",
+        "FindFirstObjectByType<",
+        "FindObjectsByType<",
+        "GameObject.Find(",
+        "Transform.Find(",
+        "GetComponent<",
+        "GetComponentsInChildren<",
+        "GetComponents<",
+    ]:
+        if token in body:
+            errors.append(
+                f"{helper_name} contains hot-path allocation/search: {token}"
+            )
+
+
+
+if "startZ" in content:
+    errors.append("content still contains stale startZ reference")
+if "FieldInfo" in content or "BindingFlags" in content or "System.Reflection" in content:
+    errors.append("content systems contains stale reflection references")
+if "left" in method_body(content, "void UpdateScore()") or "top" in method_body(content, "void UpdateScore()"):
+    errors.append("UpdateScore contains GUI-only layout identifiers")
+
+for method_name in ["void Update()", "void UpdateScore()", "void UpdateCoins()", "void UpdatePowerups()", "void UpdateVehicles()"]:
+    body = method_body(content, method_name)
+    if "GUI." in body:
+        errors.append(f"{method_name} contains GUI calls")
+
+def validate_known_compile_hazards():
+    touch_phase_re = re.compile(r"(?<![A-Za-z0-9_.])TouchPhase\.")
+
+    for path in sorted((ROOT / "Assets").rglob("*.cs")):
+        source = path.read_text(encoding="utf-8")
+        if "using UnityEngine.InputSystem;" in source and touch_phase_re.search(source):
+            errors.append(
+                f"unqualified TouchPhase with Input System import: {path.relative_to(ROOT)}"
+            )
+
+    content_source = read("Assets/Scripts/CyberRunContentSystems.cs")
+    for field in [
+        "float visualCullTimer;",
+        "float visualCacheRefreshTimer;",
+        "float laneSfxCooldown;",
+    ]:
+        if field not in content_source:
+            errors.append(f"content state field missing: {field}")
+
+    skyline_source = read("Assets/Scripts/CyberRunSkylineProps.cs")
+    tower_body = method_body(skyline_source, "void CreateTower(")
+    if '"_WindowColor",accent' in tower_body and "Color accent=" not in tower_body:
+        errors.append("skyline tower accent is used without a local declaration")
+
+
+validate_known_compile_hazards()
+
+def validate_shader_interpolation():
+    literal_smoothstep = re.compile(
+        r"smoothstep\(\s*([0-9]+(?:\.[0-9]*)?)\s*,\s*"
+        r"([0-9]+(?:\.[0-9]*)?)\s*,"
+    )
+
+    for path in sorted((ROOT / "Assets").rglob("*.shader")):
+        source = path.read_text(encoding="utf-8")
+        for match in literal_smoothstep.finditer(source):
+            edge_a = float(match.group(1))
+            edge_b = float(match.group(2))
+            if edge_a >= edge_b:
+                errors.append(
+                    f"shader smoothstep bounds invalid: "
+                    f"{path.relative_to(ROOT)}:{edge_a}>={edge_b}"
+                )
+
+
+validate_shader_interpolation()
+
+def validate_hot_path_allocations():
+    forbidden = [
+        "new Material(",
+        "new MaterialPropertyBlock(",
+        "GameObject.CreatePrimitive(",
+        "FindFirstObjectByType<",
+        "FindObjectsByType<",
+        "GameObject.Find(",
+        "Transform.Find(",
+        "GetComponent<",
+        "GetComponentsInChildren<",
+        "GetComponents<",
+    ]
+
+    for path in sorted((ROOT / "Assets").rglob("*.cs")):
+        source = path.read_text(encoding="utf-8")
+        for signature in ["void Update()", "void LateUpdate()", "void FixedUpdate()"]:
+            body = method_body(source, signature)
+            if not body:
+                continue
+            for token in forbidden:
+                if token in body:
+                    errors.append(
+                        f"hot-path allocation/search: "
+                        f"{path.relative_to(ROOT)}:{signature}:{token}"
+                    )
+
+
+validate_hot_path_allocations()
+
+if errors:
+    print("CYBER RUN STATIC CHECK: FAIL")
+    for error in errors:
+        print(f"- {error}")
+    sys.exit(1)
+
+print("CYBER RUN STATIC CHECK: PASS")
+print("Unity 6000.3.16f1 / URP 17.3.0 / Input System 1.20.0")
+print("Android ARM64 / IL2CPP configuration markers present")
+print("Runtime reset, touch input, swept collision, project shader and APK build markers present")
