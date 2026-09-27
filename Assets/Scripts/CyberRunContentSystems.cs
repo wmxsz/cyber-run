@@ -111,7 +111,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        var existing=FindFirstObjectByType<CyberRunContentSystems>();
+        var existing=FindAnyObjectByType<CyberRunContentSystems>();
         if(existing!=null) return;
         var host=GameObject.Find("CyberRun") ?? new GameObject("CyberRunContent");
         host.AddComponent<CyberRunContentSystems>();
@@ -151,7 +151,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
 
         bootstrap=GetComponent<CyberRunBootstrap>();
         if(bootstrap==null)
-            bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
+            bootstrap=FindAnyObjectByType<CyberRunBootstrap>();
 
         runStartDistance=bootstrap!=null ? bootstrap.Distance : 0f;
         lastBootstrapDistance=runStartDistance;
