@@ -27,7 +27,7 @@ public sealed class CyberRunNeonWorld : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunNeonWorld>()!=null)
+        if(FindAnyObjectByType<CyberRunNeonWorld>()!=null)
             return;
 
         var host=new GameObject("CyberRunNeonWorld");
@@ -40,7 +40,7 @@ public sealed class CyberRunNeonWorld : MonoBehaviour
         for(int i=0;i<4;i++)
             yield return null;
 
-        bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
+        bootstrap=FindAnyObjectByType<CyberRunBootstrap>();
         player=GameObject.Find("Runner")?.transform;
 
         surfaceShader=Shader.Find("CyberRun/Surface");
@@ -327,7 +327,7 @@ public sealed class CyberRunNeonWorld : MonoBehaviour
         block.SetFloat("_RimStrength",rimStrength);
         block.SetFloat(
             "_PulseSpeed",
-            1.7f+(parent.GetInstanceID()%5)*.25f);
+            1.7f+Mathf.Repeat(parent.localPosition.x*7f+parent.localPosition.z*3f,5f)*.25f);
         renderer.SetPropertyBlock(block);
 
         renderer.shadowCastingMode=
