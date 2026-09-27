@@ -19,7 +19,7 @@ public sealed class CyberRunActionVFX : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunActionVFX>()!=null) return;
+        if(FindAnyObjectByType<CyberRunActionVFX>()!=null) return;
 
         var go=new GameObject("CyberRunActionVFX");
         go.AddComponent<CyberRunActionVFX>();
