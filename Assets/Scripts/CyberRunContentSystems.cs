@@ -62,6 +62,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
     float lastCameraX;
     float lastWorldZ;
     float lastBootstrapDistance;
+    Vector2 touchStart;
     int lastBootstrapResetVersion=-1;
     bool lastGameOver;
     bool wasSliding;
@@ -1542,7 +1543,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
                 var v=s.vehicles[j];
                 if(v==null) continue;
 
-                float phase=s.root.GetInstanceID()%100*.13f;
+                float phase=(s.cycle*17+j*13)%100*.13f;
                 var pos=v.localPosition;
             pos.y=1.1f+Mathf.Sin(time*1.7f+phase)*.035f;
             pos.z=Mathf.PingPong(time*.85f+phase*3f,26f)-13f;
@@ -1562,7 +1563,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             var d=drones[i];
             if(d==null) continue;
 
-            float phase=d.GetInstanceID()%100*.11f;
+            float phase=(i*17)%100*.11f;
             var dp=d.localPosition;
             dp.x=5.5f*Mathf.Sin(time*.55f+phase);
             dp.y=7.3f+Mathf.Sin(time*1.1f+phase)*.28f;
