@@ -10,7 +10,7 @@ public sealed class CyberRunEngineAudio : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunEngineAudio>()!=null) return;
+        if(FindAnyObjectByType<CyberRunEngineAudio>()!=null) return;
 
         var go=new GameObject("CyberRunEngineAudio");
         go.AddComponent<CyberRunEngineAudio>();
@@ -20,7 +20,7 @@ public sealed class CyberRunEngineAudio : MonoBehaviour
     IEnumerator Start()
     {
         yield return null;
-        bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
+        bootstrap=FindAnyObjectByType<CyberRunBootstrap>();
         if(bootstrap==null) yield break;
 
         source=gameObject.AddComponent<AudioSource>();
