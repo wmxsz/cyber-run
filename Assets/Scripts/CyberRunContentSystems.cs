@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[DefaultExecutionOrder(0)]
 public sealed class CyberRunContentSystems : MonoBehaviour
 {
     const float LaneWidth=2.7f;
