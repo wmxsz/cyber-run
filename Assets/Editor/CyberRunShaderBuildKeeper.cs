@@ -9,14 +9,20 @@ public static class CyberRunShaderBuildKeeper
 {
     static CyberRunShaderBuildKeeper()
     {
-        var shaders=new List<Shader>();
-        var existing=GraphicsSettings.alwaysIncludedShaders;
+        var graphicsSettings=AssetDatabase.LoadAssetAtPath<GraphicsSettings>(
+            "ProjectSettings/GraphicsSettings.asset");
+        if(graphicsSettings==null) return;
 
-        if(existing!=null)
+        var serialized=new SerializedObject(graphicsSettings);
+        var included=serialized.FindProperty("m_AlwaysIncludedShaders");
+        if(included==null||!included.isArray) return;
+
+        var shaders=new List<Shader>();
+        for(int i=0;i<included.arraySize;i++)
         {
-            for(int i=0;i<existing.Length;i++)
-                if(existing[i]!=null&&!shaders.Contains(existing[i]))
-                    shaders.Add(existing[i]);
+            var shader=included.GetArrayElementAtIndex(i).objectReferenceValue as Shader;
+            if(shader!=null&&!shaders.Contains(shader))
+                shaders.Add(shader);
         }
 
         Add("CyberRun/Surface",shaders);
@@ -28,7 +34,14 @@ public static class CyberRunShaderBuildKeeper
         Add("Universal Render Pipeline/Lit",shaders);
         Add("Universal Render Pipeline/Unlit",shaders);
 
-        GraphicsSettings.alwaysIncludedShaders=shaders.ToArray();
+        included.ClearArray();
+        for(int i=0;i<shaders.Count;i++)
+        {
+            included.InsertArrayElementAtIndex(i);
+            included.GetArrayElementAtIndex(i).objectReferenceValue=shaders[i];
+        }
+
+        serialized.ApplyModifiedPropertiesWithoutUndo();
         AssetDatabase.SaveAssets();
     }
 
