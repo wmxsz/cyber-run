@@ -23,7 +23,7 @@ public sealed class CyberRunPowerVFX : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunPowerVFX>()!=null) return;
+        if(FindAnyObjectByType<CyberRunPowerVFX>()!=null) return;
 
         var go=new GameObject("CyberRunPowerVFX");
         go.AddComponent<CyberRunPowerVFX>();
@@ -36,7 +36,7 @@ public sealed class CyberRunPowerVFX : MonoBehaviour
         yield return null;
         yield return null;
 
-        content=FindFirstObjectByType<CyberRunContentSystems>();
+        content=FindAnyObjectByType<CyberRunContentSystems>();
         player=GameObject.Find("Runner")?.transform;
 
         if(player==null||content==null)
