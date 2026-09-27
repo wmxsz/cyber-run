@@ -1013,7 +1013,20 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             introTimer=2.2f;
         }
 
-        if(introTimer>0f) introTimer-=Time.unscaledDeltaTime;
+        if(!paused && introTimer>0f)
+            introTimer-=Time.unscaledDeltaTime;
+
+        if(paused)
+        {
+            if(hudRefreshTimer>0f)
+                hudRefreshTimer-=Time.unscaledDeltaTime;
+            else
+            {
+                UpdateHudCache();
+                hudRefreshTimer=.12f;
+            }
+            return;
+        }
 
         if(bootstrap!=null)
         {
