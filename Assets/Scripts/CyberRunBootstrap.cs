@@ -494,9 +494,10 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
         UpdateMovingHazards();
         Recycle();
+        // Resolve collision before world recenter so the swept segment keeps its real frame displacement.
+        Collide(previousPlayerPosition);
         RecenterWorldIfNeeded();
         FollowCamera(dt);
-        Collide(previousPlayerPosition);
     }
 
     bool IsRestartTapped()
