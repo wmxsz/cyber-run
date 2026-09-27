@@ -10,7 +10,7 @@ public sealed class CyberRunSkylineProps : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunSkylineProps>()!=null) return;
+        if(FindAnyObjectByType<CyberRunSkylineProps>()!=null) return;
 
         var go=new GameObject("CyberRunSkylineProps");
         go.AddComponent<CyberRunSkylineProps>();
