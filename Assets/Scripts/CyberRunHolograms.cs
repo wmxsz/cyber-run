@@ -13,7 +13,7 @@ public sealed class CyberRunHolograms : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunHolograms>()!=null) return;
+        if(FindAnyObjectByType<CyberRunHolograms>()!=null) return;
 
         var go=new GameObject("CyberRunHolograms");
         go.AddComponent<CyberRunHolograms>();
