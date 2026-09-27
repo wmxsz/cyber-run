@@ -11,7 +11,7 @@ public sealed class CyberRunMusicSystem : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunMusicSystem>()!=null) return;
+        if(FindAnyObjectByType<CyberRunMusicSystem>()!=null) return;
 
         var go=new GameObject("CyberRunMusicSystem");
         go.AddComponent<CyberRunMusicSystem>();
@@ -21,7 +21,7 @@ public sealed class CyberRunMusicSystem : MonoBehaviour
     IEnumerator Start()
     {
         yield return null;
-        bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
+        bootstrap=FindAnyObjectByType<CyberRunBootstrap>();
         if(bootstrap==null) yield break;
 
         source=gameObject.AddComponent<AudioSource>();
