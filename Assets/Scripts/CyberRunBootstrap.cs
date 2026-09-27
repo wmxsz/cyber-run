@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
+[DefaultExecutionOrder(-100)]
 public sealed class CyberRunBootstrap : MonoBehaviour
 {
     const float LaneWidth = 2.7f;
