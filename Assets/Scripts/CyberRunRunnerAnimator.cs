@@ -3,18 +3,21 @@ using UnityEngine;
 public sealed class CyberRunRunnerAnimator : MonoBehaviour
 {
     Transform armL,armR,legL,legR,torso,head;
+    Transform visualRoot;
     CyberRunBootstrap bootstrap;
     Vector3 torsoBase;
     Vector3 headBase;
 
     void Awake()
     {
-        armL=transform.Find("ArmL");
-        armR=transform.Find("ArmR");
-        legL=transform.Find("LegL");
-        legR=transform.Find("LegR");
-        torso=transform.Find("Torso");
-        head=transform.Find("Head");
+        visualRoot=transform.Find("RunnerVisualRoot");
+        var root=visualRoot!=null ? visualRoot : transform;
+        armL=root.Find("ArmL");
+        armR=root.Find("ArmR");
+        legL=root.Find("LegL");
+        legR=root.Find("LegR");
+        torso=root.Find("Torso");
+        head=root.Find("Head");
         bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
 
         if(torso!=null) torsoBase=torso.localPosition;
