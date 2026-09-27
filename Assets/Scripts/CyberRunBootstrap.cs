@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
@@ -39,6 +40,8 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     Vector3 previousPlayerPosition;
     CapsuleCollider playerCollider;
     Vector3 playerBaseScale;
+    Transform visualRoot;
+    float playerColliderBaseHeight;
     const float PlayerGroundY = 1.1f;
     public bool IsGameOver => gameOver;
     public bool IsSliding => sliding;
@@ -47,6 +50,8 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     public int ResetVersion { get; private set; }
     public bool IsSpeedBurstActive => speedBurstTimer>0f;
     public float SpeedBurstRemaining => speedBurstTimer;
+    public event Action<Transform,int> SegmentRecycled;
+    public event Action RunReset;
 
     public void TriggerSpeedBurst(float bonus,float duration)
     {
@@ -124,6 +129,10 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         playerBaseScale = player.localScale;
         ApplyMaterial(player.GetComponent<Renderer>(), new Color(.05f,.65f,1f));
         playerCollider = player.GetComponent<CapsuleCollider>();
+        playerColliderBaseHeight = playerCollider != null ? playerCollider.height : 2f;
+        visualRoot = new GameObject("RunnerVisualRoot").transform;
+        visualRoot.SetParent(player,false);
+        visualRoot.localPosition=Vector3.zero;
         CreateRunnerDetails();
         previousPlayerPosition=player.position;
 
@@ -274,45 +283,45 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         Color magenta=new Color(1.8f,.06f,3.7f);
         Color white=new Color(.65f,.85f,1.2f);
 
-        Cube("Torso",player,new Vector3(.56f,.68f,.34f),
+        Cube("Torso",visualRoot,new Vector3(.56f,.68f,.34f),
             new Vector3(0,.02f,.02f),suit);
-        Cube("ChestLight",player,new Vector3(.42f,.055f,.055f),
+        Cube("ChestLight",visualRoot,new Vector3(.42f,.055f,.055f),
             new Vector3(0,.18f,.19f),cyan);
-        Cube("Core",player,new Vector3(.14f,.23f,.07f),
+        Cube("Core",visualRoot,new Vector3(.14f,.23f,.07f),
             new Vector3(0,-.05f,.19f),magenta);
 
         var head=GameObject.CreatePrimitive(PrimitiveType.Sphere);
         head.name="Head";
-        head.transform.SetParent(player,false);
+        head.transform.SetParent(visualRoot,false);
         head.transform.localPosition=new Vector3(0,.5f,.02f);
         head.transform.localScale=new Vector3(.43f,.43f,.43f);
         ApplyMaterial(head.GetComponent<Renderer>(),suit);
         var headCollider=head.GetComponent<Collider>();
         if(headCollider!=null) Destroy(headCollider);
 
-        Cube("Visor",player,new Vector3(.3f,.09f,.04f),
+        Cube("Visor",visualRoot,new Vector3(.3f,.09f,.04f),
             new Vector3(0,.54f,.22f),magenta);
-        Cube("VisorGlow",player,new Vector3(.22f,.025f,.025f),
+        Cube("VisorGlow",visualRoot,new Vector3(.22f,.025f,.025f),
             new Vector3(0,.54f,.245f),white);
 
-        Cube("ShoulderL",player,new Vector3(.18f,.18f,.32f),
+        Cube("ShoulderL",visualRoot,new Vector3(.18f,.18f,.32f),
             new Vector3(-.35f,.16f,.02f),cyan);
-        Cube("ShoulderR",player,new Vector3(.18f,.18f,.32f),
+        Cube("ShoulderR",visualRoot,new Vector3(.18f,.18f,.32f),
             new Vector3(.35f,.16f,.02f),magenta);
 
-        Cube("ArmL",player,new Vector3(.14f,.48f,.15f),
+        Cube("ArmL",visualRoot,new Vector3(.14f,.48f,.15f),
             new Vector3(-.38f,-.12f,.02f),suit);
-        Cube("ArmR",player,new Vector3(.14f,.48f,.15f),
+        Cube("ArmR",visualRoot,new Vector3(.14f,.48f,.15f),
             new Vector3(.38f,-.12f,.02f),suit);
 
-        Cube("LegL",player,new Vector3(.18f,.5f,.18f),
+        Cube("LegL",visualRoot,new Vector3(.18f,.5f,.18f),
             new Vector3(-.16f,-.55f,.01f),suit);
-        Cube("LegR",player,new Vector3(.18f,.5f,.18f),
+        Cube("LegR",visualRoot,new Vector3(.18f,.5f,.18f),
             new Vector3(.16f,-.55f,.01f),suit);
 
-        Cube("BootL",player,new Vector3(.22f,.12f,.32f),
+        Cube("BootL",visualRoot,new Vector3(.22f,.12f,.32f),
             new Vector3(-.16f,-.82f,.08f),cyan);
-        Cube("BootR",player,new Vector3(.22f,.12f,.32f),
+        Cube("BootR",visualRoot,new Vector3(.22f,.12f,.32f),
             new Vector3(.16f,-.82f,.08f),magenta);
 
         if(player.GetComponent<CyberRunRunnerAnimator>()==null)
@@ -617,24 +626,33 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         sliding=value;
         if(player==null) return;
 
+        const float slideRatio=.6f;
+        float baseWorldHeight=playerColliderBaseHeight*playerBaseScale.y;
+        float slideWorldHeight=baseWorldHeight*slideRatio;
+        float yOffset=(baseWorldHeight-slideWorldHeight)*.5f;
+
+        if(playerCollider!=null)
+        {
+            playerCollider.height=playerColliderBaseHeight*slideRatio;
+            playerCollider.center=Vector3.zero;
+        }
+
+        if(visualRoot!=null)
+        {
+            visualRoot.localPosition=value
+                ? new Vector3(0f,-.34f,0f)
+                : Vector3.zero;
+            visualRoot.localRotation=value
+                ? Quaternion.Euler(18f,0f,0f)
+                : Quaternion.identity;
+        }
+
+        var pos=player.position;
         if(value)
-        {
-            float scaleY=playerBaseScale.y*.6f;
-            float yOffset=(playerBaseScale.y-scaleY);
-            var scale=playerBaseScale;
-            scale.y=scaleY;
-            player.localScale=scale;
-            var pos=player.position;
             pos.y=PlayerGroundY-yOffset;
-            player.position=pos;
-        }
-        else
-        {
-            player.localScale=playerBaseScale;
-            var pos=player.position;
-            if(pos.y<PlayerGroundY) pos.y=PlayerGroundY;
-            player.position=pos;
-        }
+        else if(pos.y<PlayerGroundY)
+            pos.y=PlayerGroundY;
+        player.position=pos;
     }
 
     void RecenterWorldIfNeeded()
@@ -694,6 +712,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
                 cycle++;
                 segmentCycles[s]=cycle;
                 ReconfigureSegmentObstacles(s,cycle);
+                SegmentRecycled?.Invoke(s,cycle);
             }
         }
     }
@@ -876,6 +895,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         }
 
         Physics.SyncTransforms();
+        RunReset?.Invoke();
 
         if(cam!=null)
         {
