@@ -18,7 +18,7 @@ public sealed class CyberRunRunnerAnimator : MonoBehaviour
         legR=root.Find("LegR");
         torso=root.Find("Torso");
         head=root.Find("Head");
-        bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
+        bootstrap=FindAnyObjectByType<CyberRunBootstrap>();
 
         if(torso!=null) torsoBase=torso.localPosition;
         if(head!=null) headBase=head.localPosition;
