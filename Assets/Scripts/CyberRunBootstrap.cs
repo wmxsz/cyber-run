@@ -383,7 +383,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
         {
             var unusedCollider=g.GetComponent<Collider>();
             if(unusedCollider!=null)
-                Object.Destroy(unusedCollider);
+                UnityEngine.Object.Destroy(unusedCollider);
         }
 
         return g;
