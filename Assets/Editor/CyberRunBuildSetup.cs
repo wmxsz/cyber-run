@@ -74,33 +74,52 @@ public static class CyberRunBuildSetup
         GraphicsSettings.defaultRenderPipeline=urp;
         QualitySettings.renderPipeline=urp;
 
-        var included=new System.Collections.Generic.List<Shader>();
-        var existing=GraphicsSettings.alwaysIncludedShaders;
-        if(existing!=null)
+        var graphicsSettings=AssetDatabase.LoadAssetAtPath<GraphicsSettings>(
+            "ProjectSettings/GraphicsSettings.asset");
+        if(graphicsSettings!=null)
         {
-            for(int i=0;i<existing.Length;i++)
-                if(existing[i]!=null && !included.Contains(existing[i]))
-                    included.Add(existing[i]);
+            var serialized=new SerializedObject(graphicsSettings);
+            var included=serialized.FindProperty("m_AlwaysIncludedShaders");
+            if(included!=null && included.isArray)
+            {
+                var shaders=new System.Collections.Generic.List<Shader>();
+                for(int i=0;i<included.arraySize;i++)
+                {
+                    var shader=included.GetArrayElementAtIndex(i).objectReferenceValue as Shader;
+                    if(shader!=null && !shaders.Contains(shader))
+                        shaders.Add(shader);
+                }
+
+                string[] shaderNames={
+                    "CyberRun/Surface",
+                    "CyberRun/City",
+                    "CyberRun/Road",
+                    "CyberRun/Hologram",
+                    "CyberRun/Unlit",
+                    "CyberRun/Particle",
+                    "Universal Render Pipeline/Lit",
+                    "Universal Render Pipeline/Unlit"
+                };
+
+                for(int i=0;i<shaderNames.Length;i++)
+                {
+                    var shader=Shader.Find(shaderNames[i]);
+                    if(shader!=null && !shaders.Contains(shader))
+                        shaders.Add(shader);
+                }
+
+                included.ClearArray();
+                for(int i=0;i<shaders.Count;i++)
+                {
+                    included.InsertArrayElementAtIndex(i);
+                    included.GetArrayElementAtIndex(i).objectReferenceValue=shaders[i];
+                }
+
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(graphicsSettings);
+            }
         }
 
-        var projectSurface=Shader.Find("CyberRun/Surface");
-        var projectCity=Shader.Find("CyberRun/City");
-        var projectRoad=Shader.Find("CyberRun/Road");
-        var projectHologram=Shader.Find("CyberRun/Hologram");
-        var projectUnlit=Shader.Find("CyberRun/Unlit");
-        var projectParticle=Shader.Find("CyberRun/Particle");
-        var lit=Shader.Find("Universal Render Pipeline/Lit");
-        var unlit=Shader.Find("Universal Render Pipeline/Unlit");
-        if(projectSurface!=null && !included.Contains(projectSurface)) included.Add(projectSurface);
-        if(projectCity!=null && !included.Contains(projectCity)) included.Add(projectCity);
-        if(projectRoad!=null && !included.Contains(projectRoad)) included.Add(projectRoad);
-        if(projectHologram!=null && !included.Contains(projectHologram)) included.Add(projectHologram);
-        if(projectUnlit!=null && !included.Contains(projectUnlit)) included.Add(projectUnlit);
-        if(projectParticle!=null && !included.Contains(projectParticle)) included.Add(projectParticle);
-        if(lit!=null && !included.Contains(lit)) included.Add(lit);
-        if(unlit!=null && !included.Contains(unlit)) included.Add(unlit);
-
-        GraphicsSettings.alwaysIncludedShaders=included.ToArray();
         EditorUtility.SetDirty(urp);
         AssetDatabase.SaveAssets();
     }
