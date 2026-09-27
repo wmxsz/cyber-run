@@ -1158,6 +1158,13 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             segment.lastZ=segment.root.position.z;
             RebuildCoinPath(segment);
 
+            if(segment.boostGate!=null)
+            {
+                ConfigureBoostGate(segment);
+                segment.boostGateTriggered=false;
+                segment.boostGate.gameObject.SetActive(true);
+            }
+
             for(int j=0;j<segment.coins.Count;j++)
                 if(segment.coins[j]!=null)
                     segment.coins[j].SetActive(true);
@@ -1595,6 +1602,7 @@ public sealed class CyberRunContentSystems : MonoBehaviour
             var segment=data[i];
             if(segment.boostGate==null) continue;
 
+            ConfigureBoostGate(segment);
             segment.boostGateTriggered=false;
             segment.boostGate.gameObject.SetActive(true);
             segment.boostGateLastDz=
