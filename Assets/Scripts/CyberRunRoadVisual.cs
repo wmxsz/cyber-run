@@ -9,7 +9,7 @@ public sealed class CyberRunRoadVisual : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunRoadVisual>()!=null) return;
+        if(FindAnyObjectByType<CyberRunRoadVisual>()!=null) return;
 
         var go=new GameObject("CyberRunRoadVisual");
         go.AddComponent<CyberRunRoadVisual>();
