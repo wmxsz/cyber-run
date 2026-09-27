@@ -13,7 +13,7 @@ public sealed class CyberRunGameplayVisuals : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunGameplayVisuals>()!=null) return;
+        if(FindAnyObjectByType<CyberRunGameplayVisuals>()!=null) return;
 
         var go=new GameObject("CyberRunGameplayVisuals");
         go.AddComponent<CyberRunGameplayVisuals>();
