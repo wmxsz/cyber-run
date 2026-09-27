@@ -53,7 +53,7 @@ public sealed class CyberRunSectorPalette : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        if(FindFirstObjectByType<CyberRunSectorPalette>()!=null) return;
+        if(FindAnyObjectByType<CyberRunSectorPalette>()!=null) return;
 
         var go=new GameObject("CyberRunSectorPalette");
         go.AddComponent<CyberRunSectorPalette>();
@@ -64,7 +64,7 @@ public sealed class CyberRunSectorPalette : MonoBehaviour
     {
         yield return null;
         yield return null;
-        bootstrap=FindFirstObjectByType<CyberRunBootstrap>();
+        bootstrap=FindAnyObjectByType<CyberRunBootstrap>();
 
         renderers=FindObjectsByType<Renderer>(
             FindObjectsInactive.Exclude,
