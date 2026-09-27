@@ -93,7 +93,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Boot()
     {
-        if (FindFirstObjectByType<CyberRunBootstrap>() == null)
+        if (FindAnyObjectByType<CyberRunBootstrap>() == null)
             new GameObject("CyberRun").AddComponent<CyberRunBootstrap>();
     }
 
@@ -688,7 +688,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
             var hazard=movingHazards[i];
             if(hazard==null) continue;
 
-            float phase=hazard.GetInstanceID()*.013f;
+            float phase=i*.37f;
             Vector3 pos=hazard.localPosition;
             pos.y=1.55f+
                 Mathf.Sin(t*frequency+phase)*amplitude;
