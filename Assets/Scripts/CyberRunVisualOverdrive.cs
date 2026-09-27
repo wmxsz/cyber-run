@@ -11,7 +11,7 @@ public sealed class CyberRunVisualOverdrive : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        var existing=FindFirstObjectByType<CyberRunVisualOverdrive>();
+        var existing=FindAnyObjectByType<CyberRunVisualOverdrive>();
         if(existing!=null) return;
 
         var host=new GameObject("CyberRunVisualOverdrive");
