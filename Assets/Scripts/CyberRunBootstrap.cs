@@ -43,6 +43,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
     public bool IsSliding => sliding;
     public float CurrentSpeed => speed+speedBurstBonus;
     public float Distance => distance;
+    public int ResetVersion { get; private set; }
     public bool IsSpeedBurstActive => speedBurstTimer>0f;
     public float SpeedBurstRemaining => speedBurstTimer;
 
@@ -837,6 +838,7 @@ public sealed class CyberRunBootstrap : MonoBehaviour
 
     void Restart()
     {
+        ResetVersion++;
         lane=0;
         speed=11f;
         speedBurstTimer=0f;
