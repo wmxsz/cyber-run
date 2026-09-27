@@ -11,7 +11,7 @@ public sealed class CyberRunCityVisual : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Install()
     {
-        var existing=FindFirstObjectByType<CyberRunCityVisual>();
+        var existing=FindAnyObjectByType<CyberRunCityVisual>();
         if(existing!=null) return;
 
         var go=new GameObject("CyberRunCityVisual");
