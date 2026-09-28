@@ -123,6 +123,7 @@ build_setup_version = read("Assets/Editor/CyberRunBuildSetup.cs")
 for marker in [
     "PlayerSettings.Android.minSdkVersion=AndroidSdkVersions.AndroidApiLevel26;",
     "PlayerSettings.Android.targetSdkVersion=AndroidSdkVersions.AndroidApiLevel36;",
+    "PlayerSettings.SetMobileMTRendering(\n            BuildTargetGroup.Android,true);",
 
     'PlayerSettings.bundleVersion="0.4.0";',
     "PlayerSettings.Android.bundleVersionCode=5;",
@@ -209,6 +210,7 @@ for marker in [
     "CyberRun/Unlit",
     "GraphicsSettings.defaultRenderPipeline=urp;",
     "PlayerSettings.colorSpace=ColorSpace.Linear;",
+    "BuildTargetGroup.Android,true",
     "PlayerSettings.SetGraphicsAPIs(",
     "GraphicsDeviceType.Vulkan",
     "GraphicsDeviceType.OpenGLES3",
@@ -236,6 +238,25 @@ for marker in [
         errors.append(f"build script marker missing: {marker}")
 if build_script.count("{") != build_script.count("}"):
     errors.append("build script brace count mismatch")
+
+# Build input must be tracked rather than created only as an editor-side effect.
+# This allows a clean Android batch build to resolve its first scene before any
+# initialization callbacks have had a chance to run.
+scene = read("Assets/Scenes/Main.unity")
+scene_meta = read("Assets/Scenes/Main.unity.meta")
+editor_build_settings = read("ProjectSettings/EditorBuildSettings.asset")
+project_settings = read("ProjectSettings/ProjectSettings.asset")
+for marker, label, source in [
+    ("NavMeshSettings:", "main scene", scene),
+    ("guid: 8de46a62aedb949d2842b962dd6b2a19", "main scene meta", scene_meta),
+    ("path: Assets/Scenes/Main.unity", "editor build settings", editor_build_settings),
+    ("guid: 8de46a62aedb949d2842b962dd6b2a19", "editor build settings", editor_build_settings),
+    ("PlayerSettings:", "project settings", project_settings),
+    ("AndroidTargetSdkVersion: 36", "project settings", project_settings),
+    ("AndroidTargetArchitectures: 2", "project settings", project_settings),
+]:
+    if marker not in source:
+        errors.append(f"{label} marker missing: {marker}")
 
 content = read("Assets/Scripts/CyberRunContentSystems.cs")
 for marker in [

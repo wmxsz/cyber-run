@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 28
+  productGUID: 7da421716a7d4aa58618af92f15a1b81
+  AndroidProfiler: 0
+  AndroidFilterTouchesWhenObscured: 0
+  AndroidEnableSustainedPerformanceMode: 0
+  defaultScreenOrientation: 3
+  targetDevice: 2
+  useOnDemandResources: 0
+  accelerometerFrequency: 60
+  companyName: CyberRun
+  productName: Cyber Run
+  defaultCursor: {fileID: 0}
+  cursorHotspot: {x: 0, y: 0}
+  m_SplashScreenBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
+  m_ShowUnitySplashScreen: 0
+  m_ShowUnitySplashLogo: 1
+  m_SplashScreenOverlayOpacity: 1
+  m_SplashScreenAnimation: 1
+  m_SplashScreenLogoStyle: 1
+  m_SplashScreenDrawMode: 0
+  m_SplashScreenBackgroundAnimationZoom: 1
+  m_SplashScreenLogoAnimationZoom: 1
+  m_SplashScreenBackgroundLandscapeAspect: 1
+  m_SplashScreenBackgroundPortraitAspect: 1
+  m_SplashScreenBackgroundLandscapeUvs:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  m_SplashScreenBackgroundPortraitUvs:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  m_SplashScreenLogos: []
+  m_VirtualRealitySplashScreen: {fileID: 0}
+  m_HolographicTrackingLossScreen: {fileID: 0}
+  defaultScreenWidth: 1080
+  defaultScreenHeight: 1920
+  defaultScreenWidthWeb: 960
+  defaultScreenHeightWeb: 600
+  m_StereoRenderingPath: 0
+  m_ActiveColorSpace: 1
+  m_MTRendering: 1
+  m_StackTraceTypes: 010000000100000001000000010000000100000001000000
+  iosShowActivityIndicatorOnLoading: -1
+  androidShowActivityIndicatorOnLoading: -1
+  iosUseCustomAppBackgroundBehavior: 0
+  allowedAutorotateToPortrait: 1
+  allowedAutorotateToPortraitUpsideDown: 0
+  allowedAutorotateToLandscapeRight: 0
+  allowedAutorotateToLandscapeLeft: 0
+  useOSAutorotation: 1
+  use32BitDisplayBuffer: 1
+  preserveFramebufferAlpha: 0
+  disableDepthAndStencilBuffers: 0
+  androidStartInFullscreen: 1
+  androidRenderOutsideSafeArea: 1
+  androidUseSwappy: 1
+  androidBlitType: 0
+  androidResizableWindow: 0
+  androidDefaultWindowWidth: 1920
+  androidDefaultWindowHeight: 1080
+  androidMinimumWindowWidth: 400
+  androidMinimumWindowHeight: 300
+  androidFullscreenMode: 1
+  androidAutoRotationBehavior: 1
+  androidApplicationEntry: 2
+  androidPredictiveBackSupport: 0
+  androidEnableArmv9SecurityFeatures: 0
+  androidApplicationIdentifier:
+    Android: com.wmxsz.cyberrun
+  buildNumber:
+    Android: 5
+  AndroidMinSdkVersion: 26
+  AndroidTargetSdkVersion: 36
+  AndroidPreferredInstallLocation: 1
+  AndroidTargetArchitectures: 2
+  AndroidEnableIL2CPPDebugger: 0
+  AndroidEnableArmv9SecurityFeatures: 0
+  AndroidUseCustomKeystore: 0
+  AndroidEnableTango: 0
+  androidMaxAspectRatio: 2.1
+  AndroidBundleVersionCode: 5
+  AndroidMinifyRelease: 0
+  AndroidMinifyDebug: 0
+  AndroidValidateAppBundleSize: 1
+  AndroidAppBundleSizeToValidate: 150
+  AndroidReportGooglePlayAppDependencies: 1
+  AndroidUseLowAccuracyLocation: 0
+  AndroidUseCustomMainManifest: 0
+  AndroidUseCustomMainGradleTemplate: 0
+  AndroidUseCustomLauncherGradleManifest: 0
+  AndroidUseCustomBaseGradleTemplate: 0
+  AndroidUseCustomGradlePropertiesTemplate: 0
+  AndroidUseCustomGradleSettingsTemplate: 0
+  AndroidUseCustomProguardFile: 0
+  AndroidUseAPKExpansionFiles: 0
+  AndroidKeepARCoreEnabled: 0
+  AndroidTVCompatibility: 0
+  AndroidIsGame: 1
