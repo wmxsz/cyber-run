@@ -30,8 +30,12 @@ public static class CyberRunBuildSetup
         PlayerSettings.Android.bundleVersionCode=5;
         EditorUserBuildSettings.buildAppBundle=false;
 
+        // This API still takes a BuildTargetGroup in Unity 6.3. Most of the
+        // PlayerSettings APIs below have NamedBuildTarget overloads, but using
+        // it here prevents the editor assembly from compiling before an
+        // Android build can start.
         PlayerSettings.SetMobileMTRendering(
-            NamedBuildTarget.Android,true);
+            BuildTargetGroup.Android,true);
         PlayerSettings.stripUnusedMeshComponents=true;
         PlayerSettings.SetManagedStrippingLevel(
             NamedBuildTarget.Android,

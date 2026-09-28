@@ -87,6 +87,10 @@ build/CyberRun.apk
 
 构建脚本会再次强制执行项目设置，不依赖云端编辑器当前状态。
 
+`Assets/Scenes/Main.unity`、其 `.meta` 文件以及 `ProjectSettings` 中的构建
+场景和 Android PlayerSettings 都已纳入版本控制，因此干净的批处理构建无需先
+打开编辑器来生成首个场景或项目设置文件。
+
 ## 自动质量门禁
 
 .github/workflows/static-check.yml 会检查：
