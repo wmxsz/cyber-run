@@ -115,4 +115,27 @@ export class ObstacleManager {
     for (let i = this.active.length - 1; i >= 0; i--) this._removeAt(i);
     this.lastSafeLane = 1;
   }
+
+  dispose() {
+    this.clear();
+    const disposed = new Set();
+    const disposeItem = (item) => {
+      item?.traverse?.((node) => {
+        if (!node.isMesh) return;
+        if (node.geometry && !disposed.has(node.geometry)) {
+          node.geometry.dispose();
+          disposed.add(node.geometry);
+        }
+        const materials = Array.isArray(node.material) ? node.material : [node.material];
+        for (const material of materials) {
+          if (material && !disposed.has(material)) {
+            material.dispose();
+            disposed.add(material);
+          }
+        }
+      });
+    };
+    for (const pool of Object.values(this.pools)) pool.dispose(disposeItem);
+    this.pools = {};
+  }
 }
