@@ -28,8 +28,8 @@ export class RoadManager {
 
   _build() {
     const canvas = document.createElement("canvas");
-    canvas.width = 512;
-    canvas.height = 512;
+    canvas.width = 1024;
+    canvas.height = 1024;
     const ctx = canvas.getContext("2d");
     const bg = ctx.createLinearGradient(0, 0, 0, 512);
     bg.addColorStop(0, "#03030c");
@@ -43,22 +43,37 @@ export class RoadManager {
     ctx.shadowColor = "#00f0ff";
     ctx.shadowBlur = 7;
     ctx.lineWidth = 2;
-    for (let i = 0; i <= 512; i += 64) {
-      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
+    for (let i = 0; i <= 1024; i += 64) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 1024); ctx.stroke();
     }
-    for (let i = 0; i <= 512; i += 32) {
-      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
+    for (let i = 0; i <= 1024; i += 32) {
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(1024, i); ctx.stroke();
     }
     ctx.shadowBlur = 0;
     ctx.strokeStyle = "rgba(255,0,119,.55)";
     ctx.lineWidth = 5;
-    ctx.beginPath(); ctx.moveTo(256, 0); ctx.lineTo(256, 512); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(512, 0); ctx.lineTo(512, 1024); ctx.stroke();
     ctx.strokeStyle = "rgba(255,234,0,.18)";
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(128, 0); ctx.lineTo(128, 512); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(384, 0); ctx.lineTo(384, 512); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(256, 0); ctx.lineTo(256, 1024); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(768, 0); ctx.lineTo(768, 1024); ctx.stroke();
     ctx.fillStyle = "rgba(255,255,255,.05)";
-    for (let y = 18; y < 512; y += 64) ctx.fillRect(0, y, 512, 3);
+    for (let y = 36; y < 1024; y += 64) ctx.fillRect(0, y, 1024, 3);
+    ctx.strokeStyle = "rgba(138,43,226,.24)";
+    ctx.lineWidth = 3;
+    for (let x = 24; x < 1024; x += 96) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + 36, 1024);
+      ctx.stroke();
+    }
+    ctx.fillStyle = "rgba(0,240,255,.11)";
+    for (let y = 44; y < 1024; y += 128) {
+      for (let x = 18; x < 1024; x += 128) {
+        ctx.fillRect(x, y, 52, 5);
+        ctx.fillRect(x + 8, y + 10, 18, 3);
+      }
+    }
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
