@@ -66,14 +66,14 @@ export class InputManager {
   }
   _onTouchStart(e) {
     const target = e.target;
-    if (target instanceof Element && target.closest(".mobile-touch-btn")) return;
+    if (target instanceof Element && target.closest("button, a, input, select, textarea")) return;
     const t = e.changedTouches[0];
     this._touch = { identifier: t.identifier, x: t.clientX, y: t.clientY, time: performance.now() };
   }
   _onTouchEnd(e) {
     if (!this._touch || !e.changedTouches.length) return;
     const target = e.target;
-    if (target instanceof Element && target.closest(".mobile-touch-btn")) { this._touch = null; return; }
+    if (target instanceof Element && target.closest("button, a, input, select, textarea")) { this._touch = null; return; }
     const t = Array.from(e.changedTouches).find((touch) => touch.identifier === this._touch.identifier);
     if (!t) return;
     const dx = t.clientX - this._touch.x;
