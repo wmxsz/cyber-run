@@ -61,6 +61,8 @@ export class GameEngine {
     this._hunterLaneTimer = 0;
     this._hunterX = 0;
     this._hunter = null;
+    this._hunterNormalModel = this._makeHunter(false);
+    this._hunterEliteModel = this._makeHunter(true);
     this._hunterElite = false;
     this._sectorHunterGap = 3.8;
     this._comboMilestones = new Set();
@@ -132,6 +134,10 @@ export class GameEngine {
     this._hunterLaneTimer = 0;
     this._hunterX = 0;
     this._hunter = null;
+    this._hunterNormalModel.visible = false;
+    this._hunterEliteModel.visible = false;
+    this._hunterNormalModel.position.set(0, 0, 0);
+    this._hunterEliteModel.position.set(0, 0, 0);
     this._hunterElite = false;
     this._sectorHunterGap = 3.8;
     this._comboMilestones.clear();
@@ -195,7 +201,8 @@ export class GameEngine {
         this._hunterLane = Math.floor(Math.random() * 3);
         this._hunterLaneTimer = 0;
         this._hunterX = this.player.group.position.x;
-        this._hunter = this._makeHunter(this._hunterElite);
+        this._hunter = this._hunterElite ? this._hunterEliteModel : this._hunterNormalModel;
+        this._hunter.visible = true;
         this.scene.add(this._hunter);
         this._ui?.announce(this._hunterElite ? "PURSUER // LOCKED" : "HUNTER DRONE // LOCKED");
         this._refreshEventMultiplier();
@@ -287,7 +294,7 @@ export class GameEngine {
     this.score.update(dt, speed, this.hasShield, this.boosting);
     const missionProgress = this.missions.update(this.score.score);
     if (missionProgress) this._completeMission(missionProgress);
-    this.road.update(speed, spawn.phase, dt);
+    this.road.update(speed, spawn.phase, dt, this._elapsed);
     this.city.update(speed, spawn.phase, dt, this._elapsed);
     this.player.update(dt, this._elapsed);
     this.obstacles.update(dt, speed, this._elapsed);
@@ -435,13 +442,8 @@ export class GameEngine {
   _removeHunter() {
     if (!this._hunter) return;
     this.scene.remove(this._hunter);
-    this._hunter.traverse((node) => {
-      if (!node.isMesh) return;
-      node.geometry?.dispose?.();
-      const material = node.material;
-      if (Array.isArray(material)) material.forEach((m) => m?.dispose?.());
-      else material?.dispose?.();
-    });
+    this._hunter.visible = false;
+    this._hunter.position.set(0, 0, 0);
     this._hunter = null;
   }
 
@@ -605,10 +607,26 @@ export class GameEngine {
     this.audio.dispose();
     this.obstacles.dispose?.();
     this.pickups.dispose?.();
-    this.particles.clear?.();
+    this.particles.dispose?.();
     this.player.dispose?.();
     this.road.dispose?.();
     this.city.dispose?.();
+    this._hunterNormalModel?.traverse?.((node) => {
+      if (!node.isMesh) return;
+      node.geometry?.dispose?.();
+      const material = node.material;
+      if (Array.isArray(material)) material.forEach((m) => m?.dispose?.());
+      else material?.dispose?.();
+    });
+    this._hunterEliteModel?.traverse?.((node) => {
+      if (!node.isMesh) return;
+      node.geometry?.dispose?.();
+      const material = node.material;
+      if (Array.isArray(material)) material.forEach((m) => m?.dispose?.());
+      else material?.dispose?.();
+    });
+    this._hunterNormalModel = null;
+    this._hunterEliteModel = null;
     this.sceneMgr.dispose();
   }
 }
