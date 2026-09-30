@@ -280,7 +280,7 @@ export class GameEngine {
     }
 
     const speed = this._effectiveSpeed();
-    this.sceneMgr.setSpeedFeel(this.difficulty.speed, this.boosting, spawn.phase);
+    this.sceneMgr.setSpeedFeel(this.difficulty.speed, this.boosting, spawn.phase, dt);
     this.score.update(dt, speed, this.hasShield, this.boosting);
     const missionProgress = this.missions.update(this.score.score);
     if (missionProgress) this._completeMission(missionProgress);
