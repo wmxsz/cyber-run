@@ -21,6 +21,9 @@ export class UIManager {
     this.goRecord = this._el("go-record");
     this.audioIcon = this._el("audio-icon");
     this.phase = this._el("hud-phase");
+    this.mission = this._el("hud-mission");
+    this.missionFill = this._el("hud-mission-fill");
+    this.missionProgress = this._el("hud-mission-progress");
     this.laneThreats = [0, 1, 2].map((lane) => this._el(`lane-threat-${lane}`));
 
     this._setHighScore();
@@ -46,6 +49,12 @@ export class UIManager {
     }
     if (this.pauseButton) this.pauseButton.textContent = engine.paused ? "▶" : "Ⅱ";
     if (this.phase) this.phase.textContent = engine.difficulty.phaseName || "NIGHT CITY";
+    const mission = engine.missions?.getStatus?.();
+    if (mission) {
+      if (this.mission) this.mission.textContent = mission.label;
+      if (this.missionFill) this.missionFill.style.width = `${mission.progress * 100}%`;
+      if (this.missionProgress) this.missionProgress.textContent = `${mission.value} / ${mission.target}`;
+    }
 
     const threat = [0, 1, 2].map(() => null);
     engine.obstacles.forEachActive((item) => {
