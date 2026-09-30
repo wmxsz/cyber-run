@@ -483,6 +483,23 @@ export class GameEngine {
     wing.position.y = -0.08;
     g.add(wing);
 
+    // Distinct hunter silhouette: forward sensor housing + split stabilizers.
+    const sensor = new THREE.Mesh(
+      new THREE.ConeGeometry(elite ? 0.24 : 0.19, elite ? 0.62 : 0.5, 5),
+      glowMat,
+    );
+    sensor.rotation.x = -Math.PI / 2;
+    sensor.position.z = -size * 1.02;
+    g.add(sensor);
+
+    const finGeo = new THREE.BoxGeometry(elite ? 0.16 : 0.12, elite ? 0.32 : 0.25, elite ? 0.62 : 0.48);
+    for (const x of [-size * 0.72, size * 0.72]) {
+      const fin = new THREE.Mesh(finGeo, bodyMat);
+      fin.position.set(x, 0.06, size * 0.08);
+      fin.rotation.z = x < 0 ? -0.22 : 0.22;
+      g.add(fin);
+    }
+
     const edge = new THREE.Mesh(
       new THREE.BoxGeometry(elite ? 1.8 : 1.35, 0.055, 0.06),
       glowMat,
@@ -497,6 +514,14 @@ export class GameEngine {
     thruster.rotation.x = Math.PI / 2;
     thruster.position.z = size * 0.55;
     g.add(thruster);
+
+    const rearHousing = new THREE.Mesh(
+      new THREE.CylinderGeometry(elite ? 0.28 : 0.22, elite ? 0.34 : 0.27, 0.28, 8),
+      bodyMat,
+    );
+    rearHousing.rotation.x = Math.PI / 2;
+    rearHousing.position.z = size * 0.66;
+    g.add(rearHousing);
 
     if (elite) {
       const ring = new THREE.Mesh(
