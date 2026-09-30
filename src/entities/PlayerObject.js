@@ -88,6 +88,14 @@ export class PlayerObject {
     this.frontBar.position.set(0, 0.7, -1.35);
     this.group.add(this.frontBar);
 
+    this.energyHalo = new THREE.Mesh(
+      new THREE.TorusGeometry(0.82, 0.025, 6, 28),
+      new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.65 }),
+    );
+    this.energyHalo.rotation.x = Math.PI / 2;
+    this.energyHalo.position.set(0, 0.7, -1.28);
+    this.group.add(this.energyHalo);
+
     this.shield = new THREE.Mesh(
       new THREE.SphereGeometry(2, 16, 16),
       new THREE.MeshBasicMaterial({ color: COLORS.green, wireframe: true, transparent: true, opacity: 0.5 }),
@@ -124,6 +132,8 @@ export class PlayerObject {
     this.thrusterLight.intensity = active ? 5 : 2;
     this.hoverRing.material.color.setHex(active ? COLORS.pink : COLORS.cyan);
     this.frontBar.material.color.setHex(active ? COLORS.yellow : COLORS.pink);
+    this.energyHalo.material.color.setHex(active ? COLORS.yellow : COLORS.cyan);
+    this.energyHalo.material.opacity = active ? 0.95 : 0.45;
   }
 
   update(dt, elapsed) {
@@ -157,8 +167,12 @@ export class PlayerObject {
 
     this.hoverRing.rotation.z += dt * (this.boosting ? 6 : 2.2);
     this.hoverRing.scale.setScalar(1 + Math.sin(elapsed * 8) * 0.05);
+    this.energyHalo.rotation.z -= dt * (this.boosting ? 8 : 3);
+    this.energyHalo.scale.setScalar(1 + Math.sin(elapsed * (this.boosting ? 18 : 9)) * (this.boosting ? 0.12 : 0.05));
+    this.energyHalo.material.opacity = (this.boosting ? 0.72 : 0.42) + Math.sin(elapsed * 10) * 0.12;
     this.wings.rotation.z = Math.sin(elapsed * 4) * 0.035;
-    this.cockpit.material.emissiveIntensity = this.boosting ? 1.8 : 0.7;
+    this.cockpit.material.emissiveIntensity = this.boosting ? 1.8 + Math.sin(elapsed * 16) * 0.35 : 0.7;
+    this.frontBar.scale.x = this.boosting ? 1.15 + Math.sin(elapsed * 14) * 0.08 : 1;
 
     if (this.shield.visible) {
       this.shield.rotation.y += dt * 1.8;
