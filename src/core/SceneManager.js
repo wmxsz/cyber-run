@@ -45,9 +45,9 @@ export class SceneManager {
 
     const cyan = new THREE.DirectionalLight(COLORS.cyan, 1.5);
     cyan.position.set(20, 40, 20);
-    cyan.castShadow = true;
-    cyan.shadow.mapSize.width = 1024;
-    cyan.shadow.mapSize.height = 1024;
+    cyan.castShadow = !this._isMobile;
+    cyan.shadow.mapSize.width = 512;
+    cyan.shadow.mapSize.height = 512;
     this.scene.add(cyan);
 
     const pink = new THREE.DirectionalLight(COLORS.pink, 1.2);
