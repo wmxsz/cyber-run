@@ -596,6 +596,12 @@ export class GameEngine {
     document.removeEventListener("visibilitychange", this._onVisibilityChange);
     this.input.dispose();
     this.audio.dispose();
+    this.obstacles.dispose?.();
+    this.pickups.dispose?.();
+    this.particles.clear?.();
+    this.player.dispose?.();
+    this.road.dispose?.();
+    this.city.dispose?.();
     this.sceneMgr.dispose();
   }
 }
