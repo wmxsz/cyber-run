@@ -55,9 +55,9 @@ export class UIManager {
     if (this.pauseButton) this.pauseButton.textContent = engine.paused ? "▶" : "Ⅱ";
     if (this.phase) this.phase.textContent = engine.difficulty.phaseName || "NIGHT CITY";
     if (this.eventPanel) {
-      if (engine._hunterTime > 0 && engine._eventTime > 0) this.eventPanel.textContent = "HUNTER // EVADE // STORM x1.75";
-      else if (engine._hunterTime > 0) this.eventPanel.textContent = "HUNTER // EVADE // x1.35";
-      else if (engine._eventTime > 0) this.eventPanel.textContent = "DATA STORM // x1.75";
+      if (engine._hunterTime > 0 && engine._eventTime > 0) this.eventPanel.textContent = "HUNTER // EVADE // STORM x" + GAME_CONFIG.dataStormMultiplier.toFixed(2);
+      else if (engine._hunterTime > 0) this.eventPanel.textContent = "HUNTER // EVADE // x" + GAME_CONFIG.hunterMultiplier.toFixed(2);
+      else if (engine._eventTime > 0) this.eventPanel.textContent = "DATA STORM // x" + GAME_CONFIG.dataStormMultiplier.toFixed(2);
       else this.eventPanel.textContent = "";
     }
     if (this.risk) {
