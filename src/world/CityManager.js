@@ -74,13 +74,14 @@ export class CityManager {
     ];
     signs.forEach(([label, color], i) => {
       const side = i % 2 === 0 ? -1 : 1;
-      const panel = new THREE.Mesh(
-        new THREE.PlaneGeometry(7, 3.5),
-        new THREE.MeshBasicMaterial({
-          map: hologramTexture(label, "#" + color.toString(16).padStart(6, "0")),
-          transparent: true, opacity: 0.72, side: THREE.DoubleSide, depthWrite: false,
-        }),
-      );
+      const panelMaterial = new THREE.MeshBasicMaterial({
+        map: hologramTexture(label, "#" + color.toString(16).padStart(6, "0")),
+        transparent: true,
+        opacity: 0.72,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+      const panel = new THREE.Mesh(new THREE.PlaneGeometry(7, 3.5), panelMaterial);
       panel.position.set(side * (15 + (i % 3) * 4), 10 + (i % 3) * 5, -70 - i * 62);
       panel.rotation.y = side < 0 ? -Math.PI / 2 : Math.PI / 2;
       panel.userData.baseY = panel.position.y; panel.userData.phase = i * 0.9;
