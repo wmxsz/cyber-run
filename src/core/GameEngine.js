@@ -450,12 +450,53 @@ export class GameEngine {
   _makeHunter(elite = false) {
     const g = new THREE.Group();
     const size = elite ? 0.9 : 0.7;
-    const body = new THREE.Mesh(new THREE.OctahedronGeometry(size, elite ? 1 : 0), new THREE.MeshStandardMaterial({color:0x14002a, emissive:elite ? 0x8a2be2 : 0xff006e, emissiveIntensity:elite ? 2.8 : 2}));
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(elite ? 0.23 : 0.18, 10, 10), new THREE.MeshBasicMaterial({color:0xffe600}));
-    eye.position.z = size * 0.92;
-    g.add(body, eye);
+    const accent = elite ? 0x8a2be2 : 0xff006e;
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: 0x0c0820,
+      emissive: accent,
+      emissiveIntensity: elite ? 2.4 : 1.8,
+      metalness: 0.9,
+      roughness: 0.16,
+      flatShading: true,
+    });
+    const glowMat = new THREE.MeshBasicMaterial({ color: elite ? 0x8a2be2 : 0xff006e });
+    const body = new THREE.Mesh(new THREE.OctahedronGeometry(size, elite ? 1 : 0), bodyMat);
+    g.add(body);
+
+    const core = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(elite ? 0.28 : 0.22, 0),
+      new THREE.MeshBasicMaterial({ color: 0xffe600 }),
+    );
+    core.position.z = size * 0.92;
+    g.add(core);
+
+    const wing = new THREE.Mesh(
+      new THREE.BoxGeometry(elite ? 2.35 : 1.8, 0.08, elite ? 0.5 : 0.38),
+      bodyMat,
+    );
+    wing.position.y = -0.08;
+    g.add(wing);
+
+    const edge = new THREE.Mesh(
+      new THREE.BoxGeometry(elite ? 1.8 : 1.35, 0.055, 0.06),
+      glowMat,
+    );
+    edge.position.set(0, -0.18, 0);
+    g.add(edge);
+
+    const thruster = new THREE.Mesh(
+      new THREE.TorusGeometry(elite ? 0.62 : 0.45, 0.045, 6, 20),
+      glowMat,
+    );
+    thruster.rotation.x = Math.PI / 2;
+    thruster.position.z = size * 0.55;
+    g.add(thruster);
+
     if (elite) {
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.06, 8, 32), new THREE.MeshBasicMaterial({color:0x8a2be2, transparent:true, opacity:0.85}));
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(1.15, 0.06, 8, 32),
+        new THREE.MeshBasicMaterial({ color: 0x8a2be2, transparent: true, opacity: 0.85 }),
+      );
       ring.rotation.x = Math.PI / 2;
       g.add(ring);
       g.userData.ring = ring;
