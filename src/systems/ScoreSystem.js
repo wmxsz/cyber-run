@@ -13,6 +13,7 @@ export class ScoreSystem {
     this.comboTimer = 0;
     this.maxCombo = 0;
     this.overdriveScore = 0;
+    this.eventMultiplier = 1;
   }
 
   update(dt, speed, shieldActive, boosting = false) {
@@ -20,7 +21,7 @@ export class ScoreSystem {
     const base = (speed * 8 + (shieldActive ? 2 : 1)) * dt * 15;
     const overdriveBonus = boosting ? speed * dt * 8 : 0;
     this.overdriveScore += overdriveBonus;
-    this.score += base + overdriveBonus;
+    this.score += (base + overdriveBonus) * this.eventMultiplier;
 
     this.comboTimer = Math.max(0, this.comboTimer - dt);
     if (this.comboTimer === 0) this.combo = 0;
@@ -31,7 +32,7 @@ export class ScoreSystem {
     this.maxCombo = Math.max(this.maxCombo, this.combo);
     this.comboTimer = GAME_CONFIG.comboWindow;
     const multiplier = 1 + Math.min(4, Math.floor(this.combo / 4));
-    const points = base * multiplier;
+    const points = base * multiplier * this.eventMultiplier;
     this.score += points;
     return { points, multiplier };
   }
@@ -39,6 +40,10 @@ export class ScoreSystem {
   collectCore() {
     this.cores += 1;
     return this._chainBonus(150);
+  }
+
+  setEventMultiplier(multiplier = 1) {
+    this.eventMultiplier = Math.max(1, multiplier);
   }
 
   nearMiss() {
