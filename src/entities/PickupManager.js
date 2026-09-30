@@ -156,6 +156,8 @@ export class PickupManager {
       p.rotation.y += dt * 2.5;
       p.rotation.x += dt * 1.2;
       if (p.userData.type === "hackNode") {
+        p.userData.ring.material.opacity = 0.68 + Math.sin(elapsed * 11 + p.position.z * 0.05) * 0.16;
+        p.userData.ring2.material.opacity = 0.48 + Math.sin(elapsed * 14) * 0.14;
         p.userData.core.rotation.y += dt * 4.5;
         p.userData.ring.rotation.z += dt * 3.5;
         if (p.userData.ring2) p.userData.ring2.rotation.y -= dt * 2.8;
@@ -165,11 +167,14 @@ export class PickupManager {
       }
       if ((p.userData.type === "core" || p.userData.type === "bonusCore") && p.userData.halo) {
         p.userData.halo.rotation.z += dt * 3.5;
-        p.userData.halo.scale.setScalar(1 + Math.sin(elapsed * 9) * 0.16);
-        p.userData.halo.scale.setScalar(1 + Math.sin(elapsed * 12) * 0.08);
+        const haloPulse = 1 + Math.sin(elapsed * 10 + p.position.z * 0.08) * 0.13;
+        p.userData.halo.scale.setScalar(haloPulse);
+        p.userData.halo.material.opacity = 0.58 + Math.sin(elapsed * 8 + p.position.x) * 0.12;
       }
       if (p.userData.type === "shield") {
-        const pulse = 1 + Math.sin(elapsed * 8) * 0.12;
+        const pulse = 1 + Math.sin(elapsed * 8 + p.position.z * 0.04) * 0.12;
+        if (p.userData.outer) p.userData.outer.material.opacity = 0.62 + Math.sin(elapsed * 9) * 0.16;
+        if (p.userData.ring) p.userData.ring.material.opacity = 0.48 + Math.sin(elapsed * 12) * 0.14;
         p.scale.setScalar(pulse);
         if (p.userData.outer) p.userData.outer.rotation.z -= dt * 1.8;
         if (p.userData.ring) p.userData.ring.rotation.z += dt * 2.2;
