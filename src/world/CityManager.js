@@ -3,19 +3,70 @@ import { COLORS } from "../config/gameConfig.js";
 
 function buildingTexture() {
   const canvas = document.createElement("canvas");
-  canvas.width = 256; canvas.height = 512;
+  canvas.width = 512; canvas.height = 1024;
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#09071b"; ctx.fillRect(0, 0, 256, 512);
-  const colors = ["#00f0ff", "#ff0077", "#ffe600", "#221133", "#110d29"];
-  for (let y = 16; y < 500; y += 24) {
-    for (let x = 16; x < 240; x += 20) {
-      if (Math.random() > 0.4) {
-        ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-        ctx.fillRect(x, y, 12, 14);
+  const g = ctx.createLinearGradient(0, 0, 512, 1024);
+  g.addColorStop(0, "#050412");
+  g.addColorStop(0.48, "#0b0920");
+  g.addColorStop(1, "#02030d");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 512, 1024);
+
+  // Dense architectural paneling: dark structure first, then sparse lit windows.
+  ctx.strokeStyle = "rgba(95,120,180,.22)";
+  ctx.lineWidth = 2;
+  for (let x = 10; x < 512; x += 64) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 1024); ctx.stroke();
+  }
+  for (let y = 16; y < 1024; y += 48) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(512, y); ctx.stroke();
+  }
+
+  const neon = ["#00f0ff", "#ff0077", "#ffe600", "#8a2be2"];
+  let seed = 17;
+  const rand = () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+  for (let y = 28; y < 990; y += 48) {
+    for (let x = 22; x < 500; x += 34) {
+      if (rand() > 0.52) {
+        const accent = neon[Math.floor(rand() * neon.length)];
+        ctx.fillStyle = accent;
+        ctx.globalAlpha = 0.16 + rand() * 0.38;
+        ctx.fillRect(x, y, 17, 23);
+        if (rand() > 0.82) {
+          ctx.globalAlpha = 0.75;
+          ctx.fillRect(x, y, 17, 2);
+        }
       }
     }
   }
-  return new THREE.CanvasTexture(canvas);
+  ctx.globalAlpha = 1;
+
+  // Large facade seams and occasional vertical light spines.
+  for (const x of [78, 256, 434]) {
+    ctx.fillStyle = "#00f0ff";
+    ctx.globalAlpha = 0.18;
+    ctx.fillRect(x, 0, 3, 1024);
+  }
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = "#ff0077";
+  ctx.globalAlpha = 0.22;
+  ctx.fillRect(344, 0, 4, 1024);
+  ctx.globalAlpha = 1;
+
+  // Sparse advertisement bands prevent the skyline from reading as plain boxes.
+  for (const y of [238, 598, 862]) {
+    ctx.fillStyle = rand() > 0.5 ? "#00f0ff" : "#ff0077";
+    ctx.globalAlpha = 0.22;
+    ctx.fillRect(0, y, 512, 8);
+    ctx.globalAlpha = 1;
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
 }
 
 function hologramTexture(label, accent) {
