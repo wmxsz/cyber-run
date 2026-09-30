@@ -30,6 +30,7 @@ export class SceneManager {
 
     this._baseX = 0;
     this._shake = 0;
+    this._speedFeel = 0;
     this._shakeBase = this.camera.position.clone();
 
     this._resize = this._resize.bind(this);
@@ -61,8 +62,17 @@ export class SceneManager {
     this._shakeBase.copy(this.camera.position);
   }
 
+  setSpeedFeel(speed, boosting = false, phase = 0) {
+    const target = Math.min(1, Math.max(0, (speed - 1.2) / 2)) + (boosting ? 0.28 : 0) + phase * 0.025;
+    this._speedFeel = THREE.MathUtils.lerp(this._speedFeel, Math.min(1.25, target), 0.12);
+  }
+
   update(dt) {
     this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this._baseX, Math.min(1, dt * 8));
+
+    const targetFov = 65 + this._speedFeel * 10;
+    this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFov, Math.min(1, dt * 5));
+    this.camera.updateProjectionMatrix();
 
     if (this._shake > 0) {
       this._shake *= Math.pow(0.08, dt);
