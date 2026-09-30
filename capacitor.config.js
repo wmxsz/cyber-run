@@ -6,4 +6,4 @@ const config = {
   bundledWebRuntime: false
 };
 
-module.exports = config;
+export default config;
