@@ -148,6 +148,32 @@ export class CityManager {
       this.scene.add(mesh);
       this.buildings.push(mesh);
     }
+    const facadeRailGeo = new THREE.BoxGeometry(0.11, 1, 0.11);
+    const facadeRails = {
+      left: new THREE.InstancedMesh(facadeRailGeo, new THREE.MeshBasicMaterial({ color: COLORS.cyan }), 70),
+      right: new THREE.InstancedMesh(facadeRailGeo, new THREE.MeshBasicMaterial({ color: COLORS.pink }), 70),
+    };
+    const railCounts = { left: 0, right: 0 };
+    for (const anchor of towerAnchors) {
+      const side = anchor.side;
+      const index = railCounts[side]++;
+      dummy.position.set(
+        anchor.x - (side === "left" ? -1 : 1) * anchor.w * 0.22,
+        anchor.h * 0.5,
+        anchor.z + anchor.d * 0.5 + 0.08,
+      );
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(1, anchor.h * 0.86, 1);
+      dummy.updateMatrix();
+      facadeRails[side].setMatrixAt(index, dummy.matrix);
+    }
+    for (const side of ["left", "right"]) {
+      facadeRails[side].count = railCounts[side];
+      facadeRails[side].instanceMatrix.needsUpdate = true;
+      this.scene.add(facadeRails[side]);
+      this.buildings.push(facadeRails[side]);
+    }
+
     for (const side of ["left", "right"]) {
       rooftopCrests[side].count = side === "left" ? leftCrestCount : rightCrestCount;
       rooftopCrests[side].instanceMatrix.needsUpdate = true;
