@@ -42,15 +42,26 @@ function makeHighLaser() {
   const g = new THREE.Group();
   const poleGeo = new THREE.CylinderGeometry(0.18, 0.3, 2.9, 8);
   const mat = new THREE.MeshStandardMaterial({ color: 0x24104a, emissive: COLORS.pink, emissiveIntensity: 0.65, metalness: 0.65, roughness: 0.24 });
+  const baseGeo = new THREE.CylinderGeometry(0.38, 0.5, 0.18, 8);
   for (const x of [-1.5, 1.5]) {
     const pole = new THREE.Mesh(poleGeo, mat);
     pole.position.set(x, 2.7, 0);
     g.add(pole);
+    const base = new THREE.Mesh(baseGeo, mat);
+    base.position.set(x, 0.09, 0);
+    g.add(base);
     const emitter = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.24, 0.42, 8), new THREE.MeshBasicMaterial({ color: COLORS.pink }));
     emitter.rotation.z = Math.PI / 2;
     emitter.position.set(x, 2.45, 0);
     g.add(emitter);
   }
+  const brace = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, 2.1, 0.12),
+    new THREE.MeshBasicMaterial({ color: COLORS.pink }),
+  );
+  brace.position.set(0, 1.35, 0);
+  brace.rotation.z = Math.PI / 2.9;
+  g.add(brace);
   const beam = new THREE.Mesh(new THREE.BoxGeometry(3.1, 0.25, 0.35), new THREE.MeshBasicMaterial({ color: COLORS.pink }));
   beam.position.y = 2.45;
   const core = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.06, 0.06), new THREE.MeshBasicMaterial({ color: 0xffffff }));
@@ -80,9 +91,19 @@ function makeMine() {
     spike.translateY(0.75);
     g.add(spike);
   }
+  const base = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.55, 0.7, 0.24, 8),
+    new THREE.MeshStandardMaterial({ color: 0x15111d, metalness: 0.86, roughness: 0.22, emissive: COLORS.pink, emissiveIntensity: 0.18 }),
+  );
+  base.position.y = 0.12;
+  const neck = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.22, 0.32, 0.7, 8),
+    spikeMat,
+  );
+  neck.position.y = 0.52;
   const ring = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.08, 8, 24), new THREE.MeshBasicMaterial({ color: COLORS.pink }));
   ring.position.y = 1.25;
-  g.add(ring, disc(1.55, COLORS.orange));
+  g.add(base, neck, ring, disc(1.55, COLORS.orange));
   g.userData.ring = ring;
   g.userData.pulse = core;
   return g;
