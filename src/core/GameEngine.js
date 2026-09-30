@@ -392,6 +392,7 @@ export class GameEngine {
 
   takeDamage() {
     if (this.invulnerable > 0) return;
+    this.score.breakRiskChain();
 
     const p = this.player.group.position;
     if (this.hasShield) {
