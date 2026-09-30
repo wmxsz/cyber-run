@@ -95,7 +95,7 @@ export class GameEngine {
 
     this.obstacles.clear();
     this.pickups.clear();
-    if (this._hunter) this.scene.remove(this._hunter);
+    if (this._hunter) this._removeHunter();
     this.particles.clear?.();
 
     this.score.reset();
@@ -112,6 +112,7 @@ export class GameEngine {
     this.over = false;
     this._elapsed = 0;
     this._lastPhase = 0;
+    this._exhaustTimer = 0;
     this._eventTimer = 18;
     this._eventTime = 0;
     this._empTimer = GAME_CONFIG.empCooldown;
@@ -171,8 +172,7 @@ export class GameEngine {
       const approach = this._hunterElite ? 0.48 : 0.42;
       this._hunter.position.z = Math.max(0.6, gap - (duration - this._hunterTime) * approach) + Math.sin(this._hunterTime * 5) * 0.12;
       if (this._hunterTime <= 0) {
-        this.scene.remove(this._hunter);
-        this._hunter = null;
+        this._removeHunter();
         this._refreshEventMultiplier();
         this._ui?.announce(this._hunterElite ? "PURSUER // EVADED" : "HUNTER DRONE // ESCAPED");
         this._hunterElite = false;
@@ -408,8 +408,7 @@ export class GameEngine {
       this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + 15);
       this.particles.burst(h.x, h.y, h.z, 0xffe600, 32);
       this.audio.playPowerup();
-      this.scene.remove(this._hunter);
-      this._hunter = null;
+      this._removeHunter();
       this._hunterTime = 0;
       this._refreshEventMultiplier();
       this._ui?.announce(this._hunterElite ? "PURSUER DESTROYED // +100 // +15 BOOST" : "HUNTER DESTROYED // +100 // +15 BOOST");
@@ -423,6 +422,19 @@ export class GameEngine {
       this._hunterElite = false;
       this.takeDamage();
     }
+  }
+
+  _removeHunter() {
+    if (!this._hunter) return;
+    this.scene.remove(this._hunter);
+    this._hunter.traverse((node) => {
+      if (!node.isMesh) return;
+      node.geometry?.dispose?.();
+      const material = node.material;
+      if (Array.isArray(material)) material.forEach((m) => m?.dispose?.());
+      else material?.dispose?.();
+    });
+    this._hunter = null;
   }
 
   _makeHunter(elite = false) {
