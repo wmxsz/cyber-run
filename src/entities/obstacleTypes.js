@@ -101,6 +101,20 @@ function makeBlock() {
   panel.position.set(0, 1.62, 0.93);
   const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.08, 0.07), new THREE.MeshBasicMaterial({ color: COLORS.yellow }));
   stripe.position.set(0, 1.62, 0.98);
+  const footGeo = new THREE.CylinderGeometry(0.38, 0.48, 0.2, 8);
+  const footMat = new THREE.MeshStandardMaterial({
+    color: 0x17140f, metalness: 0.8, roughness: 0.25,
+    emissive: COLORS.orange, emissiveIntensity: 0.18,
+  });
+  const ventMat = new THREE.MeshBasicMaterial({ color: COLORS.orange });
+  for (const x of [-0.95, 0.95]) {
+    const foot = new THREE.Mesh(footGeo, footMat);
+    foot.position.set(x, 0.1, 0);
+    g.add(foot);
+    const vent = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.06, 0.04), ventMat);
+    vent.position.set(x, 1.0, 0.93);
+    g.add(vent);
+  }
   g.add(body, frame, panel, stripe, disc(1.7, COLORS.orange));
   g.userData.pulse = panel;
   return g;
@@ -122,7 +136,26 @@ function makePulseGate() {
     new THREE.MeshStandardMaterial({ color: COLORS.pink, emissive: COLORS.pink, emissiveIntensity: 1.35, metalness: 0.65, roughness: 0.12 }),
   );
   core.position.y = 1.15;
-  g.add(outer, inner, core, disc(1.45, COLORS.cyan));
+  const supportMat = new THREE.MeshStandardMaterial({
+    color: 0x10162b, metalness: 0.88, roughness: 0.2,
+    emissive: COLORS.cyan, emissiveIntensity: 0.2,
+  });
+  const supportGeo = new THREE.BoxGeometry(0.22, 2.35, 0.22);
+  const baseGeo = new THREE.CylinderGeometry(0.34, 0.42, 0.18, 8);
+  for (const x of [-1.38, 1.38]) {
+    const support = new THREE.Mesh(supportGeo, supportMat);
+    support.position.set(x, 1.15, 0);
+    g.add(support);
+    const base = new THREE.Mesh(baseGeo, supportMat);
+    base.position.set(x, 0.09, 0);
+    g.add(base);
+  }
+  const topLink = new THREE.Mesh(
+    new THREE.BoxGeometry(2.9, 0.12, 0.22),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
+  );
+  topLink.position.y = 2.28;
+  g.add(outer, inner, core, topLink, disc(1.45, COLORS.cyan));
   g.userData.ring = outer;
   g.userData.innerRing = inner;
   g.userData.pulse = core;
