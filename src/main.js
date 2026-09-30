@@ -10,4 +10,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const ui = new UIManager(engine);
   engine.setUI(ui);
   engine.start();
+
+  const dispose = () => engine.dispose();
+  window.addEventListener("pagehide", dispose, { once: true });
+  window.addEventListener("beforeunload", dispose, { once: true });
 });
