@@ -174,6 +174,35 @@ export class CityManager {
       this.buildings.push(facadeRails[side]);
     }
 
+    // Horizontal facade bands break up tall silhouettes without adding per-building meshes.
+    const bandGeo = new THREE.BoxGeometry(1, 0.08, 0.08);
+    const facadeBands = {
+      left: new THREE.InstancedMesh(bandGeo, new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.72 }), 140),
+      right: new THREE.InstancedMesh(bandGeo, new THREE.MeshBasicMaterial({ color: COLORS.pink, transparent: true, opacity: 0.72 }), 140),
+    };
+    const bandCounts = { left: 0, right: 0 };
+    for (const anchor of towerAnchors) {
+      const bandTotal = anchor.h > 62 ? 3 : 2;
+      for (let b = 1; b <= bandTotal; b++) {
+        const index = bandCounts[anchor.side]++;
+        dummy.position.set(
+          anchor.x,
+          (anchor.h / (bandTotal + 1)) * b,
+          anchor.z + anchor.d * 0.5 + 0.11,
+        );
+        dummy.rotation.set(0, 0, 0);
+        dummy.scale.set(Math.min(anchor.w * 0.82, 10), 1, 1);
+        dummy.updateMatrix();
+        facadeBands[anchor.side].setMatrixAt(index, dummy.matrix);
+      }
+    }
+    for (const side of ["left", "right"]) {
+      facadeBands[side].count = bandCounts[side];
+      facadeBands[side].instanceMatrix.needsUpdate = true;
+      this.scene.add(facadeBands[side]);
+      this.buildings.push(facadeBands[side]);
+    }
+
     for (const side of ["left", "right"]) {
       rooftopCrests[side].count = side === "left" ? leftCrestCount : rightCrestCount;
       rooftopCrests[side].instanceMatrix.needsUpdate = true;
