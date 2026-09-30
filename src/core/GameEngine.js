@@ -365,7 +365,7 @@ export class GameEngine {
       this._hunter = null;
       this._hunterTime = 0;
       this._refreshEventMultiplier();
-      this._ui?.announce("HUNTER DESTROYED // +100 // +20 BOOST");
+      this._ui?.announce("HUNTER DESTROYED // +100 // +15 BOOST");
     } else {
       this.scene.remove(this._hunter);
       this._hunter = null;
