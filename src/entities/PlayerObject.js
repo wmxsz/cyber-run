@@ -119,8 +119,8 @@ export class PlayerObject {
     if (this.isJumping) {
       this.group.position.y += this.jumpVelocity * dt * 60;
       this.jumpVelocity -= GAME_CONFIG.gravity * dt * 60;
-      if (this.group.position.y <= 0) {
-        this.group.position.y = 0;
+      if (this.group.position.y <= 0.84) {
+        this.group.position.y = 0.84;
         this.isJumping = false;
         this.jumpVelocity = 0;
       }
@@ -165,7 +165,7 @@ export class PlayerObject {
     this.isSliding = false;
     this.jumpVelocity = 0;
     this.slideTimer = 0;
-    this.group.position.set(0, 0, 0);
+    this.group.position.set(0, 0.84, 0);
     this.group.rotation.set(0, 0, 0);
     this.group.scale.set(1, 1, 1);
     this.shield.visible = false;
