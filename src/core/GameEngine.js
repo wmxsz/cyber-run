@@ -143,7 +143,7 @@ export class GameEngine {
 
     const speed = this._effectiveSpeed();
     this.score.update(dt, speed, this.hasShield, this.boosting);
-    this.road.update(speed);
+    this.road.update(speed, spawn.phase);
     this.city.update(speed);
     this.player.update(dt, this._elapsed);
     this.obstacles.update(dt, speed, this._elapsed);

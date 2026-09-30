@@ -7,6 +7,7 @@ export class RoadManager {
     this.track = null;
     this.laneStrips = [];
     this.edgeLights = [];
+    this._phase = 0;
     this._build();
   }
 
@@ -84,15 +85,23 @@ export class RoadManager {
     }
   }
 
-  update(speed) {
+  update(speed, phase = this._phase) {
+    this._phase = phase;
     if (this.track?.material?.map) this.track.material.map.offset.y -= speed * 0.015;
     const advance = speed * 60 * 0.016;
+    const pulse = 0.55 + Math.sin(performance.now() * 0.004 + speed) * 0.2;
+    const accent = phase >= 4 ? COLORS.yellow : phase >= 2 ? COLORS.pink : COLORS.cyan;
+    const secondary = phase >= 4 ? COLORS.pink : COLORS.violet;
     for (const strip of this.laneStrips) {
       strip.position.z += advance;
+      strip.material.opacity = 0.55 + pulse * 0.28;
+      strip.material.color.setHex((this._phase >= 2 && strip.position.x < 0) ? accent : secondary);
       if (strip.position.z > 18) strip.position.z -= 28 * 18;
     }
     for (const light of this.edgeLights) {
       light.position.z += advance * 0.92;
+      light.material.opacity = 0.62 + pulse * 0.3;
+      light.material.color.setHex(light.position.x < 0 ? accent : secondary);
       if (light.position.z > 18) light.position.z -= 22 * 22;
     }
   }
