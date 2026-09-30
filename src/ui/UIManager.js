@@ -26,6 +26,7 @@ export class UIManager {
     this.missionProgress = this._el("hud-mission-progress");
     this.eventPanel = this._el("event-status");
     this.multiplier = this._el("hud-multiplier");
+    this.risk = this._el("hud-risk");
     this.laneThreats = [0, 1, 2].map((lane) => this._el(`lane-threat-${lane}`));
 
     this._setHighScore();
@@ -56,6 +57,12 @@ export class UIManager {
       else if (engine._hunterTime > 0) this.eventPanel.textContent = "HUNTER // EVADE // x1.35";
       else if (engine._eventTime > 0) this.eventPanel.textContent = "DATA STORM // x1.75";
       else this.eventPanel.textContent = "";
+    }
+    if (this.risk) {
+      const risk = engine.score.riskChain || 0;
+      const target = engine.constructor ? 3 : 3;
+      this.risk.textContent = "RISK " + risk + "/" + target;
+      this.risk.classList.toggle("active", risk > 0);
     }
     if (this.multiplier) {
       const multiplier = Number(engine.score.eventMultiplier || 1);
