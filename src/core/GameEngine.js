@@ -52,6 +52,8 @@ export class GameEngine {
     this._exhaustTimer = 0;
     this._eventTimer = 18;
     this._eventTime = 0;
+    this._empTimer = GAME_CONFIG.empCooldown;
+    this._empTime = 0;
     this._hunterTimer = 22;
     this._hunterTime = 0;
     this._hunterLane = 1;
@@ -111,6 +113,8 @@ export class GameEngine {
     this._lastPhase = 0;
     this._eventTimer = 18;
     this._eventTime = 0;
+    this._empTimer = GAME_CONFIG.empCooldown;
+    this._empTime = 0;
     this._hunterTimer = 22;
     this._hunterTime = 0;
     this._hunterLane = 1;
@@ -218,7 +222,30 @@ export class GameEngine {
       }
     }
 
-    if (this.boosting) {
+    if (this._empTime > 0) {
+      this._empTime -= dt;
+      this.boosting = false;
+      this.player.setBoost(false);
+      if (this._empTime <= 0) {
+        this._ui?.announce("EMP // BOOST LINK RESTORED");
+      }
+    } else {
+      this._empTimer -= dt;
+      if (this._empTimer <= 0 && this._lastPhase >= 3) {
+        this._empTime = GAME_CONFIG.empDuration;
+        this._empTimer = GAME_CONFIG.empCooldown + Math.random() * 12;
+        this.boosting = false;
+        this.player.setBoost(false);
+        this.boostEnergy = Math.max(0, this.boostEnergy - GAME_CONFIG.empBoostDrain);
+        this.audio.playHit();
+        const p = this.player.group.position;
+        this.particles.burst(p.x, p.y + 0.7, p.z, 0x8a2be2, 42);
+        this.sceneMgr.shake(0.2);
+        this._ui?.announce("EMP BLACKOUT // BOOST OFFLINE // " + GAME_CONFIG.empDuration.toFixed(1) + " SEC");
+      }
+    }
+
+    if (this.boosting && this._empTime <= 0) {
       this.boostEnergy = Math.max(0, this.boostEnergy - GAME_CONFIG.boostDrain * dt);
       if (this.boostEnergy <= 0) { this.boosting = false; this.player.setBoost(false); }
     }
@@ -241,7 +268,8 @@ export class GameEngine {
       const safe = [0, 1, 2].filter((lane) => !occupied.includes(lane));
       this.pickups.spawn(safe, occupied, spawn.phase);
       const stormDensity = this._eventTime > 0 ? 0.86 : 1;
-      this.difficulty.armSpawn(spawn.interval * stormDensity);
+      const empDensity = this._empTime > 0 ? 0.9 : 1;
+      this.difficulty.armSpawn(spawn.interval * stormDensity * empDensity);
     }
 
     const speed = this._effectiveSpeed();
@@ -515,7 +543,7 @@ export class GameEngine {
     }
     if (!this.active || this.over || this.paused) return;
 
-    if (action === ACTIONS.BOOST) this.toggleBoost();
+    if (action === ACTIONS.BOOST && this._empTime <= 0) this.toggleBoost();
     else if (action === ACTIONS.LEFT) this.player.moveLane(-1);
     else if (action === ACTIONS.RIGHT) this.player.moveLane(1);
     else if (action === ACTIONS.JUMP && this.player.jump()) this.audio.playJump();
