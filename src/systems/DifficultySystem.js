@@ -20,8 +20,16 @@ export class DifficultySystem {
     this.phaseName = GAME_CONFIG.phaseNames[phase];
 
     const ramp = Math.min(1, score / GAME_CONFIG.spawnRampScore);
-    const interval = GAME_CONFIG.spawnStartMs + (GAME_CONFIG.spawnMinMs - GAME_CONFIG.spawnStartMs) * ramp;
-    return { shouldSpawn: this.spawnTimer <= 0, interval, phase, phaseName: this.phaseName };
+    const density = GAME_CONFIG.phaseSpawnDensity?.[phase] || 1;
+    const interval = (GAME_CONFIG.spawnStartMs + (GAME_CONFIG.spawnMinMs - GAME_CONFIG.spawnStartMs) * ramp) * density;
+    return {
+      shouldSpawn: this.spawnTimer <= 0,
+      interval,
+      phase,
+      phaseName: this.phaseName,
+      stormChance: GAME_CONFIG.phaseStormChance?.[phase] || 0,
+      hunterGap: GAME_CONFIG.phaseHunterGap?.[phase] || 3.8,
+    };
   }
 
   armSpawn(interval) {
