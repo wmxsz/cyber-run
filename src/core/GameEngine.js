@@ -355,6 +355,7 @@ export class GameEngine {
       this.audio.playCollect();
       const p = item.obj.position;
       this.particles.burst(p.x, 1.0, p.z, 0xffe600, 8);
+      this.particles.flash(p.x, 1.0, p.z, 0xfff3a0, 0.75);
       this.particles.streak(p.x, 1.0, p.z, 0xffe600, 4, 1.2);
       const comboText = bonus.multiplier > 1 ? " // COMBO x" + bonus.multiplier : "";
       this._ui?.announce(
@@ -443,6 +444,10 @@ export class GameEngine {
       this._checkComboMilestone(bonus);
       this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + 15);
       this.particles.burst(h.x, h.y, h.z, 0xffe600, 32);
+      this.particles.shockwave(h.x, h.y, h.z, this._hunterElite ? 0x8a2be2 : 0xff006e, this._hunterElite ? 3.4 : 2.8);
+      this.particles.flash(h.x, h.y, h.z, 0xfff2a6, this._hunterElite ? 2.0 : 1.7);
+      this.particles.streak(h.x, h.y, h.z, this._hunterElite ? 0x8a2be2 : 0xff006e, 7, 2.2);
+      this.sceneMgr.shake(this._hunterElite ? 0.22 : 0.16);
       this.audio.playPowerup();
       this._removeHunter();
       this._hunterTime = 0;
