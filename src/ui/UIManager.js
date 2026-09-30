@@ -31,6 +31,7 @@ export class UIManager {
     this.risk = this._el("hud-risk");
     this.ghost = this._el("hud-ghost");
     this.laneThreats = [0, 1, 2].map((lane) => this._el(`lane-threat-${lane}`));
+    this.laneThreatLabels = this.laneThreats.map((el) => el?.querySelector("b"));
 
     this._last = Object.create(null);
     this._lastThreatAt = 0;
@@ -148,8 +149,7 @@ export class UIManager {
       const label = danger
         ? (hit.type === "highLaser" ? "SLIDE" : hit.type === "barrier" ? "JUMP" : "CHANGE")
         : "SAFE";
-      const b = el.querySelector("b");
-      this._setText(b, label, `threatLabel${lane}`);
+      this._setText(this.laneThreatLabels[lane], label, `threatLabel${lane}`);
       this._setClass(el, "elite", Boolean(hit && (hit.type === "pulseGate" || hit.type === "mine") && engine.difficulty.phase >= 4), `threatElite${lane}`);
     });
   }
