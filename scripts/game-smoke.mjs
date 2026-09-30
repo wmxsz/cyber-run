@@ -5,6 +5,8 @@ import { MissionSystem } from "../src/systems/MissionSystem.js";
 import { CollisionSystem } from "../src/systems/CollisionSystem.js";
 import { ObjectPool } from "../src/core/ObjectPool.js";
 import { GAME_CONFIG } from "../src/config/gameConfig.js";
+import { ParticleSystem } from "../src/world/ParticleSystem.js";
+import * as THREE from "three";
 
 const finite = (value, label) => assert.ok(Number.isFinite(value), label + " must stay finite");
 
@@ -111,3 +113,18 @@ const finite = (value, label) => assert.ok(Number.isFinite(value), label + " mus
 }
 
 console.log("Cyber Run smoke checks passed.");
+
+// Particle lifecycle and geometry invariants.
+{
+  const scene = new THREE.Scene();
+  const particles = new ParticleSystem(scene);
+  particles.burst(0, 0, 0, 0xff0077, 4);
+  particles.streak(0, 0, 0, 0x00f0ff, 3, 2);
+  particles.flash(0, 0, 0, 0xffffff, 1.5);
+  particles.shockwave(0, 0, 0, 0x00ffaa, 2);
+  assert.equal(particles.streakGeometry.type, "CylinderGeometry", "streaks should use fine cylindrical energy trails");
+  assert.equal(particles.materials.get(0x00f0ff).blending, THREE.AdditiveBlending, "energy particles should use additive glow");
+  for (let i = 0; i < 120; i++) particles.update(1 / 60);
+  assert.equal(particles.items.length, 0, "particle pool should reclaim short-lived effects");
+  particles.dispose();
+}
