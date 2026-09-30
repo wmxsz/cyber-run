@@ -111,6 +111,16 @@ export class AudioManager {
     }, 135);
   }
 
+  pause() {
+    if (this.ctx?.state === "running") this.ctx.suspend().catch(() => {});
+  }
+
+  resume() {
+    if (this.muted || !this.ctx) return;
+    if (this.ctx.state === "suspended") this.ctx.resume().catch(() => {});
+    this.startBgm();
+  }
+
   stopBgm() {
     if (this.bgmTimer) clearInterval(this.bgmTimer);
     this.bgmTimer = null;
