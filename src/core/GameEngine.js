@@ -175,7 +175,7 @@ export class GameEngine {
         this._hunter = this._makeHunter();
         this.scene.add(this._hunter);
         this._refreshEventMultiplier();
-        this._ui?.announce("HUNTER DRONE // EVADE // SCORE x1.35");
+        this._ui?.announce("HUNTER DRONE // EVADE // SCORE x1.20");
       }
     }
 
@@ -188,13 +188,13 @@ export class GameEngine {
     } else {
       this._eventTimer -= dt;
       if (this._eventTimer <= 0 && this._lastPhase >= 1) {
-        this._eventTime = 6;
+        this._eventTime = 5;
         this._eventTimer = 16 + Math.random() * 8;
         this._refreshEventMultiplier();
         this.audio.playPowerup();
         const p = this.player.group.position;
         this.particles.burst(p.x, p.y + 1, p.z, 0xff00aa, 36);
-        this._ui?.announce("DATA STORM // SCORE x1.75 // 6 SEC");
+        this._ui?.announce("DATA STORM // SCORE x1.50 // 5 SEC");
       }
     }
 
@@ -341,10 +341,10 @@ export class GameEngine {
   }
 
   _refreshEventMultiplier() {
-    const storm = this._eventTime > 0 ? 1.75 : 1;
-    const hunter = this._hunterTime > 0 ? 1.35 : 1;
+    const storm = this._eventTime > 0 ? GAME_CONFIG.dataStormMultiplier : 1;
+    const hunter = this._hunterTime > 0 ? GAME_CONFIG.hunterMultiplier : 1;
     const ghost = this._ghostTime > 0 ? GAME_CONFIG.ghostProtocolMultiplier : 1;
-    this.score.setEventMultiplier(storm * hunter * ghost);
+    this.score.setEventMultiplier(Math.min(GAME_CONFIG.eventMultiplierCap || 2.25, storm * hunter * ghost));
   }
 
   _resolveHunterEncounter() {
@@ -358,14 +358,14 @@ export class GameEngine {
     if (this.boosting) {
       const bonus = this.score.hunterBreak();
       this._checkComboMilestone(bonus);
-      this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + 20);
+      this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + 15);
       this.particles.burst(h.x, h.y, h.z, 0xffe600, 32);
       this.audio.playPowerup();
       this.scene.remove(this._hunter);
       this._hunter = null;
       this._hunterTime = 0;
       this._refreshEventMultiplier();
-      this._ui?.announce("HUNTER DESTROYED // +180 // +20 BOOST");
+      this._ui?.announce("HUNTER DESTROYED // +100 // +20 BOOST");
     } else {
       this.scene.remove(this._hunter);
       this._hunter = null;
