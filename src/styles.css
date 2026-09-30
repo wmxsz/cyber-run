@@ -50,7 +50,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 24px 30px;
+      padding: max(24px, env(safe-area-inset-top)) max(30px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(30px, env(safe-area-inset-left));
     }
 
     .hud-top {
@@ -203,10 +203,10 @@
     #mobile-controls {
       display: none;
       position: absolute;
-      bottom: 25px;
+      bottom: max(25px, env(safe-area-inset-bottom));
       left: 0;
       width: 100%;
-      padding: 0 30px;
+      padding: 0 max(30px, env(safe-area-inset-right)) 0 max(30px, env(safe-area-inset-left));
       justify-content: space-between;
       z-index: 20;
       pointer-events: none;
@@ -405,7 +405,7 @@
 
     @media (max-width: 768px) {
       #hud {
-        padding: 16px 18px;
+        padding: max(16px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
       }
       .stat-value {
         font-size: 22px;
