@@ -40,6 +40,9 @@ function makeBonusCore() {
   core.material.dispose();
   core.geometry = new THREE.IcosahedronGeometry(0.58, 0);
   core.material = new THREE.MeshStandardMaterial({ color: COLORS.orange, emissive: COLORS.orange, emissiveIntensity: 1.9, metalness: 0.92, roughness: 0.08 });
+  shell.material.dispose();
+  shellCross.material.dispose();
+  halo.material.dispose();
   shell.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.56 });
   shellCross.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.52 });
   halo.material = new THREE.MeshBasicMaterial({ color: COLORS.orange, transparent: true, opacity: 0.84 });
