@@ -1,3 +1,4 @@
+import { GAME_CONFIG } from "../config/gameConfig.js";
 export class UIManager {
   constructor(engine) {
     this.engine = engine;
@@ -60,7 +61,7 @@ export class UIManager {
     }
     if (this.risk) {
       const risk = engine.score.riskChain || 0;
-      const target = engine.constructor ? 3 : 3;
+      const target = GAME_CONFIG.riskChainTarget || 3;
       this.risk.textContent = "RISK " + risk + "/" + target;
       this.risk.classList.toggle("active", risk > 0);
     }
