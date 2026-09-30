@@ -135,6 +135,8 @@ export class CityManager {
       drone.position.set((i % 2 ? 1 : -1) * (10 + Math.random() * 28), 8 + Math.random() * 28, -30 - i * 55);
       drone.userData.phase = Math.random() * Math.PI * 2;
       drone.userData.speed = 0.7 + Math.random() * 0.8;
+      drone.userData.baseX = drone.position.x;
+      drone.userData.baseY = drone.position.y;
       this.scene.add(drone); this.drones.push(drone);
     }
 
@@ -235,11 +237,12 @@ export class CityManager {
     for (const drone of this.drones) {
       drone.position.z += speed * droneBoost * drone.userData.speed * dt * 60;
       const wave = Math.sin(t * (1.4 + phase * 0.12) + drone.userData.phase);
-      drone.position.y += wave * 0.012 * dt * 60;
-      drone.position.x += Math.cos(t * 0.7 + drone.userData.phase) * (0.012 + phase * 0.004) * dt * 60;
+      drone.position.y = drone.userData.baseY + wave * 0.7;
+      drone.position.x = drone.userData.baseX + Math.cos(t * 0.7 + drone.userData.phase) * (0.7 + phase * 0.22);
       if (drone.position.z > 15) {
         drone.position.z -= 470;
         drone.position.x = (Math.random() > 0.5 ? 1 : -1) * (10 + Math.random() * 28);
+        drone.userData.baseX = drone.position.x;
       }
       drone.rotation.z = wave * 0.08;
       drone.rotation.y = Math.cos(t * 1.1 + drone.userData.phase) * 0.06;
