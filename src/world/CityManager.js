@@ -74,8 +74,8 @@ function hologramTexture(label, accent) {
   canvas.width = 1024; canvas.height = 512;
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, 512, 256);
-  ctx.strokeStyle = accent; ctx.shadowColor = accent; ctx.shadowBlur = 18; ctx.lineWidth = 5;
-  ctx.strokeRect(10, 10, 492, 236);
+  ctx.strokeStyle = accent; ctx.shadowColor = accent; ctx.shadowBlur = 28; ctx.lineWidth = 5;
+  ctx.strokeRect(20, 20, 984, 472);
   ctx.font = "900 76px Orbitron, monospace"; ctx.textAlign = "center";
   ctx.fillStyle = "#ffffff"; ctx.fillText(label, 512, 222);
   ctx.font = "700 30px monospace"; ctx.fillStyle = accent;
