@@ -500,6 +500,22 @@ export class GameEngine {
       g.add(fin);
     }
 
+    const armorPlate = new THREE.Mesh(
+      new THREE.BoxGeometry(elite ? 1.25 : 0.95, 0.11, elite ? 0.5 : 0.4),
+      bodyMat,
+    );
+    armorPlate.position.set(0, 0.16, -0.08);
+    armorPlate.rotation.x = elite ? -0.12 : -0.08;
+    g.add(armorPlate);
+
+    const sensorCollar = new THREE.Mesh(
+      new THREE.TorusGeometry(elite ? 0.27 : 0.22, 0.035, 6, 12),
+      glowMat,
+    );
+    sensorCollar.rotation.y = Math.PI / 2;
+    sensorCollar.position.z = -size * 1.02;
+    g.add(sensorCollar);
+
     const edge = new THREE.Mesh(
       new THREE.BoxGeometry(elite ? 1.8 : 1.35, 0.055, 0.06),
       glowMat,
