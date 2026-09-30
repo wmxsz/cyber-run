@@ -28,6 +28,8 @@ function makeBonusCore() {
   const core = g.children[0];
   const shell = g.children[1];
   const halo = g.children[2];
+  core.geometry.dispose();
+  core.geometry = new THREE.IcosahedronGeometry(0.58, 0);
   core.material = new THREE.MeshStandardMaterial({ color: COLORS.orange, emissive: COLORS.orange, emissiveIntensity: 1.9, metalness: 0.92, roughness: 0.08 });
   shell.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.48 });
   halo.material = new THREE.MeshBasicMaterial({ color: COLORS.orange, transparent: true, opacity: 0.84 });
@@ -36,7 +38,7 @@ function makeBonusCore() {
 function makeHackNode() {
   const g = new THREE.Group();
   const core = new THREE.Mesh(
-    new THREE.OctahedronGeometry(0.54, 1),
+    new THREE.TetrahedronGeometry(0.68, 0),
     new THREE.MeshStandardMaterial({ color: COLORS.violet, emissive: COLORS.violet, emissiveIntensity: 2.25, metalness: 0.82, roughness: 0.07 }),
   );
   const ring = new THREE.Mesh(
