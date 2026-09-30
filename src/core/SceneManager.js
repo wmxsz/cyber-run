@@ -70,7 +70,13 @@ export class SceneManager {
   update(dt) {
     this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this._baseX, Math.min(1, dt * 8));
 
-    const targetFov = (GAME_CONFIG.baseFov || 65) + this._speedFeel * ((GAME_CONFIG.boostFov || 78) - (GAME_CONFIG.baseFov || 65));
+    const baseFov = GAME_CONFIG.baseFov || 65;
+    const maxFov = Math.max(baseFov, GAME_CONFIG.boostFov || 78);
+    const targetFov = THREE.MathUtils.clamp(
+      baseFov + this._speedFeel * (maxFov - baseFov),
+      baseFov,
+      maxFov,
+    );
     this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFov, Math.min(1, dt * 5));
     this.camera.updateProjectionMatrix();
 
