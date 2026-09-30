@@ -73,6 +73,7 @@ export class ParticleSystem {
       p.position.set(x + (Math.random() - 0.5) * 2.2, y + (Math.random() - 0.5) * 0.45, z + (Math.random() - 0.5) * 0.8);
       p.rotation.set(0, 0, 0);
       p.scale.set(0.7 + Math.random() * 0.8, 0.7 + Math.random() * 0.5, length * (0.65 + Math.random() * 0.7));
+      p.userData.baseScaleZ = p.scale.z;
       p.userData.life = 0.34 + Math.random() * 0.12;
       p.userData.decay = 0.055;
       p.userData.vx = (Math.random() - 0.5) * 0.18;
@@ -150,7 +151,7 @@ export class ParticleSystem {
       } else if (p.geometry === this.shockwaveGeometry) {
         p.scale.setScalar((1 - p.userData.life) * p.userData.maxScale);
       } else if (p.geometry === this.streakGeometry) {
-        p.scale.z *= 0.965;
+        p.scale.z = p.userData.baseScaleZ * Math.max(0.05, p.userData.life / 0.45);
         p.scale.x *= 0.985;
         p.scale.y *= 0.985;
       } else {
