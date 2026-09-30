@@ -34,7 +34,20 @@ function makeBarrier() {
   core.position.y = 1.25;
   const lower = new THREE.Mesh(new THREE.BoxGeometry(2.65, 0.08, 0.08), new THREE.MeshBasicMaterial({ color: COLORS.orange }));
   lower.position.set(0, 0.98, 0);
-  g.add(beam, core, lower, disc(1.7, COLORS.red));
+  const braceGeo = new THREE.BoxGeometry(0.1, 1.45, 0.1);
+  for (const x of [-1.1, 1.1]) {
+    const brace = new THREE.Mesh(braceGeo, poleMat);
+    brace.position.set(x, 1.12, 0);
+    brace.rotation.z = x < 0 ? -0.38 : 0.38;
+    g.add(brace);
+  }
+  const centerHousing = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.24, 0.3, 0.32, 8),
+    poleMat,
+  );
+  centerHousing.rotation.x = Math.PI / 2;
+  centerHousing.position.set(0, 1.25, 0.25);
+  g.add(beam, core, lower, centerHousing, disc(1.7, COLORS.red));
   g.userData.pulse = beam;
   return g;
 }
@@ -176,7 +189,16 @@ function makePulseGate() {
     new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
   );
   topLink.position.y = 2.28;
-  g.add(outer, inner, core, topLink, disc(1.45, COLORS.cyan));
+  const sideCaps = new THREE.Group();
+  for (const x of [-1.38, 1.38]) {
+    const cap = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.18, 0),
+      new THREE.MeshBasicMaterial({ color: COLORS.pink }),
+    );
+    cap.position.set(x, 2.18, 0);
+    sideCaps.add(cap);
+  }
+  g.add(outer, inner, core, topLink, sideCaps, disc(1.45, COLORS.cyan));
   g.userData.ring = outer;
   g.userData.innerRing = inner;
   g.userData.pulse = core;
