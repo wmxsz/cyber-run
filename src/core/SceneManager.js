@@ -103,6 +103,7 @@ export class SceneManager {
       this._shake *= Math.pow(0.08, dt);
       this.camera.position.x += (Math.random() - 0.5) * this._shake;
       this.camera.position.y += (Math.random() - 0.5) * this._shake;
+      this.camera.position.z += (Math.random() - 0.5) * this._shake * 0.45;
       if (this._shake < 0.008) {
         this._shake = 0;
         this.camera.position.x = this._baseX;
@@ -119,7 +120,7 @@ export class SceneManager {
     this._shake = 0;
     this._speedFeel = 0;
     this._shakeBase.set(0, this._baseY, this._baseZ);
-    this.camera.position.set(0, 4.5, 7.5);
+    this.camera.position.set(0, this._baseY, this._baseZ);
     this.camera.fov = GAME_CONFIG.baseFov || 65;
     this.camera.updateProjectionMatrix();
     this._lastFov = this.camera.fov;
