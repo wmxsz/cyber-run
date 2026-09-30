@@ -12,9 +12,10 @@ export class ObstacleManager {
     );
   }
 
-  spawnRow(score) {
+  spawnRow(score, phase = 0) {
     const ramp = Math.min(1, score / GAME_CONFIG.spawnRampScore);
-    const count = Math.random() < 0.35 + ramp * 0.35 ? 2 : 1;
+    // Keep one guaranteed escape lane while making later sectors less predictable.
+    const count = phase >= 3 ? 2 : (Math.random() < 0.35 + ramp * 0.35 ? 2 : 1);
     const safeChoices = [this.lastSafeLane - 1, this.lastSafeLane, this.lastSafeLane + 1]
       .filter((lane) => lane >= 0 && lane <= 2);
     const safeLane = safeChoices[Math.floor(Math.random() * safeChoices.length)];
@@ -24,7 +25,14 @@ export class ObstacleManager {
     for (let i = 0; i < count; i++) {
       const lane = count === 2 ? candidates[i] : candidates[Math.floor(Math.random() * candidates.length)];
       const r = Math.random();
-      const type = r < 0.28 ? "barrier" : r < 0.48 ? "highLaser" : r < 0.73 ? "mine" : "block";
+      let type;
+      if (phase >= 4) {
+        type = r < 0.34 ? "mine" : r < 0.58 ? "highLaser" : r < 0.82 ? "barrier" : "block";
+      } else if (phase >= 2) {
+        type = r < 0.30 ? "barrier" : r < 0.55 ? "highLaser" : r < 0.78 ? "mine" : "block";
+      } else {
+        type = r < 0.28 ? "barrier" : r < 0.48 ? "highLaser" : r < 0.73 ? "mine" : "block";
+      }
       const obj = this.pools[type].acquire();
       obj.position.set(LANES[lane], 0, GAME_CONFIG.spawnZ);
       obj.rotation.set(0, 0, 0);

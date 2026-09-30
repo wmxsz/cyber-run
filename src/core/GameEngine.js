@@ -44,6 +44,7 @@ export class GameEngine {
     this.over = false;
     this.invulnerable = 0;
     this._elapsed = 0;
+    this._lastPhase = 0;
     this._exhaustTimer = 0;
     this._ui = null;
 
@@ -88,6 +89,7 @@ export class GameEngine {
     this.active = true;
     this.over = false;
     this._elapsed = 0;
+    this._lastPhase = 0;
 
     this._ui?.hideStart();
     this._ui?.hideGameOver();
@@ -122,8 +124,18 @@ export class GameEngine {
     }
 
     const spawn = this.difficulty.update(dt, this.score.score);
+    if (spawn.phase !== this._lastPhase) {
+      this._lastPhase = spawn.phase;
+      if (spawn.phase > 0) {
+        this.audio.playPowerup();
+        const p = this.player.group.position;
+        this.particles.burst(p.x, p.y + 0.5, p.z, 0x00f0ff, 18);
+        this._ui?.announce("SECTOR // " + spawn.phaseName);
+      }
+    }
+
     if (spawn.shouldSpawn) {
-      const occupied = this.obstacles.spawnRow(this.score.score);
+      const occupied = this.obstacles.spawnRow(this.score.score, spawn.phase);
       const safe = [0, 1, 2].filter((lane) => !occupied.includes(lane));
       this.pickups.spawn(safe);
       this.difficulty.armSpawn(spawn.interval);
