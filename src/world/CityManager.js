@@ -57,28 +57,47 @@ export class CityManager {
         emissive: COLORS.pink, emissiveIntensity: 0.045,
       }),
     };
+    const buildingInstances = {
+      left: new THREE.InstancedMesh(box, buildingMats.left, 70),
+      right: new THREE.InstancedMesh(box, buildingMats.right, 70),
+    };
+    const dummy = new THREE.Object3D();
+    const spireGeo = new THREE.CylinderGeometry(0.1, 0.6, 12, 4);
     const spireMats = {
       cyan: new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
       pink: new THREE.MeshBasicMaterial({ color: COLORS.pink }),
     };
+    let leftCount = 0;
+    let rightCount = 0;
     for (let i = 0; i < 70; i++) {
       const left = Math.random() > 0.5;
       const x = (left ? -1 : 1) * (12 + Math.random() * 35);
       const z = -Math.random() * 480;
       const w = 8 + Math.random() * 12, d = 8 + Math.random() * 12, h = 25 + Math.random() * 70;
-      const b = new THREE.Mesh(box, left ? buildingMats.left : buildingMats.right);
-      b.scale.set(w, h, d); b.position.set(x, h / 2, z);
-      b.castShadow = false; b.receiveShadow = false;
-      this.scene.add(b); this.buildings.push(b);
+      const mesh = left ? buildingInstances.left : buildingInstances.right;
+      const index = left ? leftCount++ : rightCount++;
+      dummy.position.set(x, h / 2, z);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(w, h, d);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(index, dummy.matrix);
       if (Math.random() > 0.4) {
         const spireColor = Math.random() > 0.5 ? "cyan" : "pink";
-        const spire = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.1, 0.6, 12, 4),
-          spireMats[spireColor],
-        );
+        const spire = new THREE.Mesh(spireGeo, spireMats[spireColor]);
         spire.position.set(x, h + 6, z);
-        this.scene.add(spire); this.buildings.push(spire);
+        spire.castShadow = false;
+        spire.receiveShadow = false;
+        this.scene.add(spire);
+        this.buildings.push(spire);
       }
+    }
+    for (const [key, mesh] of Object.entries(buildingInstances)) {
+      mesh.count = key === "left" ? leftCount : rightCount;
+      mesh.instanceMatrix.needsUpdate = true;
+      mesh.castShadow = false;
+      mesh.receiveShadow = false;
+      this.scene.add(mesh);
+      this.buildings.push(mesh);
     }
 
     const signs = [
