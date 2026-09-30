@@ -28,6 +28,7 @@ export class UIManager {
     this.eventPanel = this._el("event-status");
     this.multiplier = this._el("hud-multiplier");
     this.risk = this._el("hud-risk");
+    this.ghost = this._el("hud-ghost");
     this.laneThreats = [0, 1, 2].map((lane) => this._el(`lane-threat-${lane}`));
 
     this._setHighScore();
@@ -64,6 +65,17 @@ export class UIManager {
       const target = GAME_CONFIG.riskChainTarget || 3;
       this.risk.textContent = "RISK " + risk + "/" + target;
       this.risk.classList.toggle("active", risk > 0);
+    }
+    if (this.ghost) {
+      const nodes = engine._hackNodes || 0;
+      const target = GAME_CONFIG.ghostProtocolTarget || 3;
+      if (engine._ghostTime > 0) {
+        this.ghost.textContent = "GHOST " + engine._ghostTime.toFixed(1) + "s";
+        this.ghost.classList.add("active");
+      } else {
+        this.ghost.textContent = "HACK " + nodes + "/" + target;
+        this.ghost.classList.toggle("active", nodes > 0);
+      }
     }
     if (this.multiplier) {
       const multiplier = Number(engine.score.eventMultiplier || 1);
