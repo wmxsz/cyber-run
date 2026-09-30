@@ -87,6 +87,7 @@ export class GameEngine {
 
     this.obstacles.clear();
     this.pickups.clear();
+    if (this._hunter) this.scene.remove(this._hunter);
     this.particles.clear?.();
 
     this.score.reset();
