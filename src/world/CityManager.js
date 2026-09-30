@@ -3,11 +3,9 @@ import { COLORS } from "../config/gameConfig.js";
 
 function buildingTexture() {
   const canvas = document.createElement("canvas");
-  canvas.width = 256;
-  canvas.height = 512;
+  canvas.width = 256; canvas.height = 512;
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#09071b";
-  ctx.fillRect(0, 0, 256, 512);
+  ctx.fillStyle = "#09071b"; ctx.fillRect(0, 0, 256, 512);
   const colors = ["#00f0ff", "#ff0077", "#ffe600", "#221133", "#110d29"];
   for (let y = 16; y < 500; y += 24) {
     for (let x = 16; x < 240; x += 20) {
@@ -22,21 +20,14 @@ function buildingTexture() {
 
 function hologramTexture(label, accent) {
   const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 256;
+  canvas.width = 512; canvas.height = 256;
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, 512, 256);
-  ctx.strokeStyle = accent;
-  ctx.shadowColor = accent;
-  ctx.shadowBlur = 18;
-  ctx.lineWidth = 5;
+  ctx.strokeStyle = accent; ctx.shadowColor = accent; ctx.shadowBlur = 18; ctx.lineWidth = 5;
   ctx.strokeRect(10, 10, 492, 236);
-  ctx.font = "900 42px Orbitron, monospace";
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText(label, 256, 112);
-  ctx.font = "700 18px monospace";
-  ctx.fillStyle = accent;
+  ctx.font = "900 42px Orbitron, monospace"; ctx.textAlign = "center";
+  ctx.fillStyle = "#ffffff"; ctx.fillText(label, 256, 112);
+  ctx.font = "700 18px monospace"; ctx.fillStyle = accent;
   ctx.fillText("NEURAL // CITY NETWORK", 256, 154);
   ctx.fillText("LINK ESTABLISHED", 256, 185);
   return new THREE.CanvasTexture(canvas);
@@ -55,50 +46,31 @@ export class CityManager {
   _build() {
     const tex = buildingTexture();
     const box = new THREE.BoxGeometry(1, 1, 1);
-
     for (let i = 0; i < 70; i++) {
       const left = Math.random() > 0.5;
       const x = (left ? -1 : 1) * (12 + Math.random() * 35);
       const z = -Math.random() * 480;
-      const w = 8 + Math.random() * 12;
-      const d = 8 + Math.random() * 12;
-      const h = 25 + Math.random() * 70;
-      const b = new THREE.Mesh(
-        box,
-        new THREE.MeshStandardMaterial({
-          map: tex,
-          roughness: 0.3,
-          metalness: 0.7,
-          emissive: left ? COLORS.cyan : COLORS.pink,
-          emissiveIntensity: 0.045,
-        }),
-      );
-      b.scale.set(w, h, d);
-      b.position.set(x, h / 2, z);
-      b.castShadow = true;
-      b.receiveShadow = true;
-      this.scene.add(b);
-      this.buildings.push(b);
-
+      const w = 8 + Math.random() * 12, d = 8 + Math.random() * 12, h = 25 + Math.random() * 70;
+      const b = new THREE.Mesh(box, new THREE.MeshStandardMaterial({
+        map: tex, roughness: 0.3, metalness: 0.7,
+        emissive: left ? COLORS.cyan : COLORS.pink, emissiveIntensity: 0.045,
+      }));
+      b.scale.set(w, h, d); b.position.set(x, h / 2, z);
+      b.castShadow = true; b.receiveShadow = true;
+      this.scene.add(b); this.buildings.push(b);
       if (Math.random() > 0.4) {
         const spire = new THREE.Mesh(
           new THREE.CylinderGeometry(0.1, 0.6, 12, 4),
           new THREE.MeshBasicMaterial({ color: Math.random() > 0.5 ? COLORS.cyan : COLORS.pink }),
         );
         spire.position.set(x, h + 6, z);
-        this.scene.add(spire);
-        this.buildings.push(spire);
+        this.scene.add(spire); this.buildings.push(spire);
       }
     }
 
-    // Floating holographic advertisements give the skyline a distinctly futuristic identity.
     const signs = [
-      ["NOVA", COLORS.cyan],
-      ["SYNTH", COLORS.pink],
-      ["AETHER", COLORS.yellow],
-      ["QUANTA", COLORS.green],
-      ["NEXUS", COLORS.cyan],
-      ["VOID", COLORS.pink],
+      ["NOVA", COLORS.cyan], ["SYNTH", COLORS.pink], ["AETHER", COLORS.yellow],
+      ["QUANTA", COLORS.green], ["NEXUS", COLORS.cyan], ["VOID", COLORS.pink],
     ];
     signs.forEach(([label, color], i) => {
       const side = i % 2 === 0 ? -1 : 1;
@@ -106,21 +78,15 @@ export class CityManager {
         new THREE.PlaneGeometry(7, 3.5),
         new THREE.MeshBasicMaterial({
           map: hologramTexture(label, "#" + color.toString(16).padStart(6, "0")),
-          transparent: true,
-          opacity: 0.72,
-          side: THREE.DoubleSide,
-          depthWrite: false,
+          transparent: true, opacity: 0.72, side: THREE.DoubleSide, depthWrite: false,
         }),
       );
       panel.position.set(side * (15 + (i % 3) * 4), 10 + (i % 3) * 5, -70 - i * 62);
       panel.rotation.y = side < 0 ? -Math.PI / 2 : Math.PI / 2;
-      panel.userData.baseY = panel.position.y;
-      panel.userData.phase = i * 0.9;
-      this.scene.add(panel);
-      this.holograms.push(panel);
-    });
+      panel.userData.baseY = panel.position.y; panel.userData.phase = i * 0.9;
+      this.scene.add(panel); this.holograms.push(panel);
+    }
 
-    // Small autonomous traffic drones add motion outside the main road.
     for (let i = 0; i < 8; i++) {
       const drone = new THREE.Group();
       const body = new THREE.Mesh(
@@ -132,39 +98,30 @@ export class CityManager {
         new THREE.BoxGeometry(1.2, 0.08, 0.08),
         new THREE.MeshBasicMaterial({ color: i % 2 ? COLORS.pink : COLORS.cyan }),
       );
-      light.position.y = -0.05;
-      drone.add(light);
+      light.position.y = -0.05; drone.add(light);
       drone.position.set((i % 2 ? 1 : -1) * (10 + Math.random() * 28), 8 + Math.random() * 28, -30 - i * 55);
       drone.userData.phase = Math.random() * Math.PI * 2;
       drone.userData.speed = 0.7 + Math.random() * 0.8;
-      this.scene.add(drone);
-      this.drones.push(drone);
+      this.scene.add(drone); this.drones.push(drone);
     }
 
     const sun = new THREE.Mesh(
       new THREE.CircleGeometry(45, 32),
       new THREE.MeshBasicMaterial({ color: 0xff0055, fog: false }),
     );
-    sun.position.set(0, 30, -320);
-    this.scene.add(sun);
+    sun.position.set(0, 30, -320); this.scene.add(sun);
 
     const ring = new THREE.Mesh(
       new THREE.TorusGeometry(55, 1.2, 16, 64),
       new THREE.MeshBasicMaterial({ color: COLORS.cyan, wireframe: true, fog: false }),
     );
-    ring.position.set(0, 30, -315);
-    ring.rotation.x = Math.PI / 4;
-    this.scene.add(ring);
-    this.sunRing = ring;
+    ring.position.set(0, 30, -315); ring.rotation.x = Math.PI / 4;
+    this.scene.add(ring); this.sunRing = ring;
 
     const count = 260;
-    const positions = new Float32Array(count * 6);
-    const colors = new Float32Array(count * 6);
+    const positions = new Float32Array(count * 6), colors = new Float32Array(count * 6);
     for (let i = 0; i < count; i++) {
-      const x = (Math.random() - 0.5) * 50;
-      const y = Math.random() * 25 + 0.5;
-      const z = -Math.random() * 400;
-      const len = 4 + Math.random() * 8;
+      const x = (Math.random() - 0.5) * 50, y = Math.random() * 25 + 0.5, z = -Math.random() * 400, len = 4 + Math.random() * 8;
       const a = i * 6;
       positions[a] = x; positions[a + 1] = y; positions[a + 2] = z;
       positions[a + 3] = x; positions[a + 4] = y; positions[a + 5] = z + len;
@@ -179,8 +136,7 @@ export class CityManager {
     geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     this.speedLines = new THREE.LineSegments(
-      geo,
-      new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.4 }),
+      geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.4 }),
     );
     this.scene.add(this.speedLines);
   }
@@ -189,17 +145,14 @@ export class CityManager {
     const positions = this.speedLines?.geometry.attributes.position.array;
     if (positions) {
       for (let i = 2; i < positions.length; i += 6) {
-        positions[i] += speed * 2.8;
-        positions[i + 3] += speed * 2.8;
+        positions[i] += speed * 2.8; positions[i + 3] += speed * 2.8;
         if (positions[i] > 10) {
           const z = -380 - Math.random() * 40;
-          positions[i] = z;
-          positions[i + 3] = z + 8;
+          positions[i] = z; positions[i + 3] = z + 8;
         }
       }
       this.speedLines.geometry.attributes.position.needsUpdate = true;
     }
-
     const t = performance.now() * 0.001;
     for (const panel of this.holograms) {
       panel.position.y = panel.userData.baseY + Math.sin(t * 2 + panel.userData.phase) * 0.12;
