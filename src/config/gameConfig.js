@@ -36,6 +36,8 @@ export const GAME_CONFIG = {
   maxBoostEnergy: 100,
   boostDrain: 45,
   boostSpeedMultiplier: 1.45,
+  boostFov: 78,
+  baseFov: 65,
   phaseThresholds: [0, 1400, 3600, 7200, 12000],
   eventMultiplierCap: 2.25,
   dataStormMultiplier: 1.5,
@@ -46,6 +48,9 @@ export const GAME_CONFIG = {
   eliteHunterLaneInterval: 0.62,
   eliteHunterGap: 5.2,
   phaseNames: ["NIGHT CITY", "NEON DISTRICT", "SYNTH GRID", "QUANTUM CORE", "CYBER NEXUS"],
+  phaseSpawnDensity: [1, 0.96, 0.9, 0.84, 0.78],
+  phaseStormChance: [0, 0.12, 0.2, 0.28, 0.34],
+  phaseHunterGap: [3.8, 3.8, 3.8, 4.5, 5.2],
 };
 
 export const COLORS = {
