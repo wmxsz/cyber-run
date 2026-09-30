@@ -711,35 +711,25 @@ export class GameEngine {
     this.player.dispose?.();
     this.road.dispose?.();
     this.city.dispose?.();
-    this._hunterNormalModel?.traverse?.((node) => {
+    const hunterGeometries = new Set();
+    const hunterMaterials = new Set();
+    const collectHunterResources = (root) => root?.traverse?.((node) => {
       if (!node.isMesh) return;
-      node.geometry?.dispose?.();
-      const material = node.material;
-      if (Array.isArray(material)) material.forEach((m) => m?.dispose?.());
-      else material?.dispose?.();
+      if (node.geometry) hunterGeometries.add(node.geometry);
+      const materials = Array.isArray(node.material) ? node.material : [node.material];
+      materials.forEach((material) => material && hunterMaterials.add(material));
     });
-    this._hunterEliteModel?.traverse?.((node) => {
-      if (!node.isMesh) return;
-      node.geometry?.dispose?.();
-      const material = node.material;
-      if (Array.isArray(material)) material.forEach((m) => m?.dispose?.());
-      else material?.dispose?.();
-    });
-    this._hunterNormalModel = null;
-    this._hunterEliteModel = null;
+    collectHunterResources(this._hunterNormalModel);
+    collectHunterResources(this._hunterEliteModel);
     if (this._hunterResources) {
-      for (const template of this._hunterResources.values()) {
-        template.traverse((node) => {
-          if (node.geometry) node.geometry.dispose();
-          if (node.material) {
-            if (Array.isArray(node.material)) node.material.forEach((m) => m?.dispose?.());
-            else node.material.dispose();
-          }
-        });
-      }
+      for (const template of this._hunterResources.values()) collectHunterResources(template);
       this._hunterResources.clear();
       this._hunterResources = null;
     }
+    hunterGeometries.forEach((geometry) => geometry.dispose());
+    hunterMaterials.forEach((material) => material.dispose());
+    this._hunterNormalModel = null;
+    this._hunterEliteModel = null;
     this.performance.dispose();
     this.sceneMgr.dispose();
   }
