@@ -43,7 +43,11 @@ export class UIManager {
 
   update(engine) {
     if (this.score) this.score.textContent = String(Math.floor(engine.score.score)).padStart(5, "0");
-    if (this.speed) this.speed.textContent = String(Math.floor(140 + engine.difficulty.speed * 60));
+    if (this.speed) {
+      const displaySpeed = Math.floor(140 + engine.difficulty.speed * 60 + (engine.boosting ? 35 : 0));
+      this.speed.textContent = String(displaySpeed);
+      this.speed.classList.toggle("overdrive", engine.boosting);
+    }
     if (this.shield) this.shield.classList.toggle("visible", engine.hasShield);
     if (this.boost) this.boost.style.width = `${engine.boostEnergy}%`;
     if (this.combo) this.combo.textContent = engine.score.combo > 1 ? `x${Math.min(5, 1 + Math.floor(engine.score.combo / 4))} COMBO` : (engine.score.combo === 1 ? "CHAIN 1" : "COMBO READY");
@@ -55,9 +59,11 @@ export class UIManager {
     if (this.pauseButton) this.pauseButton.textContent = engine.paused ? "▶" : "Ⅱ";
     if (this.phase) this.phase.textContent = engine.difficulty.phaseName || "NIGHT CITY";
     if (this.eventPanel) {
+      this.eventPanel.classList.toggle("elite", engine._hunterElite && engine._hunterTime > 0);
       if (engine._hunterTime > 0 && engine._eventTime > 0) this.eventPanel.textContent = (engine._hunterElite ? "PURSUER" : "HUNTER") + " // EVADE // STORM x" + GAME_CONFIG.dataStormMultiplier.toFixed(2);
       else if (engine._hunterTime > 0) this.eventPanel.textContent = (engine._hunterElite ? "PURSUER" : "HUNTER") + " // EVADE // x" + GAME_CONFIG.hunterMultiplier.toFixed(2);
       else if (engine._eventTime > 0) this.eventPanel.textContent = "DATA STORM // x" + GAME_CONFIG.dataStormMultiplier.toFixed(2);
+      else if (engine.difficulty.phase >= 3) this.eventPanel.textContent = "SECTOR SURGE // THREAT DENSITY HIGH";
       else this.eventPanel.textContent = "";
     }
     if (this.risk) {
@@ -105,6 +111,7 @@ export class UIManager {
       const label = danger ? (hit.type === "highLaser" ? "SLIDE" : hit.type === "barrier" ? "JUMP" : "CHANGE") : "SAFE";
       const b = el.querySelector("b");
       if (b) b.textContent = label;
+      el.classList.toggle("elite", Boolean(hit && (hit.type === "pulseGate" || hit.type === "mine") && engine.difficulty.phase >= 4));
     });
   }
 
