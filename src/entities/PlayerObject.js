@@ -37,7 +37,14 @@ export class PlayerObject {
     this.helmet=add(new THREE.SphereGeometry(.37,12,8),dark,0,2.37,0,.98,1.04,.86);
     this.visor=add(new THREE.BoxGeometry(.48,.12,.08),visor,0,2.39,-.31);
     add(new THREE.BoxGeometry(.37,.025,.025),glow,0,2.39,-.36);
+    this.neuralLine = add(new THREE.BoxGeometry(.025,.28,.025),pglow,0.27,2.12,-.31);
+    this.chestCore = new THREE.Mesh(new THREE.TorusGeometry(.16,.035,8,24),new THREE.MeshBasicMaterial({color:COLORS.cyan,transparent:true,opacity:.86}));
+    this.chestCore.rotation.x=Math.PI/2;
+    this.chestCore.position.set(0,1.48,-.53);
+    this.group.add(this.chestCore);
+    this.chestCoreInner = add(new THREE.SphereGeometry(.08,10,8),cyan,0,1.48,-.55);
 
+    this.armBlades=[];
     this.armParts=[]; for(const side of [-1,1]){
       const accent=side<0?cyan:pink;
       const shoulder=add(new THREE.SphereGeometry(.25,8,6),armor,side*.58,1.74,0,1.15,.82,1);
@@ -46,6 +53,9 @@ export class PlayerObject {
       const lower=add(new THREE.CapsuleGeometry(.12,.42,4,7),armor,side*.75,.88,-.06);
       const hand=add(new THREE.SphereGeometry(.13,8,6),skin,side*.74,.6,-.1,.82,1.15,.82);
       const strip=add(new THREE.BoxGeometry(.045,.42,.035),accent,side*.88,1.02,-.14);
+      const blade=add(new THREE.BoxGeometry(.045,.3,.07),accent,side*.91,.82,-.23);
+      blade.rotation.z=side*.12;
+      this.armBlades.push(blade);
       this.armParts.push({shoulder,upper,elbow,lower,hand,strip,side});
     }
 
@@ -161,6 +171,11 @@ export class PlayerObject {
       1 - Math.pow(1 - 0.2, dt * 60),
     );
 
+    this.chestCore.rotation.z += dt * (this.boosting ? 7 : 2.2);
+    this.chestCore.material.opacity = this.boosting ? 1 : 0.72 + Math.sin(elapsed * 8) * 0.12;
+    this.chestCoreInner.material.emissiveIntensity = this.boosting ? 3.6 : 2.1;
+    this.neuralLine.material.emissiveIntensity = this.boosting ? 3.2 : 1.8;
+    for (const blade of this.armBlades) blade.scale.y = this.boosting ? 1.2 + Math.sin(elapsed * 18) * 0.12 : 1;
     this.energyHalo.rotation.z += dt * (this.boosting ? 8 : 2.8);
     this.energyHalo.scale.setScalar(1 + Math.sin(elapsed * (this.boosting ? 18 : 9)) * (this.boosting ? 0.1 : 0.045));
     this.energyHalo.material.opacity = (this.boosting ? 0.78 : 0.42) + Math.sin(elapsed * 10) * 0.1;
