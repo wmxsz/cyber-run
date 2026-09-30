@@ -39,6 +39,7 @@ export class UIManager {
     this._el("btn-start")?.addEventListener("click", () => this.engine.startGame());
     this._el("btn-restart")?.addEventListener("click", () => this.engine.startGame());
     this._el("btn-resume")?.addEventListener("click", () => this.engine.togglePause());
+    // Pause is owned by InputManager's pointerdown binding; don't add a second click handler.
     this._el("btn-audio")?.addEventListener("click", () => {
       const muted = this.engine.audio.toggleMute();
       this.setMuted(muted);
