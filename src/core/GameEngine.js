@@ -705,6 +705,7 @@ export class GameEngine {
     document.removeEventListener("visibilitychange", this._onVisibilityChange);
     this.input.dispose();
     this.audio.dispose();
+    this._ui?.dispose?.();
     this.obstacles.dispose?.();
     this.pickups.dispose?.();
     this.particles.dispose?.();
