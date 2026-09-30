@@ -18,15 +18,17 @@ export class PlayerObject {
 
   _build() {
     const hullMat = new THREE.MeshStandardMaterial({
-      color: 0x0b1022,
-      metalness: 0.92,
-      roughness: 0.18,
+      color: 0x111a33,
+      metalness: 0.94,
+      roughness: 0.15,
+      emissive: 0x07112d,
+      emissiveIntensity: 0.28,
       flatShading: true,
     });
     const darkMat = new THREE.MeshStandardMaterial({
-      color: 0x070a14,
-      metalness: 0.82,
-      roughness: 0.24,
+      color: 0x050914,
+      metalness: 0.88,
+      roughness: 0.2,
       flatShading: true,
     });
     const cyanMat = new THREE.MeshBasicMaterial({ color: COLORS.cyan });
@@ -85,6 +87,31 @@ export class PlayerObject {
       this.group.add(armorLight);
     }
 
+    // High-contrast canopy and side blades make the craft read clearly on small screens.
+    const canopyRailGeo = new THREE.BoxGeometry(0.08, 0.08, 0.92);
+    for (const x of [-0.34, 0.34]) {
+      const rail = new THREE.Mesh(canopyRailGeo, x < 0 ? cyanMat : pinkMat);
+      rail.position.set(x, 0.9, -0.38);
+      rail.rotation.y = x < 0 ? -0.12 : 0.12;
+      this.group.add(rail);
+    }
+
+    const sideBladeGeo = new THREE.BoxGeometry(0.12, 0.08, 1.18);
+    for (const x of [-1.42, 1.42]) {
+      const blade = new THREE.Mesh(sideBladeGeo, darkMat);
+      blade.position.set(x, 0.48, -0.18);
+      blade.rotation.y = x < 0 ? -0.16 : 0.16;
+      blade.rotation.z = x < 0 ? -0.12 : 0.12;
+      this.group.add(blade);
+      const bladeEdge = new THREE.Mesh(
+        new THREE.BoxGeometry(0.035, 0.035, 0.86),
+        x < 0 ? cyanMat : pinkMat,
+      );
+      bladeEdge.position.set(x * 1.01, 0.54, -0.25);
+      bladeEdge.rotation.y = x < 0 ? -0.16 : 0.16;
+      this.group.add(bladeEdge);
+    }
+
     const cockpitFrame = new THREE.Mesh(
       new THREE.TorusGeometry(0.5, 0.045, 6, 16),
       cyanMat,
@@ -113,7 +140,7 @@ export class PlayerObject {
 
     const enginePodGeo = new THREE.CylinderGeometry(0.28, 0.38, 0.72, 8);
     const engineGeo = new THREE.CylinderGeometry(0.2, 0.3, 0.46, 8);
-    const engineMat = new THREE.MeshBasicMaterial({ color: COLORS.cyan });
+    const engineMat = new THREE.MeshStandardMaterial({ color: COLORS.cyan, emissive: COLORS.cyan, emissiveIntensity: 1.8, metalness: 0.2, roughness: 0.12 });
     for (const x of [-0.58, 0.58]) {
       const pod = new THREE.Mesh(enginePodGeo, darkMat);
       pod.rotation.x = Math.PI / 2;
@@ -182,13 +209,13 @@ export class PlayerObject {
       this.group.add(collar);
     }
 
-    this.thrusterLight = new THREE.PointLight(COLORS.cyan, 2, 8);
+    this.thrusterLight = new THREE.PointLight(COLORS.cyan, 2.6, 9);
     this.thrusterLight.position.set(0, 0.5, 2);
     this.group.add(this.thrusterLight);
 
     this.hoverRing = new THREE.Mesh(
       new THREE.TorusGeometry(1.38, 0.045, 8, 32),
-      new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.8 }),
+      new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.72 }),
     );
     this.hoverRing.rotation.x = Math.PI / 2;
     this.hoverRing.position.y = 0.12;
