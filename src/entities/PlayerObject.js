@@ -46,9 +46,9 @@ export class PlayerObject {
     nose.castShadow = true;
     this.group.add(nose);
 
-    const wings = new THREE.Mesh(new THREE.BoxGeometry(3.35, 0.12, 1.15), darkMat);
+    const wings = new THREE.Mesh(new THREE.BoxGeometry(3.35, 0.12, 0.82), darkMat);
     wings.position.set(0, 0.42, 0.35);
-    wings.rotation.z = Math.PI / 2;
+    wings.rotation.z = 0;
     wings.scale.x = 0.92;
     this.group.add(wings);
     this.wings = wings;
@@ -68,6 +68,15 @@ export class PlayerObject {
       trim.rotation.y = x < 0 ? -0.04 : 0.04;
       this.group.add(trim);
     }
+
+    const cockpitFrame = new THREE.Mesh(
+      new THREE.TorusGeometry(0.5, 0.045, 6, 16),
+      cyanMat,
+    );
+    cockpitFrame.scale.set(0.92, 0.58, 1.45);
+    cockpitFrame.rotation.x = Math.PI / 2;
+    cockpitFrame.position.set(0, 0.79, -0.28);
+    this.group.add(cockpitFrame);
 
     const cockpit = new THREE.Mesh(
       new THREE.SphereGeometry(0.48, 10, 8),
