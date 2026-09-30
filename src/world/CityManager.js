@@ -83,6 +83,11 @@ export class CityManager {
       left: new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
       right: new THREE.MeshBasicMaterial({ color: COLORS.pink }),
     };
+    const rooftopCoreGeo = new THREE.OctahedronGeometry(0.42, 0);
+    const rooftopCoreMats = {
+      left: new THREE.MeshBasicMaterial({ color: COLORS.yellow }),
+      right: new THREE.MeshBasicMaterial({ color: COLORS.yellow }),
+    };
     const rooftopCrests = {
       left: new THREE.InstancedMesh(crownGeo, crownMats.left, 36),
       right: new THREE.InstancedMesh(crownGeo, crownMats.right, 36),
@@ -95,6 +100,10 @@ export class CityManager {
     const rooftopAntennas = {
       left: new THREE.InstancedMesh(antennaGeo, antennaMats.left, 36),
       right: new THREE.InstancedMesh(antennaGeo, antennaMats.right, 36),
+    };
+    const rooftopCores = {
+      left: new THREE.InstancedMesh(rooftopCoreGeo, rooftopCoreMats.left, 36),
+      right: new THREE.InstancedMesh(rooftopCoreGeo, rooftopCoreMats.right, 36),
     };
     const dummy = new THREE.Object3D();
     const buildingCounts = { leftblock: 0, lefthex: 0, leftcrown: 0, rightblock: 0, righthex: 0, rightcrown: 0 };
@@ -133,6 +142,13 @@ export class CityManager {
         dummy.scale.set(Math.min(w * 0.72, 8), 1.4, Math.min(d * 0.72, 8));
         dummy.updateMatrix();
         crest.setMatrixAt(crestIndex, dummy.matrix);
+
+        const coreY = h + 1.35;
+        dummy.position.set(x, coreY, z);
+        dummy.rotation.set(0, Math.PI / 4, 0);
+        dummy.scale.setScalar(1);
+        dummy.updateMatrix();
+        (left ? rooftopCores.left : rooftopCores.right).setMatrixAt(crestIndex, dummy.matrix);
 
         dummy.position.set(x, h + 1.8 + Math.random() * 2.5, z);
         dummy.rotation.set(0, 0, 0);
@@ -208,8 +224,10 @@ export class CityManager {
       rooftopCrests[side].instanceMatrix.needsUpdate = true;
       rooftopAntennas[side].count = side === "left" ? leftCrestCount : rightCrestCount;
       rooftopAntennas[side].instanceMatrix.needsUpdate = true;
-      this.scene.add(rooftopCrests[side], rooftopAntennas[side]);
-      this.buildings.push(rooftopCrests[side], rooftopAntennas[side]);
+      rooftopCores[side].count = side === "left" ? leftCrestCount : rightCrestCount;
+      rooftopCores[side].instanceMatrix.needsUpdate = true;
+      this.scene.add(rooftopCrests[side], rooftopAntennas[side], rooftopCores[side]);
+      this.buildings.push(rooftopCrests[side], rooftopAntennas[side], rooftopCores[side]);
     }
 
     // Spires are anchored to real tower coordinates so skyline accents never float.
