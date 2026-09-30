@@ -1047,4 +1047,4 @@ import { createGridTexture, createBuildingTexture, createHazardTexture, createWa
     renderer.render(scene, camera);
   }
 
-  
+export { initThree, setupInputs, animate };
