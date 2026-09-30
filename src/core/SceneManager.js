@@ -13,7 +13,8 @@ export class SceneManager {
     });
     this._isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
     this._pixelRatioCap = this._isMobile ? 1.75 : 2;
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this._pixelRatioCap));
+    this._pixelRatio = Math.min(window.devicePixelRatio || 1, this._pixelRatioCap);
+    this.renderer.setPixelRatio(this._pixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setClearColor(COLORS.bg, 1);
     this.renderer.shadowMap.enabled = !this._isMobile;
@@ -24,6 +25,7 @@ export class SceneManager {
 
     this.scene = new THREE.Scene();
     this._composer = new EffectComposer(this.renderer);
+    this._composer.setPixelRatio(this._pixelRatio);
     this._renderPass = new RenderPass(this.scene, null);
     this._composer.addPass(this._renderPass);
     this._bloom = new UnrealBloomPass(
@@ -191,10 +193,12 @@ export class SceneManager {
     const h = window.innerHeight;
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
+    this._pixelRatio = Math.min(window.devicePixelRatio || 1, this._pixelRatioCap);
+    this.renderer.setPixelRatio(this._pixelRatio);
     this.renderer.setSize(w, h);
+    this._composer?.setPixelRatio(this._pixelRatio);
     this._composer?.setSize(w, h);
     this._bloom?.resolution.set(w, h);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this._pixelRatioCap));
     this._lastFov = this.camera.fov;
   }
 
