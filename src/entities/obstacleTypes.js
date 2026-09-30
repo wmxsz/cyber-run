@@ -230,7 +230,7 @@ export const OBSTACLE_TYPES = {
     hitCenterY: 1.25,
     update(obj, time) {
       obj.position.y = Math.sin(time * 8) * 0.04;
-      if (obj.userData.pulse) obj.userData.pulse.material.opacity = 0.7 + Math.sin(time * 10) * 0.25;
+      if (obj.userData.pulse) obj.userData.pulse.scale.x = 1 + Math.sin(time * 10) * 0.035;
     },
   },
   highLaser: {
@@ -243,7 +243,7 @@ export const OBSTACLE_TYPES = {
     hitCenterY: 2.45,
     update(obj, time) {
       obj.position.y = Math.sin(time * 5) * 0.03;
-      if (obj.userData.pulse) obj.userData.pulse.material.opacity = 0.55 + Math.sin(time * 12) * 0.4;
+      if (obj.userData.pulse) obj.userData.pulse.scale.x = 1 + Math.sin(time * 12) * 0.045;
     },
   },
   mine: {
@@ -269,7 +269,7 @@ export const OBSTACLE_TYPES = {
     blocksGround: true,
     update(obj, time) {
       obj.rotation.y = Math.sin(time * 2) * 0.04;
-      if (obj.userData.pulse) obj.userData.pulse.material.opacity = 0.55 + Math.sin(time * 9) * 0.35;
+      if (obj.userData.pulse) obj.userData.pulse.scale.x = 1 + Math.sin(time * 9) * 0.04;
     },
   },
 };
