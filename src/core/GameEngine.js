@@ -467,7 +467,10 @@ export class GameEngine {
   togglePause() {
     if (!this.active || this.over) return;
     this.paused = !this.paused;
-    if (this.paused) this.boosting = false;
+    if (this.paused) {
+      this.boosting = false;
+      this.player.setBoost(false);
+    }
     this._ui?.setPaused(this.paused);
     this._ui?.announce(this.paused ? "PAUSED" : "RESUMED");
   }
