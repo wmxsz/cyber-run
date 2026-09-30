@@ -1,24 +1,14 @@
-<!DOCTYPE html>
-<html lang="ko">
+<!doctype html>
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#05050f">
   <title>NEON OVERDRIVE 2099 - 3D Cyberpunk Runner</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-  <!-- Three.js CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-  <link rel="stylesheet" href="src/styles.css">
 </head>
 <body>
+  <canvas id="game-canvas"></canvas>
 
-  <!-- WebGL Canvas 렌더링 컨테이너 -->
-  <div id="webgl-container"></div>
-  <div class="scanlines"></div>
-
-  <!-- 인게임 HUD 오버레이 -->
   <div id="hud">
     <div class="hud-top">
       <div class="glass-panel">
@@ -31,14 +21,14 @@
         <div class="shield-badge" id="hud-shield">SHIELD ACTIVE</div>
       </div>
 
-      <div class="glass-panel" style="text-align: right;">
-        <div class="title-banner" style="justify-content: flex-end;">Score</div>
+      <div class="glass-panel" style="text-align:right;">
+        <div class="title-banner" style="justify-content:flex-end;">Score</div>
         <div class="stat-value" id="hud-score">00000</div>
-        <div style="font-size: 11px; color: #ff0077; font-weight: 700; letter-spacing: 1px;" id="hud-multiplier">x1.0 BOOST</div>
+        <div style="font-size:11px;color:#ff0077;font-weight:700;letter-spacing:1px;">CYBER BOOST</div>
       </div>
 
       <div class="hud-controls-top">
-        <button class="hud-btn" id="btn-audio" title="오디오 토글">
+        <button class="hud-btn" id="btn-audio" type="button" title="Audio toggle">
           <span id="audio-icon">🔊</span> AUDIO
         </button>
       </div>
@@ -49,93 +39,65 @@
     <div class="hud-bottom">
       <div class="glass-panel speed-gauge-wrap">
         <div class="title-banner">Velocity</div>
-        <div style="display: flex; align-items: baseline; gap: 6px;">
+        <div style="display:flex;align-items:baseline;gap:6px;">
           <div class="speed-number" id="hud-speed">160</div>
           <div class="speed-unit">KM/H</div>
         </div>
       </div>
 
-      <div class="glass-panel" style="text-align: right;">
-        <div class="title-banner" style="justify-content: flex-end;">High Score</div>
-        <div class="stat-value" style="font-size: 20px; color: #ff0077;" id="hud-highscore">00000</div>
+      <div class="glass-panel" style="text-align:right;">
+        <div class="title-banner" style="justify-content:flex-end;">High Score</div>
+        <div class="stat-value" style="font-size:20px;color:#ff0077;" id="hud-highscore">00000</div>
       </div>
     </div>
   </div>
 
-  <!-- 모바일 조작 가상 패드 -->
   <div id="mobile-controls">
     <div class="mobile-nav-group">
-      <div class="mobile-touch-btn" id="btn-left">◀</div>
-      <div class="mobile-touch-btn" id="btn-right">▶</div>
+      <button class="mobile-touch-btn" id="btn-left" type="button" aria-label="Move left">◀</button>
+      <button class="mobile-touch-btn" id="btn-right" type="button" aria-label="Move right">▶</button>
     </div>
-    <div class="mobile-touch-btn" id="btn-jump">▲</div>
+    <button class="mobile-touch-btn" id="btn-jump" type="button" aria-label="Jump">▲</button>
   </div>
 
-  <!-- 시작 모달 -->
   <div class="modal-overlay" id="start-modal">
     <div class="modal-card">
       <div class="game-logo">NEON OVERDRIVE</div>
       <div class="game-sub">Sector 2099 Cyber Highway</div>
       <p class="desc-text">
-        무한한 네온 사이버펑크 도시를 초광속으로 질주하세요!<br>
-        보안 장벽과 지뢰를 회피하고, 데이터 코어를 획득하여 최고 기록을 경신하세요.
+        在无尽霓虹公路上高速突进。换道躲避、跳跃越过激光，
+        收集能源核心并用护盾冲击更高纪录。
       </p>
 
       <div class="key-guide-grid">
-        <div class="key-item">
-          <span>차선 이동</span>
-          <span class="key-badge">A / D or ◀ ▶</span>
-        </div>
-        <div class="key-item">
-          <span>점프 부스트</span>
-          <span class="key-badge">W / SPACE / ▲</span>
-        </div>
-        <div class="key-item">
-          <span>에너지 코어</span>
-          <span style="color:#00f0ff; font-weight:700;">+100 PTS</span>
-        </div>
-        <div class="key-item">
-          <span>네온 쉴드</span>
-          <span style="color:#00ffaa; font-weight:700;">충돌 보호</span>
-        </div>
+        <div class="key-item"><span>换道</span><span class="key-badge">A / D / ◀ ▶</span></div>
+        <div class="key-item"><span>跳跃</span><span class="key-badge">W / SPACE / ▲</span></div>
+        <div class="key-item"><span>能源核心</span><span style="color:#00f0ff;font-weight:700;">+150 PTS</span></div>
+        <div class="key-item"><span>霓虹护盾</span><span style="color:#00ffaa;font-weight:700;">抵挡一次碰撞</span></div>
       </div>
 
-      <button class="primary-btn" id="btn-start">INITIALIZE RUN</button>
+      <button class="primary-btn" id="btn-start" type="button">INITIALIZE RUN</button>
     </div>
   </div>
 
-  <!-- 게임 오버 모달 -->
   <div class="modal-overlay hidden" id="gameover-modal">
     <div class="modal-card">
-      <div class="game-logo" style="background: linear-gradient(180deg, #fff 0%, #ff0055 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+      <div class="game-logo" style="background:linear-gradient(180deg,#fff 0%,#ff0055 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
         SYSTEM FAILURE
       </div>
       <div class="game-sub">Core Overheated & Wrecked</div>
 
       <div class="game-stats-grid">
-        <div class="stat-box">
-          <div class="stat-label">FINAL SCORE</div>
-          <div class="stat-num" id="go-score">0</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">DISTANCE TRAVELED</div>
-          <div class="stat-num" id="go-distance">0m</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">ENERGY CORES</div>
-          <div class="stat-num" id="go-cores">0</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">RECORD STATUS</div>
-          <div class="stat-num" id="go-record" style="font-size: 18px; color: #ffe600;">STANDBY</div>
-        </div>
+        <div class="stat-box"><div class="stat-label">FINAL SCORE</div><div class="stat-num" id="go-score">0</div></div>
+        <div class="stat-box"><div class="stat-label">DISTANCE TRAVELED</div><div class="stat-num" id="go-distance">0m</div></div>
+        <div class="stat-box"><div class="stat-label">ENERGY CORES</div><div class="stat-num" id="go-cores">0</div></div>
+        <div class="stat-box"><div class="stat-label">RECORD STATUS</div><div class="stat-num" id="go-record" style="font-size:18px;color:#ffe600;">STANDBY</div></div>
       </div>
 
-      <button class="primary-btn" id="btn-restart">REBOOT DRIVE</button>
+      <button class="primary-btn" id="btn-restart" type="button">REBOOT DRIVE</button>
     </div>
   </div>
 
-  <!-- 게임 엔진 스크립트 -->
-  <script type="module" src="src/main.js"></script>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>
