@@ -112,6 +112,7 @@ export class AudioManager {
   }
 
   pause() {
+    this.stopBgm();
     if (this.ctx?.state === "running") this.ctx.suspend().catch(() => {});
   }
 
@@ -145,5 +146,6 @@ export class AudioManager {
   dispose() {
     this.stopBgm();
     this.ctx?.close?.();
+    this.ctx = null;
   }
 }
