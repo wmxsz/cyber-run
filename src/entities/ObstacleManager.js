@@ -50,11 +50,19 @@ export class ObstacleManager {
       : phase >= 3
         ? (Math.random() < 0.82 ? 2 : 1)
         : (Math.random() < 0.35 + ramp * 0.35 ? 2 : 1);
-    const safeChoices = phase >= 4
-      ? [this.lastSafeLane, this.lastSafeLane - 1, this.lastSafeLane + 1]
-      : [this.lastSafeLane - 1, this.lastSafeLane, this.lastSafeLane + 1]
-      .filter((lane) => lane >= 0 && lane <= 2);
-    const safeLane = safeChoices[Math.floor(Math.random() * safeChoices.length)];
+    const safeChoices = [
+      this.lastSafeLane - 1,
+      this.lastSafeLane,
+      this.lastSafeLane + 1,
+    ].filter((lane) => lane >= 0 && lane <= 2);
+    if (phase >= 4) {
+      safeChoices.push(
+        ...[this.lastSafeLane - 2, this.lastSafeLane + 2]
+          .filter((lane) => lane >= 0 && lane <= 2),
+      );
+    }
+    const uniqueSafeChoices = [...new Set(safeChoices)];
+    const safeLane = uniqueSafeChoices[Math.floor(Math.random() * uniqueSafeChoices.length)];
     const candidates = [0, 1, 2].filter((lane) => lane !== safeLane);
     const placed = [];
 
