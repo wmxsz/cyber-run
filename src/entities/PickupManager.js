@@ -5,49 +5,66 @@ import { ObjectPool } from "../core/ObjectPool.js";
 function makeCore() {
   const g = new THREE.Group();
   const core = new THREE.Mesh(
-    new THREE.BoxGeometry(0.7, 0.7, 0.7),
-    new THREE.MeshStandardMaterial({ color: COLORS.cyan, emissive: COLORS.cyan, emissiveIntensity: 1.4, metalness: 0.9, roughness: 0.1 }),
+    new THREE.OctahedronGeometry(0.55, 1),
+    new THREE.MeshStandardMaterial({ color: COLORS.cyan, emissive: COLORS.cyan, emissiveIntensity: 1.45, metalness: 0.92, roughness: 0.08 }),
   );
+  const shell = new THREE.Mesh(
+    new THREE.BoxGeometry(0.72, 0.12, 0.72),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.42 }),
+  );
+  shell.rotation.y = Math.PI / 4;
   const halo = new THREE.Mesh(
-    new THREE.TorusGeometry(0.72, 0.07, 8, 24),
-    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.7 }),
+    new THREE.TorusGeometry(0.78, 0.06, 8, 24),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.72 }),
   );
   halo.rotation.x = Math.PI / 2;
-  g.add(core, halo);
+  g.add(core, shell, halo);
   g.userData.halo = halo;
+  g.userData.core = core;
   return g;
 }
 function makeBonusCore() {
   const g = makeCore();
   const core = g.children[0];
-  const halo = g.children[1];
-  core.material = new THREE.MeshStandardMaterial({ color: COLORS.orange, emissive: COLORS.orange, emissiveIntensity: 1.8, metalness: 0.9, roughness: 0.1 });
-  halo.material = new THREE.MeshBasicMaterial({ color: COLORS.orange, transparent: true, opacity: 0.82 });
+  const shell = g.children[1];
+  const halo = g.children[2];
+  core.material = new THREE.MeshStandardMaterial({ color: COLORS.orange, emissive: COLORS.orange, emissiveIntensity: 1.9, metalness: 0.92, roughness: 0.08 });
+  shell.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.48 });
+  halo.material = new THREE.MeshBasicMaterial({ color: COLORS.orange, transparent: true, opacity: 0.84 });
   return g;
 }
 function makeHackNode() {
   const g = new THREE.Group();
   const core = new THREE.Mesh(
-    new THREE.OctahedronGeometry(0.52),
-    new THREE.MeshStandardMaterial({ color: COLORS.violet, emissive: COLORS.violet, emissiveIntensity: 2.2, metalness: 0.8, roughness: 0.08 }),
+    new THREE.OctahedronGeometry(0.54, 1),
+    new THREE.MeshStandardMaterial({ color: COLORS.violet, emissive: COLORS.violet, emissiveIntensity: 2.25, metalness: 0.82, roughness: 0.07 }),
   );
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(0.86, 0.06, 8, 28),
-    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.85 }),
+    new THREE.TorusGeometry(0.9, 0.055, 8, 28),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.86 }),
+  );
+  const ring2 = new THREE.Mesh(
+    new THREE.TorusGeometry(0.66, 0.035, 6, 24),
+    new THREE.MeshBasicMaterial({ color: COLORS.pink, transparent: true, opacity: 0.65 }),
   );
   ring.rotation.x = Math.PI / 2;
-  g.add(core, ring);
+  ring2.rotation.y = Math.PI / 2;
+  g.add(core, ring, ring2);
   g.userData.core = core;
   g.userData.ring = ring;
+  g.userData.ring2 = ring2;
   return g;
 }
 function makeShield() {
   const g = new THREE.Group();
-  const outer = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8), new THREE.MeshBasicMaterial({ color: COLORS.green, wireframe: true }));
-  const inner = new THREE.Mesh(new THREE.OctahedronGeometry(0.34), new THREE.MeshBasicMaterial({ color: COLORS.green, transparent: true, opacity: 0.55 }));
-  g.add(outer, inner);
+  const outer = new THREE.Mesh(new THREE.DodecahedronGeometry(0.82, 1), new THREE.MeshBasicMaterial({ color: COLORS.green, wireframe: true, transparent: true, opacity: 0.8 }));
+  const inner = new THREE.Mesh(new THREE.OctahedronGeometry(0.34, 1), new THREE.MeshStandardMaterial({ color: COLORS.green, emissive: COLORS.green, emissiveIntensity: 1.4, metalness: 0.55, roughness: 0.12 }));
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.98, 0.035, 6, 24), new THREE.MeshBasicMaterial({ color: COLORS.green, transparent: true, opacity: 0.6 }));
+  ring.rotation.x = Math.PI / 2;
+  g.add(outer, inner, ring);
   g.userData.outer = outer;
   g.userData.inner = inner;
+  g.userData.ring = ring;
   return g;
 }
 
@@ -107,6 +124,7 @@ export class PickupManager {
       if (p.userData.type === "hackNode") {
         p.userData.core.rotation.y += dt * 4.5;
         p.userData.ring.rotation.z += dt * 3.5;
+        if (p.userData.ring2) p.userData.ring2.rotation.y -= dt * 2.8;
         const pulse = 1 + Math.sin(elapsed * 12) * 0.16;
         p.scale.setScalar(pulse);
         p.userData.ring.material.opacity = 0.55 + Math.sin(elapsed * 15) * 0.25;
@@ -120,6 +138,7 @@ export class PickupManager {
         const pulse = 1 + Math.sin(elapsed * 8) * 0.12;
         p.scale.setScalar(pulse);
         if (p.userData.outer) p.userData.outer.rotation.z -= dt * 1.8;
+        if (p.userData.ring) p.userData.ring.rotation.z += dt * 2.2;
         if (p.userData.inner) p.userData.inner.rotation.y += dt * 2.6;
       } else {
         p.scale.setScalar(1 + Math.sin(elapsed * 6) * 0.08);
