@@ -135,27 +135,22 @@ export class PlayerObject {
     this.group.position.y = THREE.MathUtils.lerp(this.group.position.y, targetY, 1 - Math.pow(1 - 0.18, dt * 60));
     this.group.scale.y = THREE.MathUtils.lerp(this.group.scale.y, this.isSliding ? 0.62 : 1, 1 - Math.pow(1 - 0.25, dt * 60));
 
-    this.hoverRing.rotation.z += dt * (this.boosting ? 6 : 2.2);
-    this.hoverRing.scale.setScalar(1 + Math.sin(elapsed * 8) * 0.05);
-    this.energyHalo.rotation.z -= dt * (this.boosting ? 8 : 3);
-    this.energyHalo.scale.setScalar(1 + Math.sin(elapsed * (this.boosting ? 18 : 9)) * (this.boosting ? 0.12 : 0.05));
-    this.energyHalo.material.opacity = (this.boosting ? 0.72 : 0.42) + Math.sin(elapsed * 10) * 0.12;
-    this.wings.rotation.z = Math.sin(elapsed * 4) * 0.035;
-    this.cockpit.material.emissiveIntensity = this.boosting ? 1.8 + Math.sin(elapsed * 16) * 0.35 : 0.7;
-    const thrustPulse = this.boosting ? 1.25 + Math.sin(elapsed * 24) * 0.24 : 0.82 + Math.sin(elapsed * 14) * 0.08;
-    if (this.exhaustGlows) {
-      for (const exhaust of this.exhaustGlows) {
-        exhaust.material.color.setHex(this.boosting ? COLORS.pink : COLORS.cyan);
-        exhaust.material.opacity = this.boosting ? 0.9 : 0.52;
-        exhaust.scale.set(0.72 * thrustPulse, 0.9 + thrustPulse * 0.55, 0.72 * thrustPulse);
-      }
+    this.energyHalo.rotation.z += dt * (this.boosting ? 8 : 2.8);
+    this.energyHalo.scale.setScalar(1 + Math.sin(elapsed * (this.boosting ? 18 : 9)) * (this.boosting ? 0.1 : 0.045));
+    this.energyHalo.material.opacity = (this.boosting ? 0.78 : 0.42) + Math.sin(elapsed * 10) * 0.1;
+    this.underGlow.material.color.setHex(this.boosting ? COLORS.pink : COLORS.cyan);
+    this.underGlow.material.opacity = this.boosting ? 0.5 : 0.24 + Math.sin(elapsed * 8) * 0.04;
+    this.underGlow.scale.setScalar(this.boosting ? 1.14 + Math.sin(elapsed * 16) * 0.08 : 1);
+    this.boostTrail.visible = this.boosting;
+    this.boostTrail.scale.set(1, this.boosting ? 1.3 + Math.sin(elapsed * 20) * 0.18 : 0.8, 1);
+    this.thrusterLight.intensity = this.boosting ? 3.4 + Math.sin(elapsed * 24) * 0.8 : 1.2;
+    this.visor.material.emissiveIntensity = this.boosting ? 1.8 + Math.sin(elapsed * 16) * 0.3 : 1.05;
+    this.energyBack.material.opacity = this.boosting ? 1 : 0.72;
+    for (let i = 0; i < this.spineSegments.length; i++) {
+      const pulse = 0.7 + 0.3 * Math.sin(elapsed * (8 + i * 0.4) - i * 0.8);
+      this.spineSegments[i].scale.x = this.boosting ? 1 + pulse * 0.8 : 0.8 + pulse * 0.25;
+      this.spineSegments[i].scale.z = this.boosting ? 1 + pulse * 0.35 : 1;
     }
-    if (this.underGlow) {
-      this.underGlow.material.color.setHex(this.boosting ? COLORS.pink : COLORS.cyan);
-      this.underGlow.material.opacity = this.boosting ? 0.52 : 0.28 + Math.sin(elapsed * 8) * 0.05;
-      this.underGlow.scale.setScalar(this.boosting ? 1.12 + Math.sin(elapsed * 16) * 0.08 : 1);
-    }
-    this.frontBar.scale.x = this.boosting ? 1.15 + Math.sin(elapsed * 14) * 0.08 : 1;
 
     if (this.shield.visible) {
       this.shield.rotation.y += dt * 1.8;
