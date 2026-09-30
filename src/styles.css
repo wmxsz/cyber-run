@@ -160,7 +160,7 @@
     .hud-btn:hover {
       background: rgba(0, 240, 255, 0.2);
       box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
-      transform: translateY(-2deg);
+      transform: translateY(-2px);
     }
 
     /* 부스트 게이지 & 스피드 표시 */
