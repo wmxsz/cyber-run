@@ -8,8 +8,8 @@ export class ParticleSystem {
     this.materials = new Map();
     this.group = new THREE.Group();
     scene.add(this.group);
-    this.burstGeometry = new THREE.BoxGeometry(0.18, 0.18, 0.18);
-    this.exhaustGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.2);
+    this.burstGeometry = new THREE.IcosahedronGeometry(0.16, 0);
+    this.exhaustGeometry = new THREE.TetrahedronGeometry(0.13, 0);
     this.maxItems = 160;
   }
 
@@ -52,6 +52,9 @@ export class ParticleSystem {
       p.userData.vx = (Math.random() - 0.5) * 0.45;
       p.userData.vy = Math.random() * 0.4 + 0.1;
       p.userData.vz = (Math.random() - 0.5) * 0.45;
+      p.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      p.userData.rx = (Math.random() - 0.5) * 0.16;
+      p.userData.ry = (Math.random() - 0.5) * 0.2;
     }
   }
 
@@ -82,6 +85,8 @@ export class ParticleSystem {
       p.position.x += p.userData.vx * frameScale;
       p.position.y += p.userData.vy * frameScale;
       p.position.z += p.userData.vz * frameScale;
+      p.rotation.x += (p.userData.rx || 0) * frameScale;
+      p.rotation.y += (p.userData.ry || 0) * frameScale;
       p.userData.life -= p.userData.decay * frameScale;
       p.scale.setScalar(Math.max(p.userData.life, 0.01));
       if (p.userData.life <= 0) this._releaseAt(i);
