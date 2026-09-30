@@ -48,6 +48,14 @@ function makeBarrier() {
   centerHousing.rotation.x = Math.PI / 2;
   centerHousing.position.set(0, 1.25, 0.25);
   g.add(beam, core, lower, centerHousing, disc(1.7, COLORS.red));
+  const warning = new THREE.Mesh(
+    new THREE.TorusGeometry(1.92, 0.025, 5, 24),
+    new THREE.MeshBasicMaterial({ color: COLORS.orange, transparent: true, opacity: 0.52 }),
+  );
+  warning.rotation.x = Math.PI / 2;
+  warning.position.y = 0.08;
+  g.add(warning);
+  g.userData.warning = warning;
   g.userData.pulse = beam;
   return g;
 }
@@ -80,6 +88,14 @@ function makeHighLaser() {
   const core = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.06, 0.06), new THREE.MeshBasicMaterial({ color: 0xffffff }));
   core.position.y = 2.45;
   g.add(beam, core, disc(1.7, COLORS.pink));
+  const scan = new THREE.Mesh(
+    new THREE.TorusGeometry(1.72, 0.025, 5, 28),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.48 }),
+  );
+  scan.rotation.x = Math.PI / 2;
+  scan.position.y = 0.07;
+  g.add(scan);
+  g.userData.scan = scan;
   g.userData.pulse = beam;
   return g;
 }
@@ -117,6 +133,14 @@ function makeMine() {
   const ring = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.08, 8, 24), new THREE.MeshBasicMaterial({ color: COLORS.pink }));
   ring.position.y = 1.25;
   g.add(base, neck, ring, disc(1.55, COLORS.orange));
+  const warning = new THREE.Mesh(
+    new THREE.TorusGeometry(1.74, 0.035, 5, 28),
+    new THREE.MeshBasicMaterial({ color: COLORS.red, transparent: true, opacity: 0.56 }),
+  );
+  warning.rotation.x = Math.PI / 2;
+  warning.position.y = 0.06;
+  g.add(warning);
+  g.userData.warning = warning;
   g.userData.ring = ring;
   g.userData.pulse = core;
   return g;
@@ -150,6 +174,13 @@ function makeBlock() {
     g.add(vent);
   }
   g.add(body, frame, panel, stripe, disc(1.7, COLORS.orange));
+  const hazardBar = new THREE.Mesh(
+    new THREE.BoxGeometry(2.18, 0.045, 0.05),
+    new THREE.MeshBasicMaterial({ color: COLORS.red, transparent: true, opacity: 0.72 }),
+  );
+  hazardBar.position.set(0, 0.58, 0.94);
+  g.add(hazardBar);
+  g.userData.hazardBar = hazardBar;
   g.userData.pulse = panel;
   return g;
 }
@@ -201,6 +232,14 @@ function makePulseGate() {
   g.add(outer, inner, core, topLink, sideCaps, disc(1.45, COLORS.cyan));
   g.userData.ring = outer;
   g.userData.innerRing = inner;
+  const scan = new THREE.Mesh(
+    new THREE.TorusGeometry(1.58, 0.025, 5, 32),
+    new THREE.MeshBasicMaterial({ color: COLORS.pink, transparent: true, opacity: 0.48 }),
+  );
+  scan.rotation.x = Math.PI / 2;
+  scan.position.y = 0.06;
+  g.add(scan);
+  g.userData.scan = scan;
   g.userData.pulse = core;
   return g;
 }
@@ -218,6 +257,10 @@ export const OBSTACLE_TYPES = {
       if (obj.userData.ring) obj.userData.ring.scale.setScalar(pulse);
       if (obj.userData.innerRing) obj.userData.innerRing.scale.setScalar(2 - pulse);
       if (obj.userData.pulse) obj.userData.pulse.scale.setScalar(1 + Math.sin(time * 12) * 0.12);
+      if (obj.userData.scan) {
+        obj.userData.scan.rotation.z += 0.014;
+        obj.userData.scan.material.opacity = 0.28 + Math.sin(time * 13) * 0.16;
+      }
     },
   },
 
@@ -231,6 +274,10 @@ export const OBSTACLE_TYPES = {
     update(obj, time) {
       obj.position.y = Math.sin(time * 8) * 0.04;
       if (obj.userData.pulse) obj.userData.pulse.scale.x = 1 + Math.sin(time * 10) * 0.035;
+      if (obj.userData.warning) {
+        obj.userData.warning.rotation.z += 0.018;
+        obj.userData.warning.material.opacity = 0.34 + Math.sin(time * 9) * 0.16;
+      }
     },
   },
   highLaser: {
@@ -244,6 +291,10 @@ export const OBSTACLE_TYPES = {
     update(obj, time) {
       obj.position.y = Math.sin(time * 5) * 0.03;
       if (obj.userData.pulse) obj.userData.pulse.scale.x = 1 + Math.sin(time * 12) * 0.045;
+      if (obj.userData.scan) {
+        obj.userData.scan.rotation.z -= 0.022;
+        obj.userData.scan.material.opacity = 0.28 + Math.sin(time * 12) * 0.14;
+      }
     },
   },
   mine: {
@@ -270,6 +321,7 @@ export const OBSTACLE_TYPES = {
     update(obj, time) {
       obj.rotation.y = Math.sin(time * 2) * 0.04;
       if (obj.userData.pulse) obj.userData.pulse.scale.x = 1 + Math.sin(time * 9) * 0.04;
+      if (obj.userData.hazardBar) obj.userData.hazardBar.material.opacity = 0.48 + Math.sin(time * 10) * 0.22;
     },
   },
 };
