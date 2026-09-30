@@ -48,6 +48,8 @@ export class GameEngine {
     this._elapsed = 0;
     this._lastPhase = 0;
     this._exhaustTimer = 0;
+    this._eventTimer = 18;
+    this._eventTime = 0;
     this._ui = null;
 
     this.input.onAction((action, payload) => this._onAction(action, payload));
@@ -93,6 +95,9 @@ export class GameEngine {
     this.over = false;
     this._elapsed = 0;
     this._lastPhase = 0;
+    this._eventTimer = 18;
+    this._eventTime = 0;
+    this.score.setEventMultiplier(1);
 
     this._ui?.hideStart();
     this._ui?.hideGameOver();
@@ -119,6 +124,25 @@ export class GameEngine {
     if (this.paused) {
       this._ui?.update(this);
       return;
+    }
+
+    if (this._eventTime > 0) {
+      this._eventTime -= dt;
+      if (this._eventTime <= 0) {
+        this.score.setEventMultiplier(1);
+        this._ui?.announce("DATA STORM // OFFLINE");
+      }
+    } else {
+      this._eventTimer -= dt;
+      if (this._eventTimer <= 0 && this._lastPhase >= 1) {
+        this._eventTime = 6;
+        this._eventTimer = 16 + Math.random() * 8;
+        this.score.setEventMultiplier(1.75);
+        this.audio.playPowerup();
+        const p = this.player.group.position;
+        this.particles.burst(p.x, p.y + 1, p.z, 0xff00aa, 36);
+        this._ui?.announce("DATA STORM // SCORE x1.75 // 6 SEC");
+      }
     }
 
     if (this.boosting) {
