@@ -40,6 +40,19 @@ export class ParticleSystem {
       : kind === "flash" ? this.flashGeometry
       : this.burstGeometry;
     p.material = this._material(color);
+    p.position.set(0, 0, 0);
+    p.rotation.set(0, 0, 0);
+    p.scale.set(1, 1, 1);
+    p.userData.life = 0;
+    p.userData.decay = 0;
+    p.userData.vx = 0;
+    p.userData.vy = 0;
+    p.userData.vz = 0;
+    p.userData.rx = 0;
+    p.userData.ry = 0;
+    p.userData.baseScale = 1;
+    p.userData.baseScaleY = 1;
+    p.userData.maxScale = 1;
     p.visible = true;
     p.scale.setScalar(1);
     this.group.add(p);
@@ -50,6 +63,11 @@ export class ParticleSystem {
   _releaseAt(index) {
     const p = this.items[index];
     p.visible = false;
+    p.userData.life = 0;
+    p.userData.vx = 0;
+    p.userData.vy = 0;
+    p.userData.vz = 0;
+    p.scale.set(1, 1, 1);
     this.pool.push(p);
     this.items.splice(index, 1);
   }
@@ -138,6 +156,11 @@ export class ParticleSystem {
   clear() {
     for (const p of this.items) {
       p.visible = false;
+      p.userData.life = 0;
+      p.userData.vx = 0;
+      p.userData.vy = 0;
+      p.userData.vz = 0;
+      p.scale.set(1, 1, 1);
       this.pool.push(p);
     }
     this.items.length = 0;
