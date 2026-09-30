@@ -1,11 +1,23 @@
 import { GAME_CONFIG } from "../config/gameConfig.js";
 
 export class CollisionSystem {
+  constructor() {
+    this.obstacleHits = [];
+    this.picked = [];
+    this.nearMisses = [];
+    this.result = {
+      obstacleHits: this.obstacleHits,
+      picked: this.picked,
+      nearMisses: this.nearMisses,
+    };
+  }
+
   check(player, obstacles, pickups) {
+    this.obstacleHits.length = 0;
+    this.picked.length = 0;
+    this.nearMisses.length = 0;
+
     const p = player.getHitbox();
-    const obstacleHits = [];
-    const picked = [];
-    const nearMisses = [];
 
     obstacles.forEachActive((item) => {
       if (item.obj.userData.hit) return;
@@ -16,7 +28,7 @@ export class CollisionSystem {
       if (item.def.requiresSlide) {
         if (!player.isSliding) {
           item.obj.userData.hit = true;
-          obstacleHits.push(item);
+          this.obstacleHits.push(item);
         } else {
           item.obj.userData.passed = true;
         }
@@ -24,21 +36,21 @@ export class CollisionSystem {
         const dy = Math.abs((item.def.hitCenterY ?? item.def.hitbox.y) - (p.y + p.halfY));
         if (dy < item.def.hitbox.y + p.halfY && !player.isJumping) {
           item.obj.userData.hit = true;
-          obstacleHits.push(item);
+          this.obstacleHits.push(item);
         } else if (player.isJumping) {
           item.obj.userData.passed = true;
         }
       } else if (item.def.blocksGround && !player.isJumping) {
         item.obj.userData.hit = true;
-        obstacleHits.push(item);
+        this.obstacleHits.push(item);
       } else if (item.def.blocksGround && player.isJumping && p.y < item.def.hitbox.y * 1.2) {
         item.obj.userData.hit = true;
-        obstacleHits.push(item);
+        this.obstacleHits.push(item);
       }
 
       if (!item.obj.userData.hit && !item.obj.userData.passed && item.obj.position.z > 0.8 && dx <= GAME_CONFIG.nearMissDistance) {
         item.obj.userData.passed = true;
-        nearMisses.push(item);
+        this.nearMisses.push(item);
       }
     });
 
@@ -49,10 +61,10 @@ export class CollisionSystem {
       const dz = obj.position.z - p.z;
       if (dx * dx + dy * dy + dz * dz < GAME_CONFIG.pickupRadius ** 2) {
         obj.userData.picked = true;
-        picked.push(obj);
+        this.picked.push(obj);
       }
     });
 
-    return { obstacleHits, picked, nearMisses };
+    return this.result;
   }
 }
