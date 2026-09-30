@@ -162,8 +162,8 @@ export class PlayerObject {
     const targetY = this.isJumping
       ? this.group.position.y
       : (this.isSliding ? 0.15 : Math.sin(elapsed * 6) * 0.08);
-    this.group.position.y = THREE.MathUtils.lerp(this.group.position.y, targetY, 0.18);
-    this.group.scale.y = THREE.MathUtils.lerp(this.group.scale.y, this.isSliding ? 0.62 : 1, 0.25);
+    this.group.position.y = THREE.MathUtils.lerp(this.group.position.y, targetY, 1 - Math.pow(1 - 0.18, dt * 60));
+    this.group.scale.y = THREE.MathUtils.lerp(this.group.scale.y, this.isSliding ? 0.62 : 1, 1 - Math.pow(1 - 0.25, dt * 60));
 
     this.hoverRing.rotation.z += dt * (this.boosting ? 6 : 2.2);
     this.hoverRing.scale.setScalar(1 + Math.sin(elapsed * 8) * 0.05);
