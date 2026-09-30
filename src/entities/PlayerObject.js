@@ -158,6 +158,30 @@ export class PlayerObject {
       this.group.add(housingRing);
     }
 
+    // Central keel visually ties the nose, cockpit and rear propulsion into one chassis.
+    const keel = new THREE.Mesh(
+      new THREE.BoxGeometry(0.28, 0.18, 2.25),
+      darkMat,
+    );
+    keel.position.set(0, 0.34, -0.02);
+    keel.rotation.x = 0.025;
+    this.group.add(keel);
+
+    const keelLight = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, 0.035, 1.45),
+      cyanMat,
+    );
+    keelLight.position.set(0, 0.45, -0.35);
+    this.group.add(keelLight);
+
+    const engineCollarGeo = new THREE.TorusGeometry(0.31, 0.045, 6, 12);
+    for (const x of [-0.58, 0.58]) {
+      const collar = new THREE.Mesh(engineCollarGeo, x < 0 ? cyanMat : pinkMat);
+      collar.rotation.x = Math.PI / 2;
+      collar.position.set(x, 0.44, 1.27);
+      this.group.add(collar);
+    }
+
     this.thrusterLight = new THREE.PointLight(COLORS.cyan, 2, 8);
     this.thrusterLight.position.set(0, 0.5, 2);
     this.group.add(this.thrusterLight);
