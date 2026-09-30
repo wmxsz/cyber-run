@@ -99,11 +99,12 @@ export class PlayerObject {
     if (this.boosting === active) return;
     this.boosting = active;
     this.thrusterLight.color.setHex(active ? COLORS.pink : COLORS.cyan);
-    this.thrusterLight.intensity = active ? 5 : 2;
-    this.hoverRing.material.color.setHex(active ? COLORS.pink : COLORS.cyan);
-    this.frontBar.material.color.setHex(active ? COLORS.yellow : COLORS.pink);
+    this.thrusterLight.intensity = active ? 3.4 : 1.2;
+    this.boostTrail.visible = active;
+    this.boostTrail.material.color.setHex(active ? COLORS.pink : COLORS.cyan);
     this.energyHalo.material.color.setHex(active ? COLORS.yellow : COLORS.cyan);
-    this.energyHalo.material.opacity = active ? 0.95 : 0.45;
+    this.energyHalo.material.opacity = active ? 0.9 : 0.48;
+    this.visor.material.emissiveIntensity = active ? 1.8 : 1.05;
   }
 
   update(dt, elapsed) {
