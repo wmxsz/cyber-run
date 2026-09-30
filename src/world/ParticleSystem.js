@@ -4,7 +4,7 @@ export class ParticleSystem {
   constructor(scene) {
     this.scene = scene;
     this.items = [];
-    this.maxItems = 520;
+    this.maxItems = 160;
   }
 
   burst(x, y, z, color = 0xff0077, count = 25) {
