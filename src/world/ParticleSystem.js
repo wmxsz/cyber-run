@@ -69,6 +69,7 @@ export class ParticleSystem {
     for (let i = 0; i < allowed; i++) {
       const p = this._acquire("streak", color);
       p.position.set(x + (Math.random() - 0.5) * 2.2, y + (Math.random() - 0.5) * 0.45, z + (Math.random() - 0.5) * 0.8);
+      p.rotation.set(0, 0, 0);
       p.scale.set(0.7 + Math.random() * 0.8, 0.7 + Math.random() * 0.5, length * (0.65 + Math.random() * 0.7));
       p.userData.life = 0.34 + Math.random() * 0.12;
       p.userData.decay = 0.055;
@@ -84,7 +85,7 @@ export class ParticleSystem {
     if (this.items.length >= this.maxItems) return;
     const p = this._acquire("shockwave", color);
     p.position.set(x, y, z);
-    p.rotation.x = Math.PI / 2;
+    p.rotation.set(Math.PI / 2, 0, 0);
     p.scale.setScalar(0.15);
     p.userData.life = 1;
     p.userData.decay = 0.045;
