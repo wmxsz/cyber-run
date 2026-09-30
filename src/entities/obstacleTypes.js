@@ -86,8 +86,8 @@ function makeHighLaser() {
 function makeMine() {
   const g = new THREE.Group();
   const core = new THREE.Mesh(
-    new THREE.SphereGeometry(0.82, 12, 12),
-    new THREE.MeshStandardMaterial({ color: 0x40101a, emissive: 0xff5500, emissiveIntensity: 1.15, metalness: 0.7, roughness: 0.2 }),
+    new THREE.IcosahedronGeometry(0.82, 1),
+    new THREE.MeshStandardMaterial({ color: 0x40101a, emissive: 0xff5500, emissiveIntensity: 1.15, metalness: 0.7, roughness: 0.2, flatShading: true }),
   );
   core.position.y = 1.25;
   g.add(core);
