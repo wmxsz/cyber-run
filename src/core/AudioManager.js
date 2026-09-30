@@ -12,14 +12,14 @@ export class AudioManager {
       if (!Ctx) return;
       this.ctx = new Ctx();
     }
-    if (this.ctx.state === "suspended") this.ctx.resume();
+    if (this.ctx.state === "suspended") this.ctx.resume().catch(() => {});
   }
 
   toggleMute() {
     this.muted = !this.muted;
     if (this.ctx) {
       if (this.muted) this.ctx.suspend();
-      else this.ctx.resume();
+      else this.ctx.resume().catch(() => {});
     }
     return this.muted;
   }
