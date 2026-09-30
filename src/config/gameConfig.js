@@ -51,6 +51,7 @@ export const GAME_CONFIG = {
   phaseSpawnDensity: [1, 0.96, 0.9, 0.84, 0.78],
   phaseStormPressure: [0, 0.12, 0.2, 0.28, 0.34],
   phaseHunterGap: [3.8, 3.8, 3.8, 4.5, 5.2],
+  routeChoiceChance: 0.34,
 };
 
 export const COLORS = {
