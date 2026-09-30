@@ -73,7 +73,7 @@ function hologramTexture(label, accent) {
   const canvas = document.createElement("canvas");
   canvas.width = 1024; canvas.height = 512;
   const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, 512, 256);
+  ctx.clearRect(0, 0, 1024, 512);
   ctx.strokeStyle = accent; ctx.shadowColor = accent; ctx.shadowBlur = 28; ctx.lineWidth = 5;
   ctx.strokeRect(20, 20, 984, 472);
   ctx.font = "900 76px Orbitron, monospace"; ctx.textAlign = "center";
@@ -99,7 +99,10 @@ function hologramTexture(label, accent) {
     ctx.fillRect(x, 444 + (i % 3) * 9, 24 + (i % 4) * 7, 3);
   }
   ctx.globalAlpha = 1;
-  return new THREE.CanvasTexture(canvas);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
 }
 
 export class CityManager {
