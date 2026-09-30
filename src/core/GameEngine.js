@@ -281,12 +281,19 @@ export class GameEngine {
         this.missions.recordCore();
         this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.bonusCoreBoostGain);
         this.audio.playPowerup();
-        this.particles.burst(x, y, z, 0xff8800, 28);
-        this._ui?.announce("BONUS CORE +" + bonus.points + " // +" + GAME_CONFIG.bonusCoreBoostGain + " BOOST");
+        this.particles.burst(x, y, z, 0xff8800, bonus.riskChainComplete ? 48 : 28);
+        if (bonus.riskChainComplete) {
+          this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.riskChainBoost);
+          this.audio.playPowerup();
+          this._ui?.announce("RISK ROUTE COMPLETE // +" + Math.floor(bonus.riskReward) + " SCORE // +" + GAME_CONFIG.riskChainBoost + " BOOST");
+        } else {
+          this._ui?.announce("BONUS CORE +" + bonus.points + " // RISK " + this.score.riskChain + "/" + GAME_CONFIG.riskChainTarget);
+        }
       } else {
         const bonus = this.score.collectCore();
         this._checkComboMilestone(bonus);
         this.missions.recordCore();
+        this.score.breakRiskChain();
         this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.coreBoostGain);
         this.audio.playCollect();
         this.particles.burst(x, y, z, 0x00f0ff, 15);
