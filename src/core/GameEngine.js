@@ -58,6 +58,7 @@ export class GameEngine {
     this._hunterLaneTimer = 0;
     this._hunterX = 0;
     this._hunter = null;
+    this._hunterElite = false;
     this._comboMilestones = new Set();
     this._hackNodes = 0;
     this._ghostTime = 0;
@@ -115,6 +116,7 @@ export class GameEngine {
     this._hunterLaneTimer = 0;
     this._hunterX = 0;
     this._hunter = null;
+    this._hunterElite = false;
     this._comboMilestones.clear();
     this._hackNodes = 0;
     this._ghostTime = 0;
@@ -151,31 +153,36 @@ export class GameEngine {
       this._hunterTime -= dt;
       this._hunterLaneTimer -= dt;
       if (this._hunterLaneTimer <= 0) {
-        this._hunterLaneTimer = 0.9;
+        this._hunterLaneTimer = this._hunterElite ? GAME_CONFIG.eliteHunterLaneInterval : GAME_CONFIG.hunterLaneInterval;
         this._hunterLane = this.player.currentLane;
       }
       const target = LANES[this._hunterLane];
       this._hunterX += (target - this._hunterX) * 0.08;
       this._hunter.position.x = this._hunterX;
-      this._hunter.position.z = Math.max(0.6, 3.8 - (8 - this._hunterTime) * 0.42) + Math.sin(this._hunterTime * 5) * 0.12;
+      const gap = this._hunterElite ? GAME_CONFIG.eliteHunterGap : 3.8;
+      const duration = this._hunterElite ? GAME_CONFIG.eliteHunterDuration : GAME_CONFIG.hunterDuration;
+      const approach = this._hunterElite ? 0.48 : 0.42;
+      this._hunter.position.z = Math.max(0.6, gap - (duration - this._hunterTime) * approach) + Math.sin(this._hunterTime * 5) * 0.12;
       if (this._hunterTime <= 0) {
         this.scene.remove(this._hunter);
         this._hunter = null;
         this._refreshEventMultiplier();
-        this._ui?.announce("HUNTER DRONE // ESCAPED");
+        this._ui?.announce(this._hunterElite ? "PURSUER // EVADED" : "HUNTER DRONE // ESCAPED");
+        this._hunterElite = false;
       }
     } else {
       this._hunterTimer -= dt;
       if (this._hunterTimer <= 0 && this._lastPhase >= 2) {
-        this._hunterTime = 8;
-        this._hunterTimer = 20 + Math.random() * 12;
+        this._hunterElite = this._lastPhase >= 4;
+        this._hunterTime = this._hunterElite ? GAME_CONFIG.eliteHunterDuration : GAME_CONFIG.hunterDuration;
+        this._hunterTimer = (this._hunterElite ? 18 : 20) + Math.random() * (this._hunterElite ? 8 : 12);
         this._hunterLane = Math.floor(Math.random() * 3);
         this._hunterLaneTimer = 0;
         this._hunterX = this.player.group.position.x;
-        this._hunter = this._makeHunter();
+        this._hunter = this._makeHunter(this._hunterElite);
         this.scene.add(this._hunter);
         this._refreshEventMultiplier();
-        this._ui?.announce("HUNTER DRONE // EVADE // SCORE x1.20");
+        this._ui?.announce(this._hunterElite ? "PURSUER // OVERDRIVE REQUIRED // SCORE x1.20" : "HUNTER DRONE // EVADE // SCORE x1.20");
       }
     }
 
@@ -366,23 +373,32 @@ export class GameEngine {
       this._hunter = null;
       this._hunterTime = 0;
       this._refreshEventMultiplier();
-      this._ui?.announce("HUNTER DESTROYED // +100 // +15 BOOST");
+      this._ui?.announce(this._hunterElite ? "PURSUER DESTROYED // +100 // +15 BOOST" : "HUNTER DESTROYED // +100 // +15 BOOST");
+      this._hunterElite = false;
     } else {
       this.scene.remove(this._hunter);
       this._hunter = null;
       this._hunterTime = 0;
       this._refreshEventMultiplier();
-      this._ui?.announce("HUNTER STRIKE // EVADE FASTER");
+      this._ui?.announce(this._hunterElite ? "PURSUER STRIKE // EVADE FASTER" : "HUNTER STRIKE // EVADE FASTER");
+      this._hunterElite = false;
       this.takeDamage();
     }
   }
 
-  _makeHunter() {
+  _makeHunter(elite = false) {
     const g = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.OctahedronGeometry(0.7, 0), new THREE.MeshStandardMaterial({color:0x14002a, emissive:0xff006e, emissiveIntensity:2}));
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), new THREE.MeshBasicMaterial({color:0xffe600}));
-    eye.position.z = 0.65;
+    const size = elite ? 0.9 : 0.7;
+    const body = new THREE.Mesh(new THREE.OctahedronGeometry(size, elite ? 1 : 0), new THREE.MeshStandardMaterial({color:0x14002a, emissive:elite ? 0x8a2be2 : 0xff006e, emissiveIntensity:elite ? 2.8 : 2}));
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(elite ? 0.23 : 0.18, 10, 10), new THREE.MeshBasicMaterial({color:0xffe600}));
+    eye.position.z = size * 0.92;
     g.add(body, eye);
+    if (elite) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.06, 8, 32), new THREE.MeshBasicMaterial({color:0x8a2be2, transparent:true, opacity:0.85}));
+      ring.rotation.x = Math.PI / 2;
+      g.add(ring);
+      g.userData.ring = ring;
+    }
     g.userData.hit = false;
     return g;
   }
