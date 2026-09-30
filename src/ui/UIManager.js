@@ -1,4 +1,5 @@
 import { GAME_CONFIG } from "../config/gameConfig.js";
+
 export class UIManager {
   constructor(engine) {
     this.engine = engine;
@@ -31,88 +32,125 @@ export class UIManager {
     this.ghost = this._el("hud-ghost");
     this.laneThreats = [0, 1, 2].map((lane) => this._el(`lane-threat-${lane}`));
 
+    this._last = Object.create(null);
+    this._lastThreatAt = 0;
     this._setHighScore();
     this._el("btn-start")?.addEventListener("click", () => this.engine.startGame());
     this._el("btn-restart")?.addEventListener("click", () => this.engine.startGame());
     this._el("btn-resume")?.addEventListener("click", () => this.engine.togglePause());
     this._el("btn-audio")?.addEventListener("click", () => {
       const muted = this.engine.audio.toggleMute();
-      if (this.audioIcon) this.audioIcon.textContent = muted ? "🔇" : "🔊";
+      this.setMuted(muted);
     });
   }
 
+  _setText(el, value, key) {
+    if (!el || this._last[key] === value) return;
+    el.textContent = value;
+    this._last[key] = value;
+  }
+
+  _setClass(el, className, value, key) {
+    if (!el || this._last[key] === value) return;
+    el.classList.toggle(className, value);
+    this._last[key] = value;
+  }
+
+  _setStyle(el, property, value, key) {
+    if (!el || this._last[key] === value) return;
+    el.style[property] = value;
+    this._last[key] = value;
+  }
+
   update(engine) {
-    if (this.score) this.score.textContent = String(Math.floor(engine.score.score)).padStart(5, "0");
-    if (this.speed) {
-      const displaySpeed = Math.floor(140 + engine.difficulty.speed * 60 + (engine.boosting ? 35 : 0));
-      this.speed.textContent = String(displaySpeed);
-      this.speed.classList.toggle("overdrive", engine.boosting);
-    }
-    if (this.shield) this.shield.classList.toggle("visible", engine.hasShield);
-    if (this.boost) this.boost.style.width = `${engine.boostEnergy}%`;
-    if (this.combo) this.combo.textContent = engine.score.combo > 1 ? `x${Math.min(5, 1 + Math.floor(engine.score.combo / 4))} COMBO` : (engine.score.combo === 1 ? "CHAIN 1" : "COMBO READY");
-    if (this.comboTimer) {
-      const ratio = engine.score.combo > 0 ? Math.max(0, Math.min(1, engine.score.comboTimer / 2.8)) : 0;
-      this.comboTimer.style.width = `${ratio * 100}%`;
-      this.comboTimer.classList.toggle("active", ratio > 0);
-    }
-    if (this.pauseButton) this.pauseButton.textContent = engine.paused ? "▶" : "Ⅱ";
-    if (this.phase) this.phase.textContent = engine.difficulty.phaseName || "NIGHT CITY";
+    const score = String(Math.floor(engine.score.score)).padStart(5, "0");
+    this._setText(this.score, score, "score");
+
+    const displaySpeed = String(Math.floor(140 + engine.difficulty.speed * 60 + (engine.boosting ? 35 : 0)));
+    this._setText(this.speed, displaySpeed, "speed");
+    this._setClass(this.speed, "overdrive", engine.boosting, "speedBoost");
+
+    this._setClass(this.shield, "visible", engine.hasShield, "shield");
+
+    this._setStyle(this.boost, "width", `${engine.boostEnergy}%`, "boostWidth");
+
+    const comboText = engine.score.combo > 1
+      ? `x${Math.min(5, 1 + Math.floor(engine.score.combo / 4))} COMBO`
+      : (engine.score.combo === 1 ? "CHAIN 1" : "COMBO READY");
+    this._setText(this.combo, comboText, "combo");
+
+    const ratio = engine.score.combo > 0 ? Math.max(0, Math.min(1, engine.score.comboTimer / GAME_CONFIG.comboWindow)) : 0;
+    this._setStyle(this.comboTimer, "width", `${ratio * 100}%`, "comboTimerWidth");
+    this._setClass(this.comboTimer, "active", ratio > 0, "comboTimerActive");
+
+    this._setText(this.pauseButton, engine.paused ? "▶" : "Ⅱ", "pause");
+    this._setText(this.phase, engine.difficulty.phaseName || "NIGHT CITY", "phase");
+
     if (this.eventPanel) {
-      this.eventPanel.classList.toggle("elite", engine._hunterElite && engine._hunterTime > 0);
-      if (engine._empTime > 0) this.eventPanel.textContent = "EMP BLACKOUT // BOOST OFFLINE // " + engine._empTime.toFixed(1) + "s";
-      else if (engine._hunterTime > 0 && engine._eventTime > 0) this.eventPanel.textContent = (engine._hunterElite ? "PURSUER" : "HUNTER") + " // EVADE // STORM x" + GAME_CONFIG.dataStormMultiplier.toFixed(2);
-      else if (engine._hunterTime > 0) this.eventPanel.textContent = (engine._hunterElite ? "PURSUER" : "HUNTER") + " // EVADE // x" + GAME_CONFIG.hunterMultiplier.toFixed(2);
-      else if (engine._eventTime > 0) this.eventPanel.textContent = "DATA STORM // x" + GAME_CONFIG.dataStormMultiplier.toFixed(2);
-      else if (engine.difficulty.phase >= 3) this.eventPanel.textContent = "SECTOR SURGE // THREAT DENSITY HIGH";
-      else this.eventPanel.textContent = "";
+      const elite = Boolean(engine._hunterElite && engine._hunterTime > 0);
+      this._setClass(this.eventPanel, "elite", elite, "eventElite");
+      let eventText = "";
+      if (engine._empTime > 0) eventText = "EMP BLACKOUT // BOOST OFFLINE // " + engine._empTime.toFixed(1) + "s";
+      else if (engine._hunterTime > 0 && engine._eventTime > 0) eventText = (elite ? "PURSUER" : "HUNTER") + " // EVADE // STORM x" + GAME_CONFIG.dataStormMultiplier.toFixed(2);
+      else if (engine._hunterTime > 0) eventText = (elite ? "PURSUER" : "HUNTER") + " // EVADE // x" + GAME_CONFIG.hunterMultiplier.toFixed(2);
+      else if (engine._eventTime > 0) eventText = "DATA STORM // x" + GAME_CONFIG.dataStormMultiplier.toFixed(2);
+      else if (engine.difficulty.phase >= 3) eventText = "SECTOR SURGE // THREAT DENSITY HIGH";
+      this._setText(this.eventPanel, eventText, "eventText");
     }
-    if (this.risk) {
-      const risk = engine.score.riskChain || 0;
-      const target = GAME_CONFIG.riskChainTarget || 3;
-      this.risk.textContent = "RISK " + risk + "/" + target;
-      this.risk.classList.toggle("active", risk > 0);
-    }
+
+    const risk = engine.score.riskChain || 0;
+    this._setText(this.risk, "RISK " + risk + "/" + (GAME_CONFIG.riskChainTarget || 3), "riskText");
+    this._setClass(this.risk, "active", risk > 0, "riskActive");
+
     if (this.ghost) {
       const nodes = engine._hackNodes || 0;
       const target = GAME_CONFIG.ghostProtocolTarget || 3;
-      if (engine._ghostTime > 0) {
-        this.ghost.textContent = "GHOST " + engine._ghostTime.toFixed(1) + "s";
-        this.ghost.classList.add("active");
-      } else {
-        this.ghost.textContent = "HACK " + nodes + "/" + target;
-        this.ghost.classList.toggle("active", nodes > 0);
-      }
-    }
-    if (this.multiplier) {
-      const multiplier = Number(engine.score.eventMultiplier || 1);
-      this.multiplier.textContent = "x" + multiplier.toFixed(2);
-      this.multiplier.classList.toggle("boosted", multiplier > 1);
-    }
-    const mission = engine.missions?.getStatus?.();
-    if (mission) {
-      if (this.mission) this.mission.textContent = mission.label;
-      if (this.missionFill) this.missionFill.style.width = `${mission.progress * 100}%`;
-      if (this.missionProgress) this.missionProgress.textContent = `${mission.value} / ${mission.target}`;
+      const ghostText = engine._ghostTime > 0
+        ? "GHOST " + engine._ghostTime.toFixed(1) + "s"
+        : "HACK " + nodes + "/" + target;
+      this._setText(this.ghost, ghostText, "ghostText");
+      this._setClass(this.ghost, "active", engine._ghostTime > 0 || nodes > 0, "ghostActive");
     }
 
-    const threat = [0, 1, 2].map(() => null);
+    const multiplier = Number(engine.score.eventMultiplier || 1);
+    this._setText(this.multiplier, "x" + multiplier.toFixed(2), "multiplierText");
+    this._setClass(this.multiplier, "boosted", multiplier > 1, "multiplierBoosted");
+
+    const mission = engine.missions?.getStatus?.();
+    if (mission) {
+      this._setText(this.mission, mission.label, "missionLabel");
+      this._setStyle(this.missionFill, "width", `${mission.progress * 100}%`, "missionFill");
+      this._setText(this.missionProgress, `${mission.value} / ${mission.target}`, "missionProgress");
+    }
+
+    const now = performance.now();
+    if (now - this._lastThreatAt >= 100 || this._lastThreatAt === 0) {
+      this._lastThreatAt = now;
+      this._updateThreatScan(engine);
+    }
+  }
+
+  _updateThreatScan(engine) {
+    const threat = [null, null, null];
     engine.obstacles.forEachActive((item) => {
       const z = item.obj.position.z;
       if (z < -60 || z > 10) return;
       const lane = item.lane;
       if (threat[lane] === null || z > threat[lane].z) threat[lane] = { z, type: item.type };
     });
+
     this.laneThreats.forEach((el, lane) => {
       if (!el) return;
       const hit = threat[lane];
       const danger = Boolean(hit);
-      el.classList.toggle("danger", danger);
-      el.classList.toggle("imminent", Boolean(hit && hit.z > -18));
-      const label = danger ? (hit.type === "highLaser" ? "SLIDE" : hit.type === "barrier" ? "JUMP" : "CHANGE") : "SAFE";
+      this._setClass(el, "danger", danger, `threatDanger${lane}`);
+      this._setClass(el, "imminent", Boolean(hit && hit.z > -18), `threatImminent${lane}`);
+      const label = danger
+        ? (hit.type === "highLaser" ? "SLIDE" : hit.type === "barrier" ? "JUMP" : "CHANGE")
+        : "SAFE";
       const b = el.querySelector("b");
-      if (b) b.textContent = label;
-      el.classList.toggle("elite", Boolean(hit && (hit.type === "pulseGate" || hit.type === "mine") && engine.difficulty.phase >= 4));
+      this._setText(b, label, `threatLabel${lane}`);
+      this._setClass(el, "elite", Boolean(hit && (hit.type === "pulseGate" || hit.type === "mine") && engine.difficulty.phase >= 4), `threatElite${lane}`);
     });
   }
 

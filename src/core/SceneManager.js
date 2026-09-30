@@ -34,6 +34,7 @@ export class SceneManager {
     this._shake = 0;
     this._speedFeel = 0;
     this._shakeBase = this.camera.position.clone();
+    this._lastFov = this.camera.fov;
 
     this._resize = this._resize.bind(this);
     window.addEventListener("resize", this._resize);
@@ -71,7 +72,11 @@ export class SceneManager {
   }
 
   update(dt) {
-    this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this._baseX, 1 - Math.pow(1 - 0.08, dt * 60));
+    this.camera.position.x = THREE.MathUtils.lerp(
+      this.camera.position.x,
+      this._baseX,
+      1 - Math.pow(1 - 0.08, dt * 60),
+    );
 
     const baseFov = GAME_CONFIG.baseFov || 65;
     const maxFov = Math.max(baseFov, GAME_CONFIG.boostFov || 78);
@@ -80,8 +85,16 @@ export class SceneManager {
       baseFov,
       maxFov,
     );
-    this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFov, 1 - Math.pow(1 - 0.05, dt * 60));
-    this.camera.updateProjectionMatrix();
+    const nextFov = THREE.MathUtils.lerp(
+      this.camera.fov,
+      targetFov,
+      1 - Math.pow(1 - 0.05, dt * 60),
+    );
+    if (Math.abs(nextFov - this._lastFov) > 0.0005) {
+      this.camera.fov = nextFov;
+      this.camera.updateProjectionMatrix();
+      this._lastFov = nextFov;
+    }
 
     if (this._shake > 0) {
       this._shake *= Math.pow(0.08, dt);
@@ -103,6 +116,7 @@ export class SceneManager {
     this.camera.position.set(0, 4.5, 7.5);
     this.camera.fov = GAME_CONFIG.baseFov || 65;
     this.camera.updateProjectionMatrix();
+    this._lastFov = this.camera.fov;
   }
 
   render() {
@@ -116,6 +130,7 @@ export class SceneManager {
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this._pixelRatioCap));
+    this._lastFov = this.camera.fov;
   }
 
   dispose() {
