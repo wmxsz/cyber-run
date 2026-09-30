@@ -1,0 +1,415 @@
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #05050f;
+      font-family: 'Rajdhani', sans-serif;
+      color: #fff;
+    }
+
+    #webgl-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    /* 사이버펑크 스캔라인 & 비네팅 효과 오버레이 */
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+      background: linear-gradient(rgba(18, 16, 26, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                  radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(5, 5, 20, 0.75) 100%);
+      background-size: 100% 4px, 100% 100%;
+    }
+
+    /* HUD UI 오버레이 */
+    #hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 30px;
+    }
+
+    .hud-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .glass-panel {
+      background: rgba(10, 15, 35, 0.65);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2), inset 0 0 10px rgba(0, 240, 255, 0.1);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 8px;
+      padding: 12px 20px;
+      pointer-events: auto;
+    }
+
+    .title-banner {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #00f0ff;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .title-banner::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #ff0077;
+      box-shadow: 0 0 8px #ff0077;
+      transform: rotate(45deg);
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 28px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.8), 0 0 20px rgba(0, 240, 255, 0.4);
+      letter-spacing: 1px;
+    }
+
+    .hp-container {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .hp-cell {
+      width: 26px;
+      height: 12px;
+      background: rgba(255, 0, 119, 0.2);
+      border: 1px solid #ff0077;
+      transform: skewX(-20deg);
+      transition: all 0.3s ease;
+    }
+    .hp-cell.active {
+      background: #ff0077;
+      box-shadow: 0 0 12px #ff0077, 0 0 4px #ff88cc;
+    }
+
+    .shield-badge {
+      display: inline-block;
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      color: #00ffaa;
+      border: 1px solid #00ffaa;
+      padding: 2px 8px;
+      border-radius: 4px;
+      box-shadow: 0 0 8px rgba(0, 255, 170, 0.5);
+      margin-top: 6px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .shield-badge.visible {
+      opacity: 1;
+    }
+
+    .hud-controls-top {
+      display: flex;
+      gap: 12px;
+      pointer-events: auto;
+    }
+    .hud-btn {
+      background: rgba(10, 15, 30, 0.7);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      color: #00f0ff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.2s;
+      outline: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hud-btn:hover {
+      background: rgba(0, 240, 255, 0.2);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+      transform: translateY(-2deg);
+    }
+
+    /* 부스트 게이지 & 스피드 표시 */
+    .hud-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      width: 100%;
+    }
+
+    .speed-gauge-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .speed-number {
+      font-family: 'Orbitron', monospace;
+      font-size: 38px;
+      font-weight: 900;
+      color: #00f0ff;
+      text-shadow: 0 0 15px #00f0ff;
+      line-height: 1;
+    }
+    .speed-unit {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 2px;
+    }
+
+    /* 모바일 터치 컨트롤러 */
+    #mobile-controls {
+      display: none;
+      position: absolute;
+      bottom: 25px;
+      left: 0;
+      width: 100%;
+      padding: 0 30px;
+      justify-content: space-between;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .mobile-touch-btn {
+      width: 68px;
+      height: 68px;
+      background: rgba(10, 20, 45, 0.7);
+      border: 2px solid #00f0ff;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+      border-radius: 50%;
+      color: #00f0ff;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      touch-action: manipulation;
+      user-select: none;
+    }
+    .mobile-touch-btn:active {
+      background: rgba(0, 240, 255, 0.4);
+      transform: scale(0.92);
+    }
+    .mobile-nav-group {
+      display: flex;
+      gap: 16px;
+    }
+
+    /* 모달 오버레이 (시작, 게임 오버) */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 5, 18, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.4s ease;
+    }
+    .modal-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .modal-card {
+      background: linear-gradient(135deg, rgba(15, 20, 45, 0.95), rgba(10, 8, 25, 0.95));
+      border: 2px solid #00f0ff;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.4), inset 0 0 20px rgba(0, 240, 255, 0.1);
+      border-radius: 12px;
+      padding: 40px 50px;
+      text-align: center;
+      max-width: 520px;
+      width: 90%;
+      position: relative;
+    }
+    .modal-card::after {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: linear-gradient(45deg, #ff0077, transparent, #00f0ff);
+      z-index: -1;
+      border-radius: 14px;
+      opacity: 0.5;
+    }
+
+    .game-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      background: linear-gradient(180deg, #fff 0%, #00f0ff 60%, #ff0077 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
+      margin-bottom: 8px;
+    }
+    .game-sub {
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      color: #ff0077;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .desc-text {
+      color: #b0c4de;
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .key-guide-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 28px;
+      text-align: left;
+    }
+    .key-item {
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .key-badge {
+      background: #00f0ff;
+      color: #050515;
+      font-weight: 900;
+      font-family: 'Orbitron', monospace;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    .primary-btn {
+      background: linear-gradient(90deg, #ff0077, #00f0ff);
+      color: #fff;
+      font-family: 'Orbitron', monospace;
+      font-size: 17px;
+      font-weight: 900;
+      padding: 15px 36px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(255, 0, 119, 0.6);
+      transition: all 0.2s ease;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      outline: none;
+    }
+    .primary-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.8);
+    }
+    .primary-btn:active {
+      transform: scale(0.98);
+    }
+
+    .game-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 24px;
+    }
+    .stat-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 14px;
+      border-radius: 8px;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #8fa0c0;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .stat-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 24px;
+      color: #00f0ff;
+      font-weight: 700;
+    }
+
+    /* 알림 토스트 (오버드라이브 등) */
+    #announcement {
+      position: absolute;
+      top: 25%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Orbitron', monospace;
+      font-size: 32px;
+      font-weight: 900;
+      color: #ffe600;
+      text-shadow: 0 0 20px #ffe600, 0 0 40px #ff7700;
+      letter-spacing: 4px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    #announcement.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    @media (max-width: 768px) {
+      #hud {
+        padding: 16px 18px;
+      }
+      .stat-value {
+        font-size: 22px;
+      }
+      .speed-number {
+        font-size: 28px;
+      }
+      .modal-card {
+        padding: 30px 24px;
+      }
+      .game-logo {
+        font-size: 28px;
+      }
+      #mobile-controls {
+        display: flex;
+      }
+    }
