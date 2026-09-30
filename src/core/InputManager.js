@@ -29,6 +29,7 @@ const KEY_MAP = {
 export class InputManager {
   constructor() {
     this.listeners = new Set();
+    this._buttonHandlers = new Map();
     this._touch = null;
     this._onKey = this._onKey.bind(this);
     this._onTouchStart = this._onTouchStart.bind(this);
@@ -52,7 +53,9 @@ export class InputManager {
   bindButton(id, action) {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener("pointerdown", (e) => { e.preventDefault(); this.emit(action); });
+    const handler = (e) => { e.preventDefault(); this.emit(action); };
+    this._buttonHandlers.set(el, handler);
+    el.addEventListener("pointerdown", handler);
   }
   _onKey(e) {
     const action = KEY_MAP[e.code];
@@ -65,13 +68,14 @@ export class InputManager {
     const target = e.target;
     if (target instanceof Element && target.closest(".mobile-touch-btn")) return;
     const t = e.changedTouches[0];
-    this._touch = { x: t.clientX, y: t.clientY, time: performance.now() };
+    this._touch = { identifier: t.identifier, x: t.clientX, y: t.clientY, time: performance.now() };
   }
   _onTouchEnd(e) {
     if (!this._touch || !e.changedTouches.length) return;
     const target = e.target;
     if (target instanceof Element && target.closest(".mobile-touch-btn")) { this._touch = null; return; }
-    const t = e.changedTouches[0];
+    const t = Array.from(e.changedTouches).find((touch) => touch.identifier === this._touch.identifier);
+    if (!t) return;
     const dx = t.clientX - this._touch.x;
     const dy = t.clientY - this._touch.y;
     const duration = performance.now() - this._touch.time;
@@ -96,6 +100,8 @@ export class InputManager {
     window.removeEventListener("touchend", this._onTouchEnd);
     window.removeEventListener("touchcancel", this._onTouchCancel);
     window.removeEventListener("mousemove", this._onMouseMove);
+    for (const [el, handler] of this._buttonHandlers) el.removeEventListener("pointerdown", handler);
+    this._buttonHandlers.clear();
     this.listeners.clear();
   }
 }
