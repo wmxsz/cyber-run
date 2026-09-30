@@ -69,6 +69,22 @@ export class PlayerObject {
       this.group.add(trim);
     }
 
+    const armorGeo = new THREE.BoxGeometry(0.24, 0.16, 1.15);
+    for (const x of [-1.02, 1.02]) {
+      const armor = new THREE.Mesh(armorGeo, darkMat);
+      armor.position.set(x, 0.66, -0.15);
+      armor.rotation.z = x < 0 ? -0.18 : 0.18;
+      armor.rotation.y = x < 0 ? -0.08 : 0.08;
+      this.group.add(armor);
+      const armorLight = new THREE.Mesh(
+        new THREE.BoxGeometry(0.055, 0.05, 0.72),
+        x < 0 ? cyanMat : pinkMat,
+      );
+      armorLight.position.set(x * 1.012, 0.75, -0.18);
+      armorLight.rotation.y = x < 0 ? -0.08 : 0.08;
+      this.group.add(armorLight);
+    }
+
     const cockpitFrame = new THREE.Mesh(
       new THREE.TorusGeometry(0.5, 0.045, 6, 16),
       cyanMat,
