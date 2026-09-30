@@ -28,6 +28,7 @@ export class GameEngine {
     this.missions = new MissionSystem();
 
     const scene = this.sceneMgr.scene;
+    this.scene = scene;
     this.road = new RoadManager(scene);
     this.city = new CityManager(scene);
     this.particles = new ParticleSystem(scene);
