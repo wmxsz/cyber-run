@@ -7,6 +7,7 @@ import { ObjectPool } from "../src/core/ObjectPool.js";
 import { GAME_CONFIG } from "../src/config/gameConfig.js";
 import { ParticleSystem } from "../src/world/ParticleSystem.js";
 import * as THREE from "three";
+import { PerformanceMonitor } from "../src/core/PerformanceMonitor.js";
 
 const finite = (value, label) => assert.ok(Number.isFinite(value), label + " must stay finite");
 
@@ -110,6 +111,24 @@ const finite = (value, label) => assert.ok(Number.isFinite(value), label + " mus
   const obstacles = { forEachActive(fn) { fn(makeBarrier()); fn(makeBarrier()); } };
   const pickups = { forEachActive() {} };
   assert.equal(collision.check(player, obstacles, pickups).obstacleHits.length, 2);
+}
+
+
+// Performance budget and long-run particle stability simulation.
+{
+  const renderer = {
+    info: {
+      render: { calls: 120, triangles: 90000, points: 0, lines: 0 },
+      memory: { textures: 8, geometries: 40, programs: 12 },
+    },
+  };
+  const monitor = new PerformanceMonitor(renderer);
+  for (let i = 0; i < 600 * 60; i++) monitor.sample(1 / 60);
+  const snapshot = monitor.getSnapshot();
+  assert.ok(snapshot.fps >= 59 && snapshot.fps <= 61, "stable simulation FPS baseline");
+  assert.ok(snapshot.drawCalls <= 180, "draw-call budget");
+  assert.ok(snapshot.triangles <= 180000, "triangle budget");
+  monitor.dispose();
 }
 
 console.log("Cyber Run smoke checks passed.");
