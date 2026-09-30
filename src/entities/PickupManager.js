@@ -59,19 +59,43 @@ export class PickupManager {
   }
   spawn(safeLanes, occupiedLanes = [], phase = 0) {
     if (!safeLanes.length || Math.random() > 0.68) return;
-    const riskReward = phase >= 2 && occupiedLanes.length > 0 && Math.random() < 0.42;
-    const lane = riskReward
+
+    const spawnOne = (lane, type) => {
+      const obj = this.pools[type].acquire();
+      obj.userData.type = type;
+      obj.userData.picked = false;
+      obj.position.set(
+        LANES[lane],
+        type === "shield" ? 1.4 : 1.2,
+        GAME_CONFIG.spawnZ - 5 - Math.random() * 25,
+      );
+      obj.rotation.set(0, 0, 0);
+      obj.scale.set(1, 1, 1);
+      this.scene.add(obj);
+      this.active.push(obj);
+    };
+
+    const safeLane = safeLanes[Math.floor(Math.random() * safeLanes.length)];
+    const riskyLane = occupiedLanes.length
       ? occupiedLanes[Math.floor(Math.random() * occupiedLanes.length)]
-      : safeLanes[Math.floor(Math.random() * safeLanes.length)];
+      : null;
+    const routeChoice = phase >= 2
+      && riskyLane !== null
+      && Math.random() < GAME_CONFIG.routeChoiceChance;
+
+    if (routeChoice) {
+      spawnOne(safeLane, "core");
+      spawnOne(riskyLane, "bonusCore");
+      return;
+    }
+
+    const riskReward = phase >= 2 && riskyLane !== null && Math.random() < 0.42;
+    const lane = riskReward ? riskyLane : safeLane;
     const hackRoute = phase >= 1 && !riskReward && Math.random() < 0.24;
-    const type = riskReward ? "bonusCore" : (hackRoute ? "hackNode" : (Math.random() < 0.18 ? "shield" : "core"));
-    const obj = this.pools[type].acquire();
-    obj.userData.type = type;
-    obj.userData.picked = false;
-    obj.position.set(LANES[lane], type === "shield" ? 1.4 : 1.2, GAME_CONFIG.spawnZ - 5 - Math.random() * 25);
-    obj.rotation.set(0, 0, 0);
-    this.scene.add(obj);
-    this.active.push(obj);
+    const type = riskReward
+      ? "bonusCore"
+      : (hackRoute ? "hackNode" : (Math.random() < 0.18 ? "shield" : "core"));
+    spawnOne(lane, type);
   }
   update(dt, speed) {
     const advance = speed * dt * 60;
