@@ -12,6 +12,7 @@ export class ObjectPool {
   release(item) {
     item.userData.hit = false;
     item.userData.passed = false;
+    item.userData.picked = false;
     this.items.push(item);
   }
 
