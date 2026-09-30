@@ -495,3 +495,29 @@ button.mobile-touch-btn {
 
 .sector-readout{margin-top:5px;font:700 9px/1.2 Orbitron,monospace;letter-spacing:1.5px;color:#00ffaa;text-shadow:0 0 8px rgba(0,255,170,.65)}
 .cyber-subline{margin-top:3px;font:700 8px/1 Orbitron,monospace;letter-spacing:1.2px;color:rgba(0,240,255,.65)}
+
+
+/* Combo timing feedback: makes the existing chain window readable without changing scoring. */
+.combo-timer {
+  width: 100%;
+  height: 3px;
+  margin-top: 5px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.combo-timer-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffe600, #ff0077);
+  box-shadow: 0 0 8px rgba(255,230,0,0.8);
+  opacity: 0;
+  transition: width 0.08s linear, opacity 0.15s ease;
+}
+.combo-timer-fill.active {
+  opacity: 1;
+}
+@media (max-width: 768px) {
+  .combo-timer { margin-top: 4px; }
+}

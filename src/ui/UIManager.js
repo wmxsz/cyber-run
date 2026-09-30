@@ -8,6 +8,7 @@ export class UIManager {
     this.shield = this._el("hud-shield");
     this.boost = this._el("hud-boost");
     this.combo = this._el("hud-combo");
+    this.comboTimer = this._el("hud-combo-timer");
     this.pauseButton = this._el("btn-pause");
     this.announcement = this._el("announcement");
     this.startModal = this._el("start-modal");
@@ -36,7 +37,12 @@ export class UIManager {
     if (this.speed) this.speed.textContent = String(Math.floor(140 + engine.difficulty.speed * 60));
     if (this.shield) this.shield.classList.toggle("visible", engine.hasShield);
     if (this.boost) this.boost.style.width = `${engine.boostEnergy}%`;
-    if (this.combo) this.combo.textContent = engine.score.combo > 1 ? `x${Math.min(5, 1 + Math.floor(engine.score.combo / 4))} COMBO` : "COMBO READY";
+    if (this.combo) this.combo.textContent = engine.score.combo > 1 ? `x${Math.min(5, 1 + Math.floor(engine.score.combo / 4))} COMBO` : (engine.score.combo === 1 ? "CHAIN 1" : "COMBO READY");
+    if (this.comboTimer) {
+      const ratio = engine.score.combo > 0 ? Math.max(0, Math.min(1, engine.score.comboTimer / 2.8)) : 0;
+      this.comboTimer.style.width = `${ratio * 100}%`;
+      this.comboTimer.classList.toggle("active", ratio > 0);
+    }
     if (this.pauseButton) this.pauseButton.textContent = engine.paused ? "▶" : "Ⅱ";
     if (this.phase) this.phase.textContent = engine.difficulty.phaseName || "NIGHT CITY";
   }

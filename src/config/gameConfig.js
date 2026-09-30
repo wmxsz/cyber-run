@@ -25,8 +25,6 @@ export const GAME_CONFIG = {
   boostSpeedMultiplier: 1.48,
   phaseThresholds: [0, 900, 2200, 4200, 7000],
   phaseNames: ["NIGHT CITY", "NEON DISTRICT", "SYNTH GRID", "QUANTUM CORE", "CYBER NEXUS"],
-  phaseThresholds: [0, 900, 2200, 4200, 7000],
-  phaseNames: ["NIGHT CITY", "NEON DISTRICT", "SYNTH GRID", "QUANTUM CORE", "CYBER NEXUS"],
 };
 
 export const COLORS = {
@@ -37,7 +35,6 @@ export const COLORS = {
   yellow: 0xffea00,
   red: 0xff0055,
   green: 0x00ffaa,
-  violet: 0x8a2be2,
   violet: 0x8a2be2,
 };
 
