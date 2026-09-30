@@ -147,3 +147,26 @@ console.log("Cyber Run smoke checks passed.");
   assert.equal(particles.items.length, 0, "particle pool should reclaim short-lived effects");
   particles.dispose();
 }
+
+// Per-effect particle caps must remain bounded under a burst storm.
+{
+  const scene = new THREE.Scene();
+  const particles = new ParticleSystem(scene);
+  for (let i = 0; i < 20; i++) {
+    particles.burst(0, 0, 0, 0xff0077, 25);
+    particles.streak(0, 0, 0, 0x00f0ff, 12, 2);
+    particles.flash(0, 0, 0, 0xffffff, 1.5);
+    particles.shockwave(0, 0, 0, 0x00ffaa, 2);
+    particles.exhaust(0, 0, 0, 4);
+  }
+  assert.ok(particles.kindCounts.burst <= particles.kindLimits.burst);
+  assert.ok(particles.kindCounts.streak <= particles.kindLimits.streak);
+  assert.ok(particles.kindCounts.flash <= particles.kindLimits.flash);
+  assert.ok(particles.kindCounts.shockwave <= particles.kindLimits.shockwave);
+  assert.ok(particles.kindCounts.exhaust <= particles.kindLimits.exhaust);
+  assert.ok(particles.items.length <= particles.maxItems);
+  particles.clear();
+  assert.equal(particles.items.length, 0);
+  assert.deepEqual(particles.kindCounts, { burst: 0, exhaust: 0, streak: 0, shockwave: 0, flash: 0 });
+  particles.dispose();
+}
