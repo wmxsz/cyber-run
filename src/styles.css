@@ -492,3 +492,6 @@ button.mobile-touch-btn {
     gap: 8px;
   }
 }
+
+.sector-readout{margin-top:5px;font:700 9px/1.2 Orbitron,monospace;letter-spacing:1.5px;color:#00ffaa;text-shadow:0 0 8px rgba(0,255,170,.65)}
+.cyber-subline{margin-top:3px;font:700 8px/1 Orbitron,monospace;letter-spacing:1.2px;color:rgba(0,240,255,.65)}
