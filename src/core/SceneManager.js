@@ -9,7 +9,7 @@ export class SceneManager {
       powerPreference: "high-performance",
     });
     this._isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
-    this._pixelRatioCap = this._isMobile ? 1.5 : 2;
+    this._pixelRatioCap = this._isMobile ? 1.75 : 2;
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this._pixelRatioCap));
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setClearColor(COLORS.bg, 1);
