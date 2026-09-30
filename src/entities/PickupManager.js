@@ -17,6 +17,14 @@ function makeCore() {
   g.userData.halo = halo;
   return g;
 }
+function makeBonusCore() {
+  const g = makeCore();
+  const core = g.children[0];
+  const halo = g.children[1];
+  core.material = new THREE.MeshStandardMaterial({ color: COLORS.orange, emissive: COLORS.orange, emissiveIntensity: 1.8, metalness: 0.9, roughness: 0.1 });
+  halo.material = new THREE.MeshBasicMaterial({ color: COLORS.orange, transparent: true, opacity: 0.82 });
+  return g;
+}
 function makeShield() {
   const g = new THREE.Group();
   const outer = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8), new THREE.MeshBasicMaterial({ color: COLORS.green, wireframe: true }));
@@ -31,12 +39,15 @@ export class PickupManager {
   constructor(scene) {
     this.scene = scene;
     this.active = [];
-    this.pools = { core: new ObjectPool(makeCore, 4), shield: new ObjectPool(makeShield, 2) };
+    this.pools = { core: new ObjectPool(makeCore, 4), bonusCore: new ObjectPool(makeBonusCore, 3), shield: new ObjectPool(makeShield, 2) };
   }
-  spawn(safeLanes) {
+  spawn(safeLanes, occupiedLanes = [], phase = 0) {
     if (!safeLanes.length || Math.random() > 0.68) return;
-    const lane = safeLanes[Math.floor(Math.random() * safeLanes.length)];
-    const type = Math.random() < 0.18 ? "shield" : "core";
+    const riskReward = phase >= 2 && occupiedLanes.length > 0 && Math.random() < 0.42;
+    const lane = riskReward
+      ? occupiedLanes[Math.floor(Math.random() * occupiedLanes.length)]
+      : safeLanes[Math.floor(Math.random() * safeLanes.length)];
+    const type = riskReward ? "bonusCore" : (Math.random() < 0.18 ? "shield" : "core");
     const obj = this.pools[type].acquire();
     obj.userData.type = type;
     obj.userData.picked = false;
@@ -52,7 +63,7 @@ export class PickupManager {
       p.position.z += advance;
       p.rotation.y += dt * 2.5;
       p.rotation.x += dt * 1.2;
-      if (p.userData.type === "core" && p.userData.halo) {
+      if ((p.userData.type === "core" || p.userData.type === "bonusCore") && p.userData.halo) {
         p.userData.halo.rotation.z += dt * 3.5;
         p.userData.halo.scale.setScalar(1 + Math.sin(performance.now() * 0.009) * 0.16);
         p.userData.halo.material.opacity = 0.48 + Math.sin(performance.now() * 0.012) * 0.22;
