@@ -8,7 +8,7 @@ on:
       - "src/**"
       - "index.html"
       - "package.json"
-      - "capacitor.config.js"
+      - "capacitor.config.json"
       - ".github/workflows/android-apk.yml"
 
 permissions:
