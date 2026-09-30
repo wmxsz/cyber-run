@@ -143,12 +143,13 @@ export class CityManager {
     this.scene.add(this.speedLines);
   }
 
-  update(speed, phase = 0) {
+  update(speed, phase = 0, dt = 1 / 60) {
     this._phase = phase;
     const positions = this.speedLines?.geometry.attributes.position.array;
     if (positions) {
       for (let i = 2; i < positions.length; i += 6) {
-        positions[i] += speed * 2.8; positions[i + 3] += speed * 2.8;
+        const advance = speed * 2.8 * dt * 60;
+        positions[i] += advance; positions[i + 3] += advance;
         if (positions[i] > 10) {
           const z = -380 - Math.random() * 40;
           positions[i] = z; positions[i + 3] = z + 8;
@@ -166,7 +167,7 @@ export class CityManager {
     }
     const droneBoost = 0.8 + Math.min(0.7, phase * 0.14);
     for (const drone of this.drones) {
-      drone.position.z += speed * droneBoost * drone.userData.speed;
+      drone.position.z += speed * droneBoost * drone.userData.speed * dt * 60;
       const wave = Math.sin(t * (1.4 + phase * 0.12) + drone.userData.phase);
       drone.position.y += wave * 0.012;
       drone.position.x += Math.cos(t * 0.7 + drone.userData.phase) * (0.012 + phase * 0.004);
