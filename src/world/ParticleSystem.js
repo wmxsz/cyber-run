@@ -8,18 +8,24 @@ export class ParticleSystem {
     this.materials = new Map();
     this.group = new THREE.Group();
     scene.add(this.group);
-    this.burstGeometry = new THREE.IcosahedronGeometry(0.16, 0);
-    this.exhaustGeometry = new THREE.TetrahedronGeometry(0.13, 0);
-    this.streakGeometry = new THREE.BoxGeometry(0.055, 0.055, 1);
+    this.burstGeometry = new THREE.TetrahedronGeometry(0.11, 0);
+    this.exhaustGeometry = new THREE.ConeGeometry(0.075, 0.24, 6, 1, true);
+    this.streakGeometry = new THREE.CylinderGeometry(0.018, 0.006, 1, 8, 1, true);
     this.shockwaveGeometry = new THREE.TorusGeometry(0.72, 0.045, 6, 24);
-    this.flashGeometry = new THREE.OctahedronGeometry(0.42, 0);
+    this.flashGeometry = new THREE.SphereGeometry(0.26, 8, 6);
     this.maxItems = 180;
   }
 
   _material(color) {
     let material = this.materials.get(color);
     if (!material) {
-      material = new THREE.MeshBasicMaterial({ color });
+      material = new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.72,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
       this.materials.set(color, material);
     }
     return material;
@@ -71,8 +77,8 @@ export class ParticleSystem {
     for (let i = 0; i < allowed; i++) {
       const p = this._acquire("streak", color);
       p.position.set(x + (Math.random() - 0.5) * 2.2, y + (Math.random() - 0.5) * 0.45, z + (Math.random() - 0.5) * 0.8);
-      p.rotation.set(0, 0, 0);
-      p.scale.set(0.7 + Math.random() * 0.8, 0.7 + Math.random() * 0.5, length * (0.65 + Math.random() * 0.7));
+      p.rotation.set(Math.PI / 2, 0, 0);
+      p.scale.set(0.9 + Math.random() * 0.45, 0.9 + Math.random() * 0.3, length * (0.65 + Math.random() * 0.7));
       p.userData.baseScaleZ = p.scale.z;
       p.userData.life = 0.34 + Math.random() * 0.12;
       p.userData.decay = 0.055;
@@ -90,6 +96,7 @@ export class ParticleSystem {
     p.position.set(x, y, z);
     p.rotation.set(0, 0, 0);
     p.scale.setScalar(size);
+    p.userData.baseScale = size;
     p.userData.life = 0.16;
     p.userData.decay = 0.11;
     p.userData.vx = 0;
@@ -146,7 +153,7 @@ export class ParticleSystem {
       p.rotation.y += (p.userData.ry || 0) * frameScale;
       p.userData.life -= p.userData.decay * frameScale;
       if (p.geometry === this.flashGeometry) {
-        const pulse = Math.max(p.userData.life, 0) * 1.8;
+        const pulse = Math.max(p.userData.life, 0) * p.userData.baseScale * 1.8;
         p.scale.setScalar(pulse);
       } else if (p.geometry === this.shockwaveGeometry) {
         p.scale.setScalar((1 - p.userData.life) * p.userData.maxScale);
