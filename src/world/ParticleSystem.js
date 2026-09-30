@@ -6,6 +6,8 @@ export class ParticleSystem {
     this.items = [];
     this.pool = [];
     this.materials = new Map();
+    this.group = new THREE.Group();
+    scene.add(this.group);
     this.burstGeometry = new THREE.BoxGeometry(0.18, 0.18, 0.18);
     this.exhaustGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.2);
     this.maxItems = 160;
@@ -26,7 +28,7 @@ export class ParticleSystem {
     p.material = this._material(color);
     p.visible = true;
     p.scale.setScalar(1);
-    this.scene.add(p);
+    this.group.add(p);
     this.items.push(p);
     return p;
   }
@@ -34,7 +36,7 @@ export class ParticleSystem {
   _releaseAt(index) {
     const p = this.items[index];
     p.visible = false;
-    p.removeFromParent();
+    p.visible = false;
     this.pool.push(p);
     this.items.splice(index, 1);
   }
@@ -69,7 +71,7 @@ export class ParticleSystem {
   clear() {
     for (const p of this.items) {
       p.visible = false;
-      p.removeFromParent();
+      p.visible = false;
       this.pool.push(p);
     }
     this.items.length = 0;
@@ -89,13 +91,14 @@ export class ParticleSystem {
   }
 
   dispose() {
-    for (const p of this.items) p.removeFromParent();
-    for (const p of this.pool) p.removeFromParent();
+    for (const p of this.items) p.visible = false;
+    for (const p of this.pool) p.visible = false;
     this.items.length = 0;
-    this.pool.length = 0;
+    this.group.removeFromParent();
     this.burstGeometry.dispose();
     this.exhaustGeometry.dispose();
     for (const material of this.materials.values()) material.dispose();
     this.materials.clear();
+    this.group = null;
   }
 }
