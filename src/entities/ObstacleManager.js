@@ -27,9 +27,9 @@ export class ObstacleManager {
       const r = Math.random();
       let type;
       if (phase >= 4) {
-        type = r < 0.34 ? "mine" : r < 0.58 ? "highLaser" : r < 0.82 ? "barrier" : "block";
+        type = r < 0.26 ? "mine" : r < 0.46 ? "pulseGate" : r < 0.66 ? "highLaser" : r < 0.84 ? "barrier" : "block";
       } else if (phase >= 2) {
-        type = r < 0.30 ? "barrier" : r < 0.55 ? "highLaser" : r < 0.78 ? "mine" : "block";
+        type = r < 0.25 ? "barrier" : r < 0.48 ? "highLaser" : r < 0.70 ? "mine" : r < 0.86 ? "pulseGate" : "block";
       } else {
         type = r < 0.28 ? "barrier" : r < 0.48 ? "highLaser" : r < 0.73 ? "mine" : "block";
       }
