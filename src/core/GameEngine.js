@@ -59,6 +59,8 @@ export class GameEngine {
     this._hunterX = 0;
     this._hunter = null;
     this._comboMilestones = new Set();
+    this._hackNodes = 0;
+    this._ghostTime = 0;
     this._ui = null;
 
     this.input.onAction((action, payload) => this._onAction(action, payload));
@@ -114,6 +116,8 @@ export class GameEngine {
     this._hunterX = 0;
     this._hunter = null;
     this._comboMilestones.clear();
+    this._hackNodes = 0;
+    this._ghostTime = 0;
     this.score.setEventMultiplier(1);
 
     this._ui?.hideStart();
@@ -194,6 +198,14 @@ export class GameEngine {
       }
     }
 
+    if (this._ghostTime > 0) {
+      this._ghostTime -= dt;
+      if (this._ghostTime <= 0) {
+        this._refreshEventMultiplier();
+        this._ui?.announce("GHOST PROTOCOL // OFFLINE");
+      }
+    }
+
     if (this.boosting) {
       this.boostEnergy = Math.max(0, this.boostEnergy - GAME_CONFIG.boostDrain * dt);
       if (this.boostEnergy <= 0) { this.boosting = false; this.player.setBoost(false); }
@@ -245,7 +257,14 @@ export class GameEngine {
 
     if (result.obstacleHit) {
       this.obstacles.remove(result.obstacleHit);
-      this.takeDamage();
+      if (this._ghostTime > 0) {
+        const p = this.player.group.position;
+        this.score.ghostBreak();
+        this.particles.burst(p.x, p.y + 0.5, p.z, 0x8a2be2, 20);
+        this._ui?.announce("GHOST PHASE // BYPASSED");
+      } else {
+        this.takeDamage();
+      }
     }
 
     for (const item of result.nearMisses) {
@@ -269,7 +288,22 @@ export class GameEngine {
       const x = pickup.position.x;
       const y = pickup.position.y;
       const z = pickup.position.z;
-      if (pickup.userData.type === "shield") {
+      if (pickup.userData.type === "hackNode") {
+        this._hackNodes += 1;
+        const bonus = this.score.hackNode();
+        this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.hackNodeBoostGain);
+        this.audio.playCollect();
+        this.particles.burst(x, y, z, 0x8a2be2, 22);
+        if (this._hackNodes >= GAME_CONFIG.ghostProtocolTarget) {
+          this._hackNodes = 0;
+          this._ghostTime = GAME_CONFIG.ghostProtocolDuration;
+          this._refreshEventMultiplier();
+          this.audio.playPowerup();
+          this._ui?.announce("GHOST PROTOCOL // " + GAME_CONFIG.ghostProtocolDuration + " SEC // SCORE x" + GAME_CONFIG.ghostProtocolMultiplier);
+        } else {
+          this._ui?.announce("HACK NODE +" + Math.floor(bonus.points) + " // LINK " + this._hackNodes + "/" + GAME_CONFIG.ghostProtocolTarget);
+        }
+      } else if (pickup.userData.type === "shield") {
         this.hasShield = true;
         this.player.setShield(true);
         this.audio.playPowerup();
@@ -309,7 +343,8 @@ export class GameEngine {
   _refreshEventMultiplier() {
     const storm = this._eventTime > 0 ? 1.75 : 1;
     const hunter = this._hunterTime > 0 ? 1.35 : 1;
-    this.score.setEventMultiplier(storm * hunter);
+    const ghost = this._ghostTime > 0 ? GAME_CONFIG.ghostProtocolMultiplier : 1;
+    this.score.setEventMultiplier(storm * hunter * ghost);
   }
 
   _resolveHunterEncounter() {
