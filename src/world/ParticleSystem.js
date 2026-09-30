@@ -12,6 +12,7 @@ export class ParticleSystem {
     this.exhaustGeometry = new THREE.TetrahedronGeometry(0.13, 0);
     this.streakGeometry = new THREE.BoxGeometry(0.055, 0.055, 1);
     this.shockwaveGeometry = new THREE.TorusGeometry(0.72, 0.045, 6, 24);
+    this.flashGeometry = new THREE.OctahedronGeometry(0.42, 0);
     this.maxItems = 180;
   }
 
@@ -30,6 +31,7 @@ export class ParticleSystem {
       kind === "exhaust" ? this.exhaustGeometry
       : kind === "streak" ? this.streakGeometry
       : kind === "shockwave" ? this.shockwaveGeometry
+      : kind === "flash" ? this.flashGeometry
       : this.burstGeometry;
     p.material = this._material(color);
     p.visible = true;
@@ -81,6 +83,21 @@ export class ParticleSystem {
     }
   }
 
+  flash(x, y, z, color = 0xffffff, size = 1.5) {
+    if (this.items.length >= this.maxItems) return;
+    const p = this._acquire("flash", color);
+    p.position.set(x, y, z);
+    p.rotation.set(0, 0, 0);
+    p.scale.setScalar(size);
+    p.userData.life = 0.16;
+    p.userData.decay = 0.11;
+    p.userData.vx = 0;
+    p.userData.vy = 0;
+    p.userData.vz = 0;
+    p.userData.rx = 0;
+    p.userData.ry = 0;
+  }
+
   shockwave(x, y, z, color = 0x00f0ff, size = 2.2) {
     if (this.items.length >= this.maxItems) return;
     const p = this._acquire("shockwave", color);
@@ -127,7 +144,10 @@ export class ParticleSystem {
       p.rotation.x += (p.userData.rx || 0) * frameScale;
       p.rotation.y += (p.userData.ry || 0) * frameScale;
       p.userData.life -= p.userData.decay * frameScale;
-      if (p.geometry === this.shockwaveGeometry) {
+      if (p.geometry === this.flashGeometry) {
+        const pulse = Math.max(p.userData.life, 0) * 1.8;
+        p.scale.setScalar(pulse);
+      } else if (p.geometry === this.shockwaveGeometry) {
         p.scale.setScalar((1 - p.userData.life) * p.userData.maxScale);
       } else if (p.geometry === this.streakGeometry) {
         p.scale.z *= 0.965;
@@ -149,6 +169,7 @@ export class ParticleSystem {
     this.exhaustGeometry.dispose();
     this.streakGeometry.dispose();
     this.shockwaveGeometry.dispose();
+    this.flashGeometry.dispose();
     for (const material of this.materials.values()) material.dispose();
     this.materials.clear();
     this.group = null;
