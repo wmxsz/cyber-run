@@ -10,7 +10,9 @@ export class ParticleSystem {
     scene.add(this.group);
     this.burstGeometry = new THREE.IcosahedronGeometry(0.16, 0);
     this.exhaustGeometry = new THREE.TetrahedronGeometry(0.13, 0);
-    this.maxItems = 160;
+    this.streakGeometry = new THREE.BoxGeometry(0.055, 0.055, 1);
+    this.shockwaveGeometry = new THREE.TorusGeometry(0.72, 0.045, 6, 24);
+    this.maxItems = 180;
   }
 
   _material(color) {
@@ -24,7 +26,11 @@ export class ParticleSystem {
 
   _acquire(kind, color) {
     const p = this.pool.pop() || new THREE.Mesh();
-    p.geometry = kind === "exhaust" ? this.exhaustGeometry : this.burstGeometry;
+    p.geometry =
+      kind === "exhaust" ? this.exhaustGeometry
+      : kind === "streak" ? this.streakGeometry
+      : kind === "shockwave" ? this.shockwaveGeometry
+      : this.burstGeometry;
     p.material = this._material(color);
     p.visible = true;
     p.scale.setScalar(1);
@@ -58,6 +64,38 @@ export class ParticleSystem {
     }
   }
 
+  streak(x, y, z, color = 0x00f0ff, count = 6, length = 1.8) {
+    const allowed = Math.min(count, this.maxItems - this.items.length);
+    for (let i = 0; i < allowed; i++) {
+      const p = this._acquire("streak", color);
+      p.position.set(x + (Math.random() - 0.5) * 2.2, y + (Math.random() - 0.5) * 0.45, z + (Math.random() - 0.5) * 0.8);
+      p.scale.set(0.7 + Math.random() * 0.8, 0.7 + Math.random() * 0.5, length * (0.65 + Math.random() * 0.7));
+      p.userData.life = 0.34 + Math.random() * 0.12;
+      p.userData.decay = 0.055;
+      p.userData.vx = (Math.random() - 0.5) * 0.18;
+      p.userData.vy = (Math.random() - 0.5) * 0.12;
+      p.userData.vz = 0.55 + Math.random() * 0.5;
+      p.userData.rx = 0;
+      p.userData.ry = 0;
+    }
+  }
+
+  shockwave(x, y, z, color = 0x00f0ff, size = 2.2) {
+    if (this.items.length >= this.maxItems) return;
+    const p = this._acquire("shockwave", color);
+    p.position.set(x, y, z);
+    p.rotation.x = Math.PI / 2;
+    p.scale.setScalar(0.15);
+    p.userData.life = 1;
+    p.userData.decay = 0.045;
+    p.userData.vx = 0;
+    p.userData.vy = 0;
+    p.userData.vz = 0;
+    p.userData.rx = 0;
+    p.userData.ry = 0;
+    p.userData.maxScale = size;
+  }
+
   exhaust(x, y, z, speed) {
     if (this.items.length >= this.maxItems) return;
     const p = this._acquire("exhaust", 0x00f0ff);
@@ -88,7 +126,15 @@ export class ParticleSystem {
       p.rotation.x += (p.userData.rx || 0) * frameScale;
       p.rotation.y += (p.userData.ry || 0) * frameScale;
       p.userData.life -= p.userData.decay * frameScale;
-      p.scale.setScalar(Math.max(p.userData.life, 0.01));
+      if (p.geometry === this.shockwaveGeometry) {
+        p.scale.setScalar((1 - p.userData.life) * p.userData.maxScale);
+      } else if (p.geometry === this.streakGeometry) {
+        p.scale.z *= 0.965;
+        p.scale.x *= 0.985;
+        p.scale.y *= 0.985;
+      } else {
+        p.scale.setScalar(Math.max(p.userData.life, 0.01));
+      }
       if (p.userData.life <= 0) this._releaseAt(i);
     }
   }
@@ -100,6 +146,8 @@ export class ParticleSystem {
     this.group.removeFromParent();
     this.burstGeometry.dispose();
     this.exhaustGeometry.dispose();
+    this.streakGeometry.dispose();
+    this.shockwaveGeometry.dispose();
     for (const material of this.materials.values()) material.dispose();
     this.materials.clear();
     this.group = null;
