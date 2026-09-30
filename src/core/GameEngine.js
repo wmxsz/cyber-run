@@ -159,7 +159,7 @@ export class GameEngine {
       const target = LANES[this._hunterLane];
       this._hunterX += (target - this._hunterX) * 0.08;
       this._hunter.position.x = this._hunterX;
-      const gap = this._hunterElite ? GAME_CONFIG.eliteHunterGap : 3.8;
+      const gap = this._hunterElite ? GAME_CONFIG.eliteHunterGap : (this._lastPhase >= 3 ? 4.5 : 3.8);
       const duration = this._hunterElite ? GAME_CONFIG.eliteHunterDuration : GAME_CONFIG.hunterDuration;
       const approach = this._hunterElite ? 0.48 : 0.42;
       this._hunter.position.z = Math.max(0.6, gap - (duration - this._hunterTime) * approach) + Math.sin(this._hunterTime * 5) * 0.12;
@@ -181,6 +181,7 @@ export class GameEngine {
         this._hunterX = this.player.group.position.x;
         this._hunter = this._makeHunter(this._hunterElite);
         this.scene.add(this._hunter);
+        this._ui?.announce(this._hunterElite ? "PURSUER // LOCKED" : "HUNTER DRONE // LOCKED");
         this._refreshEventMultiplier();
         this._ui?.announce(this._hunterElite ? "PURSUER // OVERDRIVE REQUIRED // SCORE x1.20" : "HUNTER DRONE // EVADE // SCORE x1.20");
       }
@@ -196,7 +197,8 @@ export class GameEngine {
       this._eventTimer -= dt;
       if (this._eventTimer <= 0 && this._lastPhase >= 1) {
         this._eventTime = 5;
-        this._eventTimer = 16 + Math.random() * 8;
+        const stormChance = GAME_CONFIG.phaseStormChance?.[this._lastPhase] || 0;
+        this._eventTimer = (stormChance > 0 ? 13 : 16) + Math.random() * (stormChance > 0 ? 7 : 8);
         this._refreshEventMultiplier();
         this.audio.playPowerup();
         const p = this.player.group.position;
@@ -223,6 +225,7 @@ export class GameEngine {
       this._lastPhase = spawn.phase;
       if (spawn.phase > 0) {
         this.audio.playPowerup();
+        this.sceneMgr.shake(0.18 + spawn.phase * 0.035);
         const p = this.player.group.position;
         this.particles.burst(p.x, p.y + 0.5, p.z, 0x00f0ff, 18);
         this._ui?.announce("SECTOR // " + spawn.phaseName);
@@ -238,6 +241,7 @@ export class GameEngine {
     }
 
     const speed = this._effectiveSpeed();
+    this.sceneMgr.setSpeedFeel(this.difficulty.speed, this.boosting, spawn.phase);
     this.score.update(dt, speed, this.hasShield, this.boosting);
     const missionProgress = this.missions.update(this.score.score);
     if (missionProgress) this._completeMission(missionProgress);
@@ -413,6 +417,7 @@ export class GameEngine {
     const p = this.player.group.position;
     this.particles.burst(p.x, p.y + 0.7, p.z, 0xffe600, 18 + index * 4);
     this.audio.playPowerup();
+    this.sceneMgr.shake(0.08 + index * 0.015);
     this._ui?.announce("COMBO " + bonus.combo + " // x" + bonus.multiplier + " // +" + reward + " BOOST");
   }
 
@@ -438,6 +443,7 @@ export class GameEngine {
     if (this.boostEnergy < 10) { this._ui?.announce("BOOST CHARGE LOW"); return; }
     this.boosting = true;
     this.player.setBoost(true);
+    this.sceneMgr.shake(0.12);
     this.audio.playPowerup();
     this._ui?.announce("OVERDRIVE ONLINE");
   }
