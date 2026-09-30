@@ -56,6 +56,8 @@ export class SceneManager {
     this._eventVisualTarget = 0;
     this._shakeBase = this.camera.position.clone();
     this._lastFov = this.camera.fov;
+    this._cameraRoll = 0;
+    this._cameraYaw = 0;
 
     this._resize = this._resize.bind(this);
     window.addEventListener("resize", this._resize);
@@ -94,7 +96,7 @@ export class SceneManager {
   }
 
   setMouseOffset(x) {
-    this._baseX = THREE.MathUtils.lerp(this._baseX, x * 1.5, 0.05);
+    this._baseX = THREE.MathUtils.lerp(this._baseX, x * 1.35, 0.06);
   }
 
   shake(intensity = 0.4) {
@@ -134,6 +136,15 @@ export class SceneManager {
     this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this._baseX, cameraAlpha);
     this.camera.position.y = THREE.MathUtils.lerp(this.camera.position.y, targetY, cameraAlpha);
     this.camera.position.z = THREE.MathUtils.lerp(this.camera.position.z, targetZ, cameraAlpha);
+
+    // Small banking/yaw feedback makes lane changes read immediately without adding geometry or passes.
+    const targetRoll = THREE.MathUtils.clamp(-this._baseX * 0.010 - this._speedFeel * this._baseX * 0.004, -0.045, 0.045);
+    const targetYaw = THREE.MathUtils.clamp(-this._baseX * 0.006, -0.028, 0.028);
+    const feelAlpha = 1 - Math.pow(1 - 0.16, dt * 60);
+    this._cameraRoll = THREE.MathUtils.lerp(this._cameraRoll, targetRoll, feelAlpha);
+    this._cameraYaw = THREE.MathUtils.lerp(this._cameraYaw, targetYaw, feelAlpha);
+    this.camera.rotation.z = this._cameraRoll;
+    this.camera.rotation.y = this._cameraYaw;
 
     const baseFov = GAME_CONFIG.baseFov || 65;
     const maxFov = Math.max(baseFov, GAME_CONFIG.boostFov || 78);
@@ -178,6 +189,9 @@ export class SceneManager {
     this.camera.fov = GAME_CONFIG.baseFov || 65;
     this.camera.updateProjectionMatrix();
     this._lastFov = this.camera.fov;
+    this._cameraRoll = 0;
+    this._cameraYaw = 0;
+    this.camera.rotation.set(0, 0, 0);
   }
 
   render() {
