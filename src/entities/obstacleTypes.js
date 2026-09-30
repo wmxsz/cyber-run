@@ -161,13 +161,13 @@ export const OBSTACLE_TYPES = {
     hitbox: { x: 1.45, y: 1.25, z: 1.2 },
     blocksAir: false,
     blocksGround: true,
-    update(obj, dt) {
+    update(obj, time, dt) {
       obj.rotation.y += dt * 1.5;
       if (obj.userData.ring) {
         obj.userData.ring.rotation.z += dt * 1.8;
-        obj.userData.ring.scale.setScalar(1 + Math.sin(performance.now() * 0.006) * 0.08);
+        obj.userData.ring.scale.setScalar(1 + Math.sin(time * 6) * 0.08);
       }
-      if (obj.userData.pulse) obj.userData.pulse.scale.setScalar(1 + Math.sin(performance.now() * 0.01) * 0.05);
+      if (obj.userData.pulse) obj.userData.pulse.scale.setScalar(1 + Math.sin(time * 10) * 0.05);
     },
   },
   block: {
