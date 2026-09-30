@@ -155,6 +155,41 @@ export class CityManager {
     this.scene.add(this.speedLines);
   }
 
+  dispose() {
+    const nodes = [
+      ...this.buildings,
+      ...this.holograms,
+      ...this.drones,
+      this.sunRing,
+      this.speedLines,
+    ];
+    const geometries = new Set();
+    const materials = new Set();
+    const textures = new Set();
+    for (const node of nodes) {
+      if (!node) continue;
+      node.traverse?.((child) => {
+        if (!child.isMesh && !child.isLineSegments) return;
+        if (child.geometry) geometries.add(child.geometry);
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        for (const material of mats) {
+          if (!material) continue;
+          materials.add(material);
+          if (material.map) textures.add(material.map);
+        }
+      });
+      node.removeFromParent?.();
+    }
+    geometries.forEach((geometry) => geometry.dispose());
+    materials.forEach((material) => material.dispose());
+    textures.forEach((texture) => texture.dispose());
+    this.buildings = [];
+    this.holograms = [];
+    this.drones = [];
+    this.sunRing = null;
+    this.speedLines = null;
+  }
+
   update(speed, phase = 0, dt = 1 / 60) {
     this._phase = phase;
     const positions = this.speedLines?.geometry.attributes.position.array;
