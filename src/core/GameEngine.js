@@ -147,7 +147,7 @@ export class GameEngine {
 
     if (!this.active || this.over) {
       this.city.update(0.12, this._lastPhase, dt);
-      this.particles.update();
+      this.particles.update(dt);
       this._ui?.update(this);
       return;
     }
