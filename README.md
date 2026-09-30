@@ -57,3 +57,22 @@ npm run build
 ```
 
 当前使用 Three.js 0.186.0 + Vite 8.3.1，并采用 ES Modules。
+
+
+## Gameplay improvements
+
+This version keeps the project's cyberpunk identity while adopting proven endless-runner patterns:
+
+- Three-lane movement with jump **and slide** obstacle classes.
+- Reachable obstacle patterns: the generator keeps a safe lane and limits abrupt lane-to-lane jumps.
+- Near-miss scoring and combo chains reward precise play instead of only survival.
+- Collecting energy cores charges **Overdrive**, a temporary speed boost.
+- Pause/resume works on desktop and mobile.
+- Obstacles and collectibles use object pools to reduce runtime allocations and garbage-collection spikes.
+- Swipe controls now support left/right, jump, and slide.
+
+### Reference projects reviewed
+
+We compared the project against actively maintained / high-interest runner references including Unity Technologies' Endless Runner sample and Evan Bacon's Sunset Cyberspace, plus MIT-licensed Three.js runner implementations. We use compatible licensed code where appropriate and implement the gameplay/architecture ideas ourselves when a reference does not provide a reusable license.
+
+The original runner foundation remains credited to the MIT-licensed cyberpunk runner used earlier in this project.
