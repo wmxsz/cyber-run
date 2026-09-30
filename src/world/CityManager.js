@@ -196,11 +196,22 @@ export class CityManager {
       this.scene.add(panel); this.holograms.push(panel);
     });
 
+    // A small set of drone silhouettes prevents the skyline traffic from looking cloned.
+    const droneBodyGeos = [
+      new THREE.BoxGeometry(1.5, 0.25, 0.7),
+      new THREE.OctahedronGeometry(0.72, 0),
+      new THREE.CylinderGeometry(0.58, 0.72, 1.5, 6),
+    ];
     for (let i = 0; i < 8; i++) {
       const drone = new THREE.Group();
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0b1022, metalness: 0.92, roughness: 0.16 });
-      const glowMat = new THREE.MeshBasicMaterial({ color: i % 2 ? COLORS.pink : COLORS.cyan });
-      const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.25, 0.7), bodyMat);
+      const variant = i % droneBodyGeos.length;
+      const accent = i % 2 ? COLORS.pink : COLORS.cyan;
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0x0b1022, metalness: 0.92, roughness: 0.16, flatShading: true,
+      });
+      const glowMat = new THREE.MeshBasicMaterial({ color: accent });
+      const body = new THREE.Mesh(droneBodyGeos[variant], bodyMat);
+      if (variant === 2) body.rotation.z = Math.PI / 2;
       body.castShadow = false;
       drone.add(body);
 
@@ -209,7 +220,11 @@ export class CityManager {
       nose.position.z = -0.55;
       drone.add(nose);
 
-      const wing = new THREE.Mesh(new THREE.BoxGeometry(2.25, 0.08, 0.42), bodyMat);
+      const wing = new THREE.Mesh(
+        new THREE.BoxGeometry(variant === 1 ? 2.5 : 2.25, 0.08, variant === 2 ? 0.55 : 0.42),
+        bodyMat,
+      );
+      wing.rotation.z = variant === 1 ? Math.PI / 6 : 0;
       wing.position.y = 0.01;
       drone.add(wing);
 
@@ -217,7 +232,7 @@ export class CityManager {
       light.position.y = -0.05;
       drone.add(light);
 
-      const core = new THREE.Mesh(new THREE.SphereGeometry(0.12, 6, 6), glowMat);
+      const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.12, 0), glowMat);
       core.position.set(0, -0.13, 0.18);
       drone.add(core);
 
@@ -225,11 +240,22 @@ export class CityManager {
       rear.position.z = 0.48;
       drone.add(rear);
 
+      if (variant !== 0) {
+        const engineRing = new THREE.Mesh(
+          new THREE.TorusGeometry(variant === 1 ? 0.38 : 0.32, 0.035, 6, 16),
+          glowMat,
+        );
+        engineRing.rotation.x = Math.PI / 2;
+        engineRing.position.z = 0.42;
+        drone.add(engineRing);
+      }
+
       drone.position.set((i % 2 ? 1 : -1) * (10 + Math.random() * 28), 8 + Math.random() * 28, -30 - i * 55);
       drone.userData.phase = Math.random() * Math.PI * 2;
       drone.userData.speed = 0.7 + Math.random() * 0.8;
       drone.userData.baseX = drone.position.x;
       drone.userData.baseY = drone.position.y;
+      drone.userData.variant = variant;
       this.scene.add(drone); this.drones.push(drone);
     }
 
