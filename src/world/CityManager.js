@@ -122,16 +122,33 @@ export class CityManager {
 
     for (let i = 0; i < 8; i++) {
       const drone = new THREE.Group();
-      const body = new THREE.Mesh(
-        new THREE.BoxGeometry(1.5, 0.25, 0.7),
-        new THREE.MeshStandardMaterial({ color: 0x10152b, metalness: 0.9, roughness: 0.15 }),
-      );
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0b1022, metalness: 0.92, roughness: 0.16 });
+      const glowMat = new THREE.MeshBasicMaterial({ color: i % 2 ? COLORS.pink : COLORS.cyan });
+      const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.25, 0.7), bodyMat);
+      body.castShadow = false;
       drone.add(body);
-      const light = new THREE.Mesh(
-        new THREE.BoxGeometry(1.2, 0.08, 0.08),
-        new THREE.MeshBasicMaterial({ color: i % 2 ? COLORS.pink : COLORS.cyan }),
-      );
-      light.position.y = -0.05; drone.add(light);
+
+      const nose = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.65, 4), bodyMat);
+      nose.rotation.x = -Math.PI / 2;
+      nose.position.z = -0.55;
+      drone.add(nose);
+
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(2.25, 0.08, 0.42), bodyMat);
+      wing.position.y = 0.01;
+      drone.add(wing);
+
+      const light = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.08, 0.08), glowMat);
+      light.position.y = -0.05;
+      drone.add(light);
+
+      const core = new THREE.Mesh(new THREE.SphereGeometry(0.12, 6, 6), glowMat);
+      core.position.set(0, -0.13, 0.18);
+      drone.add(core);
+
+      const rear = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.06, 0.16), glowMat);
+      rear.position.z = 0.48;
+      drone.add(rear);
+
       drone.position.set((i % 2 ? 1 : -1) * (10 + Math.random() * 28), 8 + Math.random() * 28, -30 - i * 55);
       drone.userData.phase = Math.random() * Math.PI * 2;
       drone.userData.speed = 0.7 + Math.random() * 0.8;
