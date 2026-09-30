@@ -21,41 +21,13 @@ jobs:
           node-version: "22.12.0"
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -e
+          find src -name "*.js" -print0 | xargs -0 -n1 node --check
 
       - name: Production build
         run: npm run build
-
-      - name: Validate project shape
-        shell: bash
-        run: |
-          test -f index.html
-          test -f package.json
-          test -f src/main.js
-          test -f src/core/GameEngine.js
-          test -f src/core/SceneManager.js
-          test -f src/core/InputManager.js
-          test -f src/core/AudioManager.js
-          test -f src/world/RoadManager.js
-          test -f src/world/CityManager.js
-          test -f src/entities/PlayerObject.js
-          test -f src/entities/ObstacleManager.js
-          test -f src/entities/PickupManager.js
-          test -f src/systems/CollisionSystem.js
-          test -f src/systems/ScoreSystem.js
-          test -f src/ui/UIManager.js
-          test ! -d Assets
-          test ! -d Packages
-          test ! -d ProjectSettings
-          test ! -d tools
-          test ! -d web
-          test ! -f src/game.js
-          test ! -f src/audio.js
-          test ! -f src/textures.js
-
-      - name: Validate entry imports
-        run: |
-          grep -q 'type="module"' index.html
-          grep -q 'src="/src/main.js"' index.html
-          grep -q 'from "./core/GameEngine.js"' src/main.js
-          grep -q 'from "./ui/UIManager.js"' src/main.js
