@@ -23,6 +23,7 @@ export class UIManager {
     this._setHighScore();
     this._el("btn-start")?.addEventListener("click", () => this.engine.startGame());
     this._el("btn-restart")?.addEventListener("click", () => this.engine.startGame());
+    this._el("btn-resume")?.addEventListener("click", () => this.engine.togglePause());
     this._el("btn-audio")?.addEventListener("click", () => {
       const muted = this.engine.audio.toggleMute();
       if (this.audioIcon) this.audioIcon.textContent = muted ? "🔇" : "🔊";
