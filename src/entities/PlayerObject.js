@@ -140,7 +140,10 @@ export class PlayerObject {
 
     const enginePodGeo = new THREE.CylinderGeometry(0.28, 0.38, 0.72, 8);
     const engineGeo = new THREE.CylinderGeometry(0.2, 0.3, 0.46, 8);
-    const engineMat = new THREE.MeshStandardMaterial({ color: COLORS.cyan, emissive: COLORS.cyan, emissiveIntensity: 1.8, metalness: 0.2, roughness: 0.12 });
+    const engineMat = new THREE.MeshStandardMaterial({
+      color: 0x0a2536, emissive: COLORS.cyan, emissiveIntensity: 2.6,
+      metalness: 0.32, roughness: 0.1, flatShading: true,
+    });
     for (const x of [-0.58, 0.58]) {
       const pod = new THREE.Mesh(enginePodGeo, darkMat);
       pod.rotation.x = Math.PI / 2;
@@ -208,6 +211,35 @@ export class PlayerObject {
       collar.position.set(x, 0.44, 1.27);
       this.group.add(collar);
     }
+
+    const exhaustGlowGeo = new THREE.ConeGeometry(0.26, 0.9, 8, 1, true);
+    this.exhaustGlows = [];
+    for (const x of [-0.58, 0.58]) {
+      const exhaust = new THREE.Mesh(
+        exhaustGlowGeo,
+        new THREE.MeshBasicMaterial({
+          color: COLORS.cyan, transparent: true, opacity: 0.62,
+          blending: THREE.AdditiveBlending, depthWrite: false,
+        }),
+      );
+      exhaust.rotation.x = -Math.PI / 2;
+      exhaust.position.set(x, 0.44, 1.86);
+      exhaust.scale.set(0.72, 0.9, 0.72);
+      this.group.add(exhaust);
+      this.exhaustGlows.push(exhaust);
+    }
+
+    const underGlow = new THREE.Mesh(
+      new THREE.TorusGeometry(1.08, 0.035, 6, 32),
+      new THREE.MeshBasicMaterial({
+        color: COLORS.cyan, transparent: true, opacity: 0.34,
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      }),
+    );
+    underGlow.rotation.x = Math.PI / 2;
+    underGlow.position.y = 0.08;
+    this.group.add(underGlow);
+    this.underGlow = underGlow;
 
     this.thrusterLight = new THREE.PointLight(COLORS.cyan, 2.6, 9);
     this.thrusterLight.position.set(0, 0.5, 2);
@@ -312,6 +344,19 @@ export class PlayerObject {
     this.energyHalo.material.opacity = (this.boosting ? 0.72 : 0.42) + Math.sin(elapsed * 10) * 0.12;
     this.wings.rotation.z = Math.sin(elapsed * 4) * 0.035;
     this.cockpit.material.emissiveIntensity = this.boosting ? 1.8 + Math.sin(elapsed * 16) * 0.35 : 0.7;
+    const thrustPulse = this.boosting ? 1.25 + Math.sin(elapsed * 24) * 0.24 : 0.82 + Math.sin(elapsed * 14) * 0.08;
+    if (this.exhaustGlows) {
+      for (const exhaust of this.exhaustGlows) {
+        exhaust.material.color.setHex(this.boosting ? COLORS.pink : COLORS.cyan);
+        exhaust.material.opacity = this.boosting ? 0.9 : 0.52;
+        exhaust.scale.set(0.72 * thrustPulse, 0.9 + thrustPulse * 0.55, 0.72 * thrustPulse);
+      }
+    }
+    if (this.underGlow) {
+      this.underGlow.material.color.setHex(this.boosting ? COLORS.pink : COLORS.cyan);
+      this.underGlow.material.opacity = this.boosting ? 0.52 : 0.28 + Math.sin(elapsed * 8) * 0.05;
+      this.underGlow.scale.setScalar(this.boosting ? 1.12 + Math.sin(elapsed * 16) * 0.08 : 1);
+    }
     this.frontBar.scale.x = this.boosting ? 1.15 + Math.sin(elapsed * 14) * 0.08 : 1;
 
     if (this.shield.visible) {
