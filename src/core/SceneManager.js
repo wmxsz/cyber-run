@@ -1,4 +1,7 @@
 import * as THREE from "three";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { COLORS, GAME_CONFIG } from "../config/gameConfig.js";
 
 export class SceneManager {
@@ -20,6 +23,15 @@ export class SceneManager {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     this.scene = new THREE.Scene();
+    this._composer = new EffectComposer(this.renderer);
+    this._composer.addPass(new RenderPass(this.scene, null));
+    this._bloom = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      0.72,
+      0.62,
+      0.34,
+    );
+    this._composer.addPass(this._bloom);
     this.scene.fog = new THREE.FogExp2(COLORS.bg, 0.015);
 
     this.camera = new THREE.PerspectiveCamera(
@@ -160,6 +172,10 @@ export class SceneManager {
   }
 
   render() {
+    if (this._composer) {
+      this._composer.render();
+      return;
+    }
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -169,6 +185,8 @@ export class SceneManager {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
+    this._composer?.setSize(w, h);
+    this._bloom?.resolution.set(w, h);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this._pixelRatioCap));
     this._lastFov = this.camera.fov;
   }
@@ -180,6 +198,9 @@ export class SceneManager {
       this._neonLights.length = 0;
       this._neonLights = null;
     }
+    this._composer?.dispose?.();
+    this._composer = null;
+    this._bloom = null;
     this.renderer.dispose();
   }
 }
