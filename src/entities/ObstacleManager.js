@@ -12,9 +12,39 @@ export class ObstacleManager {
     );
   }
 
+  _pickType(phase, slot = 0, pair = false) {
+    if (pair && phase >= 3) {
+      const patterns = phase >= 4
+        ? [
+            ["barrier", "highLaser"],
+            ["highLaser", "pulseGate"],
+            ["mine", "barrier"],
+            ["pulseGate", "mine"],
+          ]
+        : [
+            ["barrier", "highLaser"],
+            ["highLaser", "mine"],
+            ["block", "barrier"],
+            ["mine", "block"],
+          ];
+      const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+      return pattern[slot % pattern.length];
+    }
+
+    const r = Math.random();
+    if (phase >= 4) {
+      return r < 0.26 ? "mine" : r < 0.46 ? "pulseGate" : r < 0.66 ? "highLaser" : r < 0.84 ? "barrier" : "block";
+    }
+    if (phase >= 2) {
+      return r < 0.25 ? "barrier" : r < 0.48 ? "highLaser" : r < 0.70 ? "mine" : r < 0.86 ? "pulseGate" : "block";
+    }
+    return r < 0.28 ? "barrier" : r < 0.48 ? "highLaser" : r < 0.73 ? "mine" : "block";
+  }
+
   spawnRow(score, phase = 0) {
     const ramp = Math.min(1, score / GAME_CONFIG.spawnRampScore);
-    // Keep one guaranteed escape lane while making later sectors less predictable.
+    // Always keep one lane open. From sector 3 onward, paired obstacles form
+    // readable action combinations instead of two unrelated random hazards.
     const count = phase >= 3 ? 2 : (Math.random() < 0.35 + ramp * 0.35 ? 2 : 1);
     const safeChoices = [this.lastSafeLane - 1, this.lastSafeLane, this.lastSafeLane + 1]
       .filter((lane) => lane >= 0 && lane <= 2);
@@ -24,15 +54,7 @@ export class ObstacleManager {
 
     for (let i = 0; i < count; i++) {
       const lane = count === 2 ? candidates[i] : candidates[Math.floor(Math.random() * candidates.length)];
-      const r = Math.random();
-      let type;
-      if (phase >= 4) {
-        type = r < 0.26 ? "mine" : r < 0.46 ? "pulseGate" : r < 0.66 ? "highLaser" : r < 0.84 ? "barrier" : "block";
-      } else if (phase >= 2) {
-        type = r < 0.25 ? "barrier" : r < 0.48 ? "highLaser" : r < 0.70 ? "mine" : r < 0.86 ? "pulseGate" : "block";
-      } else {
-        type = r < 0.28 ? "barrier" : r < 0.48 ? "highLaser" : r < 0.73 ? "mine" : "block";
-      }
+      const type = this._pickType(phase, i, count === 2);
       const obj = this.pools[type].acquire();
       obj.position.set(LANES[lane], 0, GAME_CONFIG.spawnZ);
       obj.rotation.set(0, 0, 0);
