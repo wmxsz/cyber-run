@@ -86,14 +86,14 @@ export class RoadManager {
     }
   }
 
-  update(speed, phase = this._phase) {
+  update(speed, phase = this._phase, dt = 1 / 60) {
     this._phase = phase;
     const targetSurge = phase >= 4 ? 1 : phase >= 2 ? 0.65 : 0.25;
     this._surge += (targetSurge - this._surge) * 0.06;
     if (this.track?.material?.map) {
       this.track.material.map.offset.y -= speed * (0.015 + this._surge * 0.006);
     }
-    const advance = speed * 60 * 0.016;
+    const advance = speed * 60 * dt;
     const pulse = 0.55 + Math.sin(performance.now() * 0.004 + speed) * 0.2;
     const accent = phase >= 4 ? COLORS.yellow : phase >= 2 ? COLORS.pink : COLORS.cyan;
     const secondary = phase >= 4 ? COLORS.pink : COLORS.violet;
