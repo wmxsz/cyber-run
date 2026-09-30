@@ -532,6 +532,7 @@ export class GameEngine {
       this.paused = true;
       this.boosting = false;
       this.player.setBoost(false);
+      this.audio.pause();
       this._ui?.setPaused(true);
       this._ui?.announce("PAUSED // APP BACKGROUND");
     }
@@ -543,6 +544,9 @@ export class GameEngine {
     if (this.paused) {
       this.boosting = false;
       this.player.setBoost(false);
+      this.audio.pause();
+    } else {
+      this.audio.resume();
     }
     this._ui?.setPaused(this.paused);
     this._ui?.announce(this.paused ? "PAUSED" : "RESUMED");
