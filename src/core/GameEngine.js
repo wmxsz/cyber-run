@@ -14,6 +14,7 @@ import { ScoreSystem } from "../systems/ScoreSystem.js";
 import { DifficultySystem } from "../systems/DifficultySystem.js";
 import { PersistenceSystem } from "../systems/PersistenceSystem.js";
 import { MissionSystem } from "../systems/MissionSystem.js";
+import { LANES } from "../config/gameConfig.js";
 
 export class GameEngine {
   constructor(canvas) {
@@ -50,6 +51,9 @@ export class GameEngine {
     this._exhaustTimer = 0;
     this._eventTimer = 18;
     this._eventTime = 0;
+    this._hunterTimer = 22;
+    this._hunterTime = 0;
+    this._hunterLane = 1;
     this._ui = null;
 
     this.input.onAction((action, payload) => this._onAction(action, payload));
@@ -97,6 +101,9 @@ export class GameEngine {
     this._lastPhase = 0;
     this._eventTimer = 18;
     this._eventTime = 0;
+    this._hunterTimer = 22;
+    this._hunterTime = 0;
+    this._hunterLane = 1;
     this.score.setEventMultiplier(1);
 
     this._ui?.hideStart();
@@ -124,6 +131,31 @@ export class GameEngine {
     if (this.paused) {
       this._ui?.update(this);
       return;
+    }
+
+    if (this._hunterTime > 0) {
+      this._hunterTime -= dt;
+      const target = LANES[this._hunterLane];
+      this._hunterX += (target - this._hunterX) * 0.08;
+      this._hunter.position.x = this._hunterX;
+      this._hunter.position.z = 3.8 - Math.sin(this._hunterTime * 5) * 0.8;
+      if (this._hunterTime <= 0) {
+        this.scene.remove(this._hunter);
+        this.score.setEventMultiplier(1);
+        this._ui?.announce("HUNTER DRONE // ESCAPED");
+      }
+    } else {
+      this._hunterTimer -= dt;
+      if (this._hunterTimer <= 0 && this._lastPhase >= 2) {
+        this._hunterTime = 8;
+        this._hunterTimer = 20 + Math.random() * 12;
+        this._hunterLane = Math.floor(Math.random() * 3);
+        this._hunterX = this.player.group.position.x;
+        this._hunter = this._makeHunter();
+        this.scene.add(this._hunter);
+        this.score.setEventMultiplier(1.35);
+        this._ui?.announce("HUNTER DRONE // EVADE // SCORE x1.35");
+      }
     }
 
     if (this._eventTime > 0) {
@@ -237,6 +269,16 @@ export class GameEngine {
 
     this.particles.update();
     this._ui?.update(this);
+  }
+
+  _makeHunter() {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.OctahedronGeometry(0.7, 0), new THREE.MeshStandardMaterial({color:0x14002a, emissive:0xff006e, emissiveIntensity:2}));
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), new THREE.MeshBasicMaterial({color:0xffe600}));
+    eye.position.z = 0.65;
+    g.add(body, eye);
+    g.userData.hit = false;
+    return g;
   }
 
   _completeMission(mission) {
