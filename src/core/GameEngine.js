@@ -58,6 +58,7 @@ export class GameEngine {
     this._hunterLaneTimer = 0;
     this._hunterX = 0;
     this._hunter = null;
+    this._comboMilestones = new Set();
     this._ui = null;
 
     this.input.onAction((action, payload) => this._onAction(action, payload));
@@ -112,6 +113,7 @@ export class GameEngine {
     this._hunterLaneTimer = 0;
     this._hunterX = 0;
     this._hunter = null;
+    this._comboMilestones.clear();
     this.score.setEventMultiplier(1);
 
     this._ui?.hideStart();
@@ -248,6 +250,7 @@ export class GameEngine {
 
     for (const item of result.nearMisses) {
       const bonus = this.score.nearMiss();
+      this._checkComboMilestone(bonus);
       this.missions.recordNearMiss();
       this.boostEnergy = Math.min(
         GAME_CONFIG.maxBoostEnergy,
@@ -274,6 +277,7 @@ export class GameEngine {
         this._ui?.announce("SHIELD ONLINE");
       } else {
         const bonus = this.score.collectCore();
+        this._checkComboMilestone(bonus);
         this.missions.recordCore();
         this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.coreBoostGain);
         this.audio.playCollect();
@@ -302,7 +306,8 @@ export class GameEngine {
     if (!sameLane || !close) return;
 
     if (this.boosting) {
-      this.score.hunterBreak();
+      const bonus = this.score.hunterBreak();
+      this._checkComboMilestone(bonus);
       this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + 20);
       this.particles.burst(h.x, h.y, h.z, 0xffe600, 32);
       this.audio.playPowerup();
@@ -329,6 +334,19 @@ export class GameEngine {
     g.add(body, eye);
     g.userData.hit = false;
     return g;
+  }
+
+  _checkComboMilestone(bonus) {
+    const thresholds = GAME_CONFIG.comboMilestones || [];
+    const index = thresholds.indexOf(bonus.combo);
+    if (index < 0 || this._comboMilestones.has(bonus.combo)) return;
+    this._comboMilestones.add(bonus.combo);
+    const reward = GAME_CONFIG.comboBoostRewards?.[index] || 0;
+    this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + reward);
+    const p = this.player.group.position;
+    this.particles.burst(p.x, p.y + 0.7, p.z, 0xffe600, 18 + index * 4);
+    this.audio.playPowerup();
+    this._ui?.announce("COMBO " + bonus.combo + " // x" + bonus.multiplier + " // +" + reward + " BOOST");
   }
 
   _completeMission(mission) {
