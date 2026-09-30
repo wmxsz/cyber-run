@@ -3,7 +3,7 @@ import { GAME_CONFIG } from "../config/gameConfig.js";
 export class CollisionSystem {
   check(player, obstacles, pickups) {
     const p = player.getHitbox();
-    let obstacleHit = null;
+    const obstacleHits = [];
     const picked = [];
     const nearMisses = [];
 
@@ -16,7 +16,7 @@ export class CollisionSystem {
       if (item.def.requiresSlide) {
         if (!player.isSliding) {
           item.obj.userData.hit = true;
-          obstacleHit = item;
+          obstacleHits.push(item);
         } else {
           item.obj.userData.passed = true;
         }
@@ -24,16 +24,16 @@ export class CollisionSystem {
         const dy = Math.abs((item.def.hitCenterY ?? item.def.hitbox.y) - (p.y + p.halfY));
         if (dy < item.def.hitbox.y + p.halfY && !player.isJumping) {
           item.obj.userData.hit = true;
-          obstacleHit = item;
+          obstacleHits.push(item);
         } else if (player.isJumping) {
           item.obj.userData.passed = true;
         }
       } else if (item.def.blocksGround && !player.isJumping) {
         item.obj.userData.hit = true;
-        obstacleHit = item;
+        obstacleHits.push(item);
       } else if (item.def.blocksGround && player.isJumping && p.y < item.def.hitbox.y * 1.2) {
         item.obj.userData.hit = true;
-        obstacleHit = item;
+        obstacleHits.push(item);
       }
 
       if (!item.obj.userData.hit && !item.obj.userData.passed && item.obj.position.z > 0.8 && dx <= GAME_CONFIG.nearMissDistance) {
@@ -53,6 +53,6 @@ export class CollisionSystem {
       }
     });
 
-    return { obstacleHit, picked, nearMisses };
+    return { obstacleHits, picked, nearMisses };
   }
 }
