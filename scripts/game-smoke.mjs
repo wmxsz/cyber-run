@@ -142,6 +142,7 @@ const finite = (value, label) => assert.ok(Number.isFinite(value), label + " mus
   const pickups = new PickupManager(scene);
   const obstacle = obstacles.pools.barrier.acquire();
   const pickup = pickups.pools.core.acquire();
+  pickup.userData.type = "core";
   scene.add(obstacle, pickup);
   obstacles.active.push({ obj: obstacle, type: "barrier", lane: 1, def: OBSTACLE_TYPES?.barrier });
   pickups.active.push(pickup);
