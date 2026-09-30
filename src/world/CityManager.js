@@ -40,6 +40,7 @@ export class CityManager {
     this.holograms = [];
     this.drones = [];
     this.speedLines = null;
+    this._phase = 0;
     this._build();
   }
 
@@ -143,6 +144,7 @@ export class CityManager {
   }
 
   update(speed, phase = 0) {
+    this._phase = phase;
     const positions = this.speedLines?.geometry.attributes.position.array;
     if (positions) {
       for (let i = 2; i < positions.length; i += 6) {
@@ -154,6 +156,7 @@ export class CityManager {
       }
       this.speedLines.geometry.attributes.position.needsUpdate = true;
       this.speedLines.material.opacity = 0.32 + Math.min(0.24, phase * 0.045) + Math.min(0.12, speed * 0.03);
+      this.speedLines.scale.z = 1 + Math.min(0.55, speed * 0.08 + phase * 0.05);
     }
     const t = performance.now() * 0.001;
     for (const panel of this.holograms) {
@@ -175,6 +178,7 @@ export class CityManager {
       drone.rotation.y = Math.cos(t * 1.1 + drone.userData.phase) * 0.06;
       const light = drone.children[1];
       if (light?.material) light.material.opacity = 0.65 + Math.sin(t * 5 + drone.userData.phase) * 0.25;
+      if (phase >= 3) drone.scale.setScalar(1 + Math.sin(t * 3 + drone.userData.phase) * 0.035);
     }
     if (this.sunRing) {
       this.sunRing.rotation.z += 0.002 + speed * 0.0005 + phase * 0.0002;
