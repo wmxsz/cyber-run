@@ -40,6 +40,27 @@ function makeCore() {
   collar.position.y = -0.34;
   g.add(collar);
   g.userData.collar = collar;
+
+  const antennaGeo = new THREE.BoxGeometry(0.045, 0.34, 0.045);
+  const antennaMat = new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.72 });
+  const antennaLeft = new THREE.Mesh(antennaGeo, antennaMat);
+  const antennaRight = new THREE.Mesh(antennaGeo, antennaMat);
+  antennaLeft.position.set(-0.34, 0.42, 0);
+  antennaRight.position.set(0.34, 0.42, 0);
+  antennaLeft.rotation.z = -0.35;
+  antennaRight.rotation.z = 0.35;
+  g.add(antennaLeft, antennaRight);
+
+  const dataBeam = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.025, 0.025, 1.7, 6),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.18 }),
+  );
+  dataBeam.position.y = 0.15;
+  g.add(dataBeam);
+
+  g.userData.antennaLeft = antennaLeft;
+  g.userData.antennaRight = antennaRight;
+  g.userData.dataBeam = dataBeam;
   return g;
 }
 function makeBonusCore() {
@@ -58,6 +79,18 @@ function makeBonusCore() {
   shell.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.56 });
   shellCross.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.52 });
   halo.material = new THREE.MeshBasicMaterial({ color: COLORS.orange, transparent: true, opacity: 0.84 });
+  if (g.userData.dataBeam) {
+    g.userData.dataBeam.material.dispose();
+    g.userData.dataBeam.material = new THREE.MeshBasicMaterial({ color: COLORS.orange, transparent: true, opacity: 0.2 });
+  }
+  if (g.userData.antennaLeft) {
+    g.userData.antennaLeft.material.dispose();
+    g.userData.antennaLeft.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.78 });
+  }
+  if (g.userData.antennaRight) {
+    g.userData.antennaRight.material.dispose();
+    g.userData.antennaRight.material = g.userData.antennaLeft.material;
+  }
   if (g.userData.collar) {
     g.userData.collar.material.dispose();
     g.userData.collar.material = new THREE.MeshStandardMaterial({
@@ -87,6 +120,18 @@ function makeHackNode() {
   g.userData.core = core;
   g.userData.ring = ring;
   g.userData.ring2 = ring2;
+  const glyphs = new THREE.Group();
+  const glyphGeo = new THREE.BoxGeometry(0.07, 0.26, 0.025);
+  const glyphMat = new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.66 });
+  for (let i = 0; i < 5; i++) {
+    const glyph = new THREE.Mesh(glyphGeo, glyphMat);
+    const a = (i / 5) * Math.PI * 2;
+    glyph.position.set(Math.cos(a) * 0.78, 0.08 + (i % 2) * 0.14, Math.sin(a) * 0.78);
+    glyph.lookAt(0, glyph.position.y, 0);
+    glyphs.add(glyph);
+  }
+  g.add(glyphs);
+  g.userData.glyphs = glyphs;
   return g;
 }
 function makeShield() {
@@ -155,7 +200,22 @@ export class PickupManager {
       p.position.z += advance;
       p.rotation.y += dt * 2.5;
       p.rotation.x += dt * 1.2;
+      if (p.userData.type === "core" || p.userData.type === "bonusCore") {
+        const pulse = 0.5 + Math.sin(elapsed * 8 + p.position.z * 0.06) * 0.24;
+        if (p.userData.dataBeam) {
+          p.userData.dataBeam.scale.y = 0.72 + pulse * 0.5;
+          p.userData.dataBeam.material.opacity = 0.12 + pulse * 0.14;
+        }
+        if (p.userData.antennaLeft && p.userData.antennaRight) {
+          p.userData.antennaLeft.rotation.z = -0.35 + Math.sin(elapsed * 7) * 0.08;
+          p.userData.antennaRight.rotation.z = 0.35 - Math.sin(elapsed * 7) * 0.08;
+        }
+      }
       if (p.userData.type === "hackNode") {
+        if (p.userData.glyphs) {
+          p.userData.glyphs.rotation.y += dt * 1.8;
+          p.userData.glyphs.rotation.x = Math.sin(elapsed * 2.5) * 0.08;
+        }
         p.userData.ring.material.opacity = 0.68 + Math.sin(elapsed * 11 + p.position.z * 0.05) * 0.16;
         p.userData.ring2.material.opacity = 0.48 + Math.sin(elapsed * 14) * 0.14;
         p.userData.core.rotation.y += dt * 4.5;
