@@ -3,10 +3,19 @@ import { GAME_CONFIG, LANES, COLORS } from "../config/gameConfig.js";
 import { ObjectPool } from "../core/ObjectPool.js";
 
 function makeCore() {
-  return new THREE.Mesh(
+  const g = new THREE.Group();
+  const core = new THREE.Mesh(
     new THREE.BoxGeometry(0.7, 0.7, 0.7),
-    new THREE.MeshStandardMaterial({ color: COLORS.cyan, emissive: COLORS.cyan, emissiveIntensity: 0.9, metalness: 0.9, roughness: 0.1 }),
+    new THREE.MeshStandardMaterial({ color: COLORS.cyan, emissive: COLORS.cyan, emissiveIntensity: 1.4, metalness: 0.9, roughness: 0.1 }),
   );
+  const halo = new THREE.Mesh(
+    new THREE.TorusGeometry(0.72, 0.07, 8, 24),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.7 }),
+  );
+  halo.rotation.x = Math.PI / 2;
+  g.add(core, halo);
+  g.userData.halo = halo;
+  return g;
 }
 function makeShield() {
   const g = new THREE.Group();
