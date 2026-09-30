@@ -413,3 +413,21 @@
         display: flex;
       }
     }
+
+
+/* Modern canvas entry */
+#game-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+button.mobile-touch-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  border-radius: 50%;
+  font: inherit;
+}
