@@ -185,10 +185,17 @@ export class UIManager {
   }
 
   announce(message) {
+    if (!this.announcement) return;
     this.announcement.textContent = message;
     this.announcement.classList.add("show");
     clearTimeout(this._announceTimer);
     this._announceTimer = setTimeout(() => this.announcement.classList.remove("show"), 1100);
+  }
+
+  dispose() {
+    clearTimeout(this._announceTimer);
+    this._announceTimer = null;
+    this.engine = null;
   }
 
   _setHighScore() {
