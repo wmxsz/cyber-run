@@ -40,6 +40,11 @@ export const GAME_CONFIG = {
   eventMultiplierCap: 2.25,
   dataStormMultiplier: 1.5,
   hunterMultiplier: 1.2,
+  hunterDuration: 8,
+  eliteHunterDuration: 10,
+  hunterLaneInterval: 0.9,
+  eliteHunterLaneInterval: 0.62,
+  eliteHunterGap: 5.2,
   phaseNames: ["NIGHT CITY", "NEON DISTRICT", "SYNTH GRID", "QUANTUM CORE", "CYBER NEXUS"],
 };
 
