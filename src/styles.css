@@ -521,3 +521,67 @@ button.mobile-touch-btn {
 @media (max-width: 768px) {
   .combo-timer { margin-top: 4px; }
 }
+
+
+/* Forward threat scanner: gives the player a readable escape-lane cue without hiding the 3D scene. */
+#lane-warning {
+  position: absolute;
+  left: 50%;
+  bottom: 19%;
+  transform: translateX(-50%);
+  width: min(360px, 62vw);
+  z-index: 12;
+  pointer-events: none;
+  text-align: center;
+  opacity: 0.78;
+}
+.lane-warning-title {
+  font: 700 8px/1.2 Orbitron, monospace;
+  letter-spacing: 2px;
+  color: rgba(0,240,255,.7);
+  margin-bottom: 5px;
+}
+.lane-warning-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+.lane-threat {
+  min-height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 7px;
+  border: 1px solid rgba(0,240,255,.22);
+  border-radius: 4px;
+  background: rgba(5,10,25,.48);
+  font: 700 8px/1 Orbitron, monospace;
+  color: rgba(0,255,170,.8);
+  transition: .12s ease;
+}
+.lane-threat span { opacity: .55; }
+.lane-threat b { font-size: 7px; letter-spacing: .5px; }
+.lane-threat.danger {
+  border-color: rgba(255,230,0,.7);
+  color: #ffe600;
+  box-shadow: 0 0 9px rgba(255,230,0,.18);
+}
+.lane-threat.imminent {
+  border-color: #ff0055;
+  color: #ff668f;
+  background: rgba(100,0,35,.35);
+  box-shadow: 0 0 12px rgba(255,0,85,.28);
+  animation: threat-pulse .38s infinite alternate;
+}
+@keyframes threat-pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.035); }
+}
+@media (max-width: 768px) {
+  #lane-warning {
+    bottom: 22%;
+    width: min(330px, 82vw);
+    opacity: .68;
+  }
+  .lane-warning-title { font-size: 7px; }
+}
