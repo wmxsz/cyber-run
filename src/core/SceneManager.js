@@ -31,6 +31,8 @@ export class SceneManager {
     this.camera.lookAt(0, 1.5, -10);
 
     this._baseX = 0;
+    this._baseY = 4.5;
+    this._baseZ = 7.5;
     this._shake = 0;
     this._speedFeel = 0;
     this._shakeBase = this.camera.position.clone();
@@ -72,11 +74,12 @@ export class SceneManager {
   }
 
   update(dt) {
-    this.camera.position.x = THREE.MathUtils.lerp(
-      this.camera.position.x,
-      this._baseX,
-      1 - Math.pow(1 - 0.08, dt * 60),
-    );
+    const cameraAlpha = 1 - Math.pow(1 - 0.08, dt * 60);
+    const targetY = this._baseY - this._speedFeel * 0.08;
+    const targetZ = this._baseZ + this._speedFeel * 0.18;
+    this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this._baseX, cameraAlpha);
+    this.camera.position.y = THREE.MathUtils.lerp(this.camera.position.y, targetY, cameraAlpha);
+    this.camera.position.z = THREE.MathUtils.lerp(this.camera.position.z, targetZ, cameraAlpha);
 
     const baseFov = GAME_CONFIG.baseFov || 65;
     const maxFov = Math.max(baseFov, GAME_CONFIG.boostFov || 78);
@@ -103,16 +106,19 @@ export class SceneManager {
       if (this._shake < 0.008) {
         this._shake = 0;
         this.camera.position.x = this._baseX;
-        this.camera.position.y = this._shakeBase.y;
+        this.camera.position.y = this._baseY - this._speedFeel * 0.08;
+        this.camera.position.z = this._baseZ + this._speedFeel * 0.18;
       }
     }
   }
 
   resetView() {
     this._baseX = 0;
+    this._baseY = 4.5;
+    this._baseZ = 7.5;
     this._shake = 0;
     this._speedFeel = 0;
-    this._shakeBase.set(0, 4.5, 7.5);
+    this._shakeBase.set(0, this._baseY, this._baseZ);
     this.camera.position.set(0, 4.5, 7.5);
     this.camera.fov = GAME_CONFIG.baseFov || 65;
     this.camera.updateProjectionMatrix();
