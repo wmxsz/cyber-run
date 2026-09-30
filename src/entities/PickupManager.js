@@ -156,14 +156,14 @@ export class PickupManager {
   spawn(safeLanes, occupiedLanes = [], phase = 0) {
     if (!safeLanes.length || Math.random() > 0.68) return;
 
-    const spawnOne = (lane, type) => {
+    const spawnOne = (lane, type, zOffset = null) => {
       const obj = this.pools[type].acquire();
       obj.userData.type = type;
       obj.userData.picked = false;
       obj.position.set(
         LANES[lane],
         type === "shield" ? 1.4 : 1.2,
-        GAME_CONFIG.spawnZ - 5 - Math.random() * 25,
+        zOffset ?? (GAME_CONFIG.spawnZ - 5 - Math.random() * 25),
       );
       obj.rotation.set(0, 0, 0);
       obj.scale.set(1, 1, 1);
@@ -172,6 +172,9 @@ export class PickupManager {
     };
 
     const safeLane = safeLanes[Math.floor(Math.random() * safeLanes.length)];
+    const nextSafeLane = safeLanes.length > 1
+      ? safeLanes[(safeLanes.indexOf(safeLane) + 1) % safeLanes.length]
+      : safeLane;
     const riskyLane = occupiedLanes.length
       ? occupiedLanes[Math.floor(Math.random() * occupiedLanes.length)]
       : null;
@@ -180,8 +183,20 @@ export class PickupManager {
       && Math.random() < GAME_CONFIG.routeChoiceChance;
 
     if (routeChoice) {
-      spawnOne(safeLane, "core");
-      spawnOne(riskyLane, "bonusCore");
+      // Risk/reward line: a safe core advertises the route, then a bonus node
+      // sits just off the route so the player can consciously take the risk.
+      spawnOne(safeLane, "core", GAME_CONFIG.spawnZ - 6);
+      spawnOne(riskyLane, "bonusCore", GAME_CONFIG.spawnZ - 19);
+      if (phase >= 3) spawnOne(safeLane, "core", GAME_CONFIG.spawnZ - 32);
+      return;
+    }
+
+    // Coins/cores form an actual movement guide rather than isolated loot.
+    // The last pickup is allowed to move one lane so the player reads the next action.
+    if (phase >= 1 && Math.random() < 0.34) {
+      spawnOne(safeLane, "core", GAME_CONFIG.spawnZ - 5);
+      spawnOne(safeLane, phase >= 3 && Math.random() < 0.2 ? "hackNode" : "core", GAME_CONFIG.spawnZ - 16);
+      spawnOne(nextSafeLane, "core", GAME_CONFIG.spawnZ - 27);
       return;
     }
 
