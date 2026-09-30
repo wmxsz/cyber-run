@@ -35,11 +35,13 @@ export class InputManager {
     this._onTouchStart = this._onTouchStart.bind(this);
     this._onTouchEnd = this._onTouchEnd.bind(this);
     this._onTouchCancel = this._onTouchCancel.bind(this);
+    this._onContextMenu = (e) => e.preventDefault();
     this._onMouseMove = this._onMouseMove.bind(this);
     window.addEventListener("keydown", this._onKey, { passive: false });
     window.addEventListener("touchstart", this._onTouchStart, { passive: true });
     window.addEventListener("touchend", this._onTouchEnd, { passive: true });
     window.addEventListener("touchcancel", this._onTouchCancel, { passive: true });
+    window.addEventListener("contextmenu", this._onContextMenu, { passive: false });
     window.addEventListener("mousemove", this._onMouseMove, { passive: true });
     this.bindButton("btn-left", ACTIONS.LEFT);
     this.bindButton("btn-right", ACTIONS.RIGHT);
@@ -99,6 +101,7 @@ export class InputManager {
     window.removeEventListener("touchstart", this._onTouchStart);
     window.removeEventListener("touchend", this._onTouchEnd);
     window.removeEventListener("touchcancel", this._onTouchCancel);
+    window.removeEventListener("contextmenu", this._onContextMenu);
     window.removeEventListener("mousemove", this._onMouseMove);
     for (const [el, handler] of this._buttonHandlers) el.removeEventListener("pointerdown", handler);
     this._buttonHandlers.clear();
