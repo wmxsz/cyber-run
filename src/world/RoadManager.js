@@ -134,10 +134,8 @@ export class RoadManager {
     const pulse = 0.55 + Math.sin(elapsed * 4 + speed) * 0.2;
     const laneOpacity = 0.55 + pulse * 0.28 + this._surge * 0.08;
     const edgeOpacity = 0.62 + pulse * 0.3 + this._surge * 0.08;
-    const laneMaterials = new Set(this.laneStrips.map((strip) => strip.material));
-    laneMaterials.forEach((material) => { material.opacity = laneOpacity; });
-    const edgeMaterials = new Set(this.edgeLights.map((light) => light.material));
-    edgeMaterials.forEach((material) => { material.opacity = edgeOpacity; });
+    for (const material of this._laneMaterials.values()) material.opacity = laneOpacity;
+    for (const material of this._edgeMaterials.values()) material.opacity = edgeOpacity;
     const laneScale = 1 + this._surge * 0.35;
     for (const strip of this.laneStrips) {
       strip.position.z += advance;
