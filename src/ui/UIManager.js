@@ -19,6 +19,7 @@ export class UIManager {
     this.pauseOverlay = this._el("pause-overlay");
     this.goRecord = this._el("go-record");
     this.audioIcon = this._el("audio-icon");
+    this.phase = this._el("hud-phase");
 
     this._setHighScore();
     this._el("btn-start")?.addEventListener("click", () => this.engine.startGame());
@@ -37,6 +38,7 @@ export class UIManager {
     if (this.boost) this.boost.style.width = `${engine.boostEnergy}%`;
     if (this.combo) this.combo.textContent = engine.score.combo > 1 ? `x${Math.min(5, 1 + Math.floor(engine.score.combo / 4))} COMBO` : "COMBO READY";
     if (this.pauseButton) this.pauseButton.textContent = engine.paused ? "▶" : "Ⅱ";
+    if (this.phase) this.phase.textContent = engine.difficulty.phaseName || "NIGHT CITY";
   }
 
   setHp(hp) {
