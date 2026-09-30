@@ -60,7 +60,7 @@ export class PlayerObject {
       this.legParts.push({hip,thigh,knee,shin,boot,sole,side});
     }
 
-    this.spineSegments=[]; for(let i=0;i<6;i++) this.spineSegments.push(add(new THREE.BoxGeometry(.1,.13,.08),i%2?pinkglow:glow,0,.98+i*.19,.34));
+    this.spineSegments=[]; for(let i=0;i<6;i++) this.spineSegments.push(add(new THREE.BoxGeometry(.1,.13,.08),i%2?pglow:glow,0,.98+i*.19,.34));
     this.energyBack=add(new THREE.BoxGeometry(.08,1,.045),glow,0,1.46,.36);
     this.backFins=[]; for(const side of [-1,1]){const f=add(new THREE.BoxGeometry(.09,.5,.3),side<0?glow:pglow,side*.43,1.56,.25);f.rotation.z=side*-.18;this.backFins.push(f);}
 
