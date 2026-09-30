@@ -226,7 +226,8 @@ export class GameEngine {
       const occupied = this.obstacles.spawnRow(this.score.score, spawn.phase);
       const safe = [0, 1, 2].filter((lane) => !occupied.includes(lane));
       this.pickups.spawn(safe, occupied, spawn.phase);
-      this.difficulty.armSpawn(spawn.interval);
+      const stormDensity = this._eventTime > 0 ? 0.86 : 1;
+      this.difficulty.armSpawn(spawn.interval * stormDensity);
     }
 
     const speed = this._effectiveSpeed();
