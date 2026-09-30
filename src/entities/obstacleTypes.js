@@ -13,51 +13,66 @@ const disc = (radius, color) => {
 
 function makeBarrier() {
   const g = new THREE.Group();
-  const poleGeo = new THREE.CylinderGeometry(0.22, 0.22, 3.4, 8);
-  const poleMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0xff6600, emissiveIntensity: 0.6 });
+  const poleGeo = new THREE.CylinderGeometry(0.22, 0.28, 3.4, 8);
+  const poleMat = new THREE.MeshStandardMaterial({ color: 0x3a2030, emissive: 0xff6600, emissiveIntensity: 0.45, metalness: 0.55, roughness: 0.3 });
+  const beaconMat = new THREE.MeshBasicMaterial({ color: COLORS.red });
   for (const x of [-1.5, 1.5]) {
     const pole = new THREE.Mesh(poleGeo, poleMat);
     pole.position.set(x, 1.7, 0);
     g.add(pole);
-    const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 8), new THREE.MeshBasicMaterial({ color: COLORS.red }));
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.5, 0.18, 8), poleMat);
+    foot.position.set(x, 0.1, 0);
+    g.add(foot);
+    const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 8), beaconMat);
     beacon.position.set(x, 3.45, 0);
     g.add(beacon);
   }
-  const beam = new THREE.Mesh(new THREE.BoxGeometry(3.1, 0.5, 0.5), new THREE.MeshBasicMaterial({ color: 0xff0055 }));
+  const beamMat = new THREE.MeshBasicMaterial({ color: 0xff0055 });
+  const beam = new THREE.Mesh(new THREE.BoxGeometry(3.1, 0.5, 0.5), beamMat);
   beam.position.y = 1.25;
-  const core = new THREE.Mesh(new THREE.BoxGeometry(3.05, 0.14, 0.14), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+  const core = new THREE.Mesh(new THREE.BoxGeometry(3.05, 0.12, 0.12), new THREE.MeshBasicMaterial({ color: 0xffffff }));
   core.position.y = 1.25;
-  g.add(beam, core, disc(1.7, COLORS.red));
+  const lower = new THREE.Mesh(new THREE.BoxGeometry(2.65, 0.08, 0.08), new THREE.MeshBasicMaterial({ color: COLORS.orange }));
+  lower.position.set(0, 0.98, 0);
+  g.add(beam, core, lower, disc(1.7, COLORS.red));
   g.userData.pulse = beam;
   return g;
 }
-
 function makeHighLaser() {
   const g = new THREE.Group();
-  const poleGeo = new THREE.CylinderGeometry(0.18, 0.18, 2.9, 8);
-  const mat = new THREE.MeshStandardMaterial({ color: 0x24104a, emissive: COLORS.pink, emissiveIntensity: 0.8 });
+  const poleGeo = new THREE.CylinderGeometry(0.18, 0.3, 2.9, 8);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x24104a, emissive: COLORS.pink, emissiveIntensity: 0.65, metalness: 0.65, roughness: 0.24 });
   for (const x of [-1.5, 1.5]) {
     const pole = new THREE.Mesh(poleGeo, mat);
     pole.position.set(x, 2.7, 0);
     g.add(pole);
+    const emitter = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.24, 0.42, 8), new THREE.MeshBasicMaterial({ color: COLORS.pink }));
+    emitter.rotation.z = Math.PI / 2;
+    emitter.position.set(x, 2.45, 0);
+    g.add(emitter);
   }
   const beam = new THREE.Mesh(new THREE.BoxGeometry(3.1, 0.25, 0.35), new THREE.MeshBasicMaterial({ color: COLORS.pink }));
   beam.position.y = 2.45;
-  g.add(beam, disc(1.7, COLORS.pink));
+  const core = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.06, 0.06), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+  core.position.y = 2.45;
+  g.add(beam, core, disc(1.7, COLORS.pink));
   g.userData.pulse = beam;
   return g;
 }
-
 function makeMine() {
   const g = new THREE.Group();
   const core = new THREE.Mesh(
     new THREE.SphereGeometry(0.82, 12, 12),
-    new THREE.MeshStandardMaterial({ color: 0xff3300, emissive: 0xff5500, emissiveIntensity: 1.2 }),
+    new THREE.MeshStandardMaterial({ color: 0x40101a, emissive: 0xff5500, emissiveIntensity: 1.15, metalness: 0.7, roughness: 0.2 }),
   );
   core.position.y = 1.25;
   g.add(core);
+  const cap = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.08, 6, 18), new THREE.MeshBasicMaterial({ color: COLORS.yellow }));
+  cap.rotation.x = Math.PI / 2;
+  cap.position.y = 1.25;
+  g.add(cap);
   const spikeGeo = new THREE.ConeGeometry(0.2, 1, 6);
-  const spikeMat = new THREE.MeshBasicMaterial({ color: COLORS.yellow });
+  const spikeMat = new THREE.MeshStandardMaterial({ color: 0x3b2430, emissive: COLORS.yellow, emissiveIntensity: 0.4, metalness: 0.55, roughness: 0.25 });
   for (const [rx, ry] of [[0,0],[Math.PI,0],[0,Math.PI/2],[0,-Math.PI/2],[Math.PI/2,0],[-Math.PI/2,0]]) {
     const spike = new THREE.Mesh(spikeGeo, spikeMat);
     spike.rotation.set(rx, ry, 0);
@@ -65,55 +80,54 @@ function makeMine() {
     spike.translateY(0.75);
     g.add(spike);
   }
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(1.5, 0.08, 8, 24),
-    new THREE.MeshBasicMaterial({ color: COLORS.pink }),
-  );
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.08, 8, 24), new THREE.MeshBasicMaterial({ color: COLORS.pink }));
   ring.position.y = 1.25;
   g.add(ring, disc(1.55, COLORS.orange));
   g.userData.ring = ring;
   g.userData.pulse = core;
   return g;
 }
-
 function makeBlock() {
   const g = new THREE.Group();
   const geo = new THREE.BoxGeometry(2.7, 3.2, 1.8);
   const body = new THREE.Mesh(
     geo,
-    new THREE.MeshStandardMaterial({ color: 0xffcc00, emissive: 0x553300, emissiveIntensity: 0.7, roughness: 0.2, metalness: 0.35 }),
+    new THREE.MeshStandardMaterial({ color: 0x25201a, emissive: 0x553300, emissiveIntensity: 0.55, roughness: 0.25, metalness: 0.55 }),
   );
   body.position.y = 1.6;
-  const wire = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: COLORS.yellow }));
-  wire.position.y = 1.6;
-  const sign = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.9, 1.9),
-    new THREE.MeshBasicMaterial({ color: COLORS.red, transparent: true, opacity: 0.95 }),
-  );
-  sign.position.set(0, 1.6, 0.95);
-  g.add(body, wire, sign, disc(1.7, COLORS.orange));
-  g.userData.pulse = sign;
+  const frame = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: COLORS.yellow }));
+  frame.position.y = 1.6;
+  const panel = new THREE.Mesh(new THREE.BoxGeometry(2.15, 1.55, 0.06), new THREE.MeshBasicMaterial({ color: COLORS.red }));
+  panel.position.set(0, 1.62, 0.93);
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.08, 0.07), new THREE.MeshBasicMaterial({ color: COLORS.yellow }));
+  stripe.position.set(0, 1.62, 0.98);
+  g.add(body, frame, panel, stripe, disc(1.7, COLORS.orange));
+  g.userData.pulse = panel;
   return g;
 }
-
 function makePulseGate() {
   const g = new THREE.Group();
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(1.35, 0.14, 10, 32),
-    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.8 }),
+  const outer = new THREE.Mesh(
+    new THREE.TorusGeometry(1.42, 0.14, 10, 32),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.78 }),
   );
-  ring.position.y = 1.15;
+  const inner = new THREE.Mesh(
+    new THREE.TorusGeometry(1.05, 0.045, 8, 28),
+    new THREE.MeshBasicMaterial({ color: COLORS.pink, transparent: true, opacity: 0.68 }),
+  );
+  outer.position.y = 1.15;
+  inner.position.y = 1.15;
   const core = new THREE.Mesh(
-    new THREE.SphereGeometry(0.48, 12, 12),
-    new THREE.MeshStandardMaterial({ color: COLORS.pink, emissive: COLORS.pink, emissiveIntensity: 1.4 }),
+    new THREE.IcosahedronGeometry(0.5, 1),
+    new THREE.MeshStandardMaterial({ color: COLORS.pink, emissive: COLORS.pink, emissiveIntensity: 1.35, metalness: 0.65, roughness: 0.12 }),
   );
   core.position.y = 1.15;
-  g.add(ring, core, disc(1.45, COLORS.cyan));
-  g.userData.ring = ring;
+  g.add(outer, inner, core, disc(1.45, COLORS.cyan));
+  g.userData.ring = outer;
+  g.userData.innerRing = inner;
   g.userData.pulse = core;
   return g;
 }
-
 export const OBSTACLE_TYPES = {
   pulseGate: {
     build: makePulseGate,
@@ -126,6 +140,7 @@ export const OBSTACLE_TYPES = {
       obj.rotation.y += 0.012;
       const pulse = 1 + Math.sin(time * 9) * 0.08;
       if (obj.userData.ring) obj.userData.ring.scale.setScalar(pulse);
+      if (obj.userData.innerRing) obj.userData.innerRing.scale.setScalar(2 - pulse);
       if (obj.userData.pulse) obj.userData.pulse.scale.setScalar(1 + Math.sin(time * 12) * 0.12);
     },
   },
