@@ -25,6 +25,22 @@ function makeBonusCore() {
   halo.material = new THREE.MeshBasicMaterial({ color: COLORS.orange, transparent: true, opacity: 0.82 });
   return g;
 }
+function makeHackNode() {
+  const g = new THREE.Group();
+  const core = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.52),
+    new THREE.MeshStandardMaterial({ color: COLORS.violet, emissive: COLORS.violet, emissiveIntensity: 2.2, metalness: 0.8, roughness: 0.08 }),
+  );
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(0.86, 0.06, 8, 28),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.85 }),
+  );
+  ring.rotation.x = Math.PI / 2;
+  g.add(core, ring);
+  g.userData.core = core;
+  g.userData.ring = ring;
+  return g;
+}
 function makeShield() {
   const g = new THREE.Group();
   const outer = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8), new THREE.MeshBasicMaterial({ color: COLORS.green, wireframe: true }));
@@ -39,7 +55,7 @@ export class PickupManager {
   constructor(scene) {
     this.scene = scene;
     this.active = [];
-    this.pools = { core: new ObjectPool(makeCore, 4), bonusCore: new ObjectPool(makeBonusCore, 3), shield: new ObjectPool(makeShield, 2) };
+    this.pools = { core: new ObjectPool(makeCore, 4), bonusCore: new ObjectPool(makeBonusCore, 3), hackNode: new ObjectPool(makeHackNode, 4), shield: new ObjectPool(makeShield, 2) };
   }
   spawn(safeLanes, occupiedLanes = [], phase = 0) {
     if (!safeLanes.length || Math.random() > 0.68) return;
@@ -47,7 +63,8 @@ export class PickupManager {
     const lane = riskReward
       ? occupiedLanes[Math.floor(Math.random() * occupiedLanes.length)]
       : safeLanes[Math.floor(Math.random() * safeLanes.length)];
-    const type = riskReward ? "bonusCore" : (Math.random() < 0.18 ? "shield" : "core");
+    const hackRoute = phase >= 1 && !riskReward && Math.random() < 0.24;
+    const type = riskReward ? "bonusCore" : (hackRoute ? "hackNode" : (Math.random() < 0.18 ? "shield" : "core"));
     const obj = this.pools[type].acquire();
     obj.userData.type = type;
     obj.userData.picked = false;
@@ -63,6 +80,13 @@ export class PickupManager {
       p.position.z += advance;
       p.rotation.y += dt * 2.5;
       p.rotation.x += dt * 1.2;
+      if (p.userData.type === "hackNode") {
+        p.userData.core.rotation.y += dt * 4.5;
+        p.userData.ring.rotation.z += dt * 3.5;
+        const pulse = 1 + Math.sin(performance.now() * 0.012) * 0.16;
+        p.scale.setScalar(pulse);
+        p.userData.ring.material.opacity = 0.55 + Math.sin(performance.now() * 0.015) * 0.25;
+      }
       if ((p.userData.type === "core" || p.userData.type === "bonusCore") && p.userData.halo) {
         p.userData.halo.rotation.z += dt * 3.5;
         p.userData.halo.scale.setScalar(1 + Math.sin(performance.now() * 0.009) * 0.16);
