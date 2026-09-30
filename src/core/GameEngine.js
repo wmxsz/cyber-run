@@ -186,6 +186,12 @@ export class GameEngine {
       const duration = this._hunterElite ? GAME_CONFIG.eliteHunterDuration : GAME_CONFIG.hunterDuration;
       const approach = this._hunterElite ? 0.48 : 0.42;
       this._hunter.position.z = Math.max(0.6, gap - (duration - this._hunterTime) * approach) + Math.sin(this._hunterTime * 5) * 0.12;
+      this._hunter.rotation.y += dt * (this._hunterElite ? 2.4 : 1.7);
+      this._hunter.rotation.z = Math.sin(this._elapsed * 8) * 0.055;
+      if (this._hunter.userData.ring) {
+        this._hunter.userData.ring.rotation.z += dt * 3.2;
+        this._hunter.userData.ring.scale.setScalar(1 + Math.sin(this._elapsed * 10) * 0.08);
+      }
       if (this._hunterTime <= 0) {
         this._removeHunter();
         this._refreshEventMultiplier();
