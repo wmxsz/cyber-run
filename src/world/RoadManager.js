@@ -8,6 +8,7 @@ export class RoadManager {
     this.laneStrips = [];
     this.edgeLights = [];
     this._phase = 0;
+    this._surge = 0;
     this._build();
   }
 
@@ -87,20 +88,27 @@ export class RoadManager {
 
   update(speed, phase = this._phase) {
     this._phase = phase;
-    if (this.track?.material?.map) this.track.material.map.offset.y -= speed * 0.015;
+    const targetSurge = phase >= 4 ? 1 : phase >= 2 ? 0.65 : 0.25;
+    this._surge += (targetSurge - this._surge) * 0.06;
+    if (this.track?.material?.map) {
+      this.track.material.map.offset.y -= speed * (0.015 + this._surge * 0.006);
+    }
     const advance = speed * 60 * 0.016;
     const pulse = 0.55 + Math.sin(performance.now() * 0.004 + speed) * 0.2;
     const accent = phase >= 4 ? COLORS.yellow : phase >= 2 ? COLORS.pink : COLORS.cyan;
     const secondary = phase >= 4 ? COLORS.pink : COLORS.violet;
+    const pulseColor = phase >= 4 ? COLORS.yellow : phase >= 2 ? COLORS.pink : COLORS.cyan;
     for (const strip of this.laneStrips) {
       strip.position.z += advance;
-      strip.material.opacity = 0.55 + pulse * 0.28;
+      strip.material.opacity = 0.55 + pulse * 0.28 + this._surge * 0.08;
+      strip.scale.z = 1 + this._surge * 0.35;
       strip.material.color.setHex((this._phase >= 2 && strip.position.x < 0) ? accent : secondary);
       if (strip.position.z > 18) strip.position.z -= 28 * 18;
     }
     for (const light of this.edgeLights) {
       light.position.z += advance * 0.92;
-      light.material.opacity = 0.62 + pulse * 0.3;
+      light.material.opacity = 0.62 + pulse * 0.3 + this._surge * 0.08;
+      light.scale.z = 1 + this._surge * 0.28;
       light.material.color.setHex(light.position.x < 0 ? accent : secondary);
       if (light.position.z > 18) light.position.z -= 22 * 22;
     }
