@@ -473,40 +473,35 @@ export class GameEngine {
   }
 
   _makeHunter(elite = false) {
+    const cache = this._hunterResources || (this._hunterResources = new Map());
+    if (cache.has(elite)) {
+      const template = cache.get(elite);
+      const g = template.clone(true);
+      g.userData.hit = false;
+      if (g.userData.ring) g.userData.ring.visible = elite;
+      return g;
+    }
+
     const g = new THREE.Group();
     const size = elite ? 0.9 : 0.7;
     const accent = elite ? 0x8a2be2 : 0xff006e;
     const bodyMat = new THREE.MeshStandardMaterial({
-      color: 0x0c0820,
-      emissive: accent,
-      emissiveIntensity: elite ? 2.4 : 1.8,
-      metalness: 0.9,
-      roughness: 0.16,
-      flatShading: true,
+      color: 0x0c0820, emissive: accent, emissiveIntensity: elite ? 2.4 : 1.8,
+      metalness: 0.9, roughness: 0.16, flatShading: true,
     });
-    const glowMat = new THREE.MeshBasicMaterial({ color: elite ? 0x8a2be2 : 0xff006e });
+    const glowMat = new THREE.MeshBasicMaterial({ color: accent });
     const body = new THREE.Mesh(new THREE.OctahedronGeometry(size, elite ? 1 : 0), bodyMat);
     g.add(body);
 
-    const core = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(elite ? 0.28 : 0.22, 0),
-      new THREE.MeshBasicMaterial({ color: 0xffe600 }),
-    );
+    const core = new THREE.Mesh(new THREE.IcosahedronGeometry(elite ? 0.28 : 0.22, 0), new THREE.MeshBasicMaterial({ color: 0xffe600 }));
     core.position.z = size * 0.92;
     g.add(core);
 
-    const wing = new THREE.Mesh(
-      new THREE.BoxGeometry(elite ? 2.35 : 1.8, 0.08, elite ? 0.5 : 0.38),
-      bodyMat,
-    );
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(elite ? 2.35 : 1.8, 0.08, elite ? 0.5 : 0.38), bodyMat);
     wing.position.y = -0.08;
     g.add(wing);
 
-    // Distinct hunter silhouette: forward sensor housing + split stabilizers.
-    const sensor = new THREE.Mesh(
-      new THREE.ConeGeometry(elite ? 0.24 : 0.19, elite ? 0.62 : 0.5, 5),
-      glowMat,
-    );
+    const sensor = new THREE.Mesh(new THREE.ConeGeometry(elite ? 0.24 : 0.19, elite ? 0.62 : 0.5, 5), glowMat);
     sensor.rotation.x = -Math.PI / 2;
     sensor.position.z = -size * 1.02;
     g.add(sensor);
@@ -519,58 +514,40 @@ export class GameEngine {
       g.add(fin);
     }
 
-    const armorPlate = new THREE.Mesh(
-      new THREE.BoxGeometry(elite ? 1.25 : 0.95, 0.11, elite ? 0.5 : 0.4),
-      bodyMat,
-    );
+    const armorPlate = new THREE.Mesh(new THREE.BoxGeometry(elite ? 1.25 : 0.95, 0.11, elite ? 0.5 : 0.4), bodyMat);
     armorPlate.position.set(0, 0.16, -0.08);
     armorPlate.rotation.x = elite ? -0.12 : -0.08;
     g.add(armorPlate);
 
-    const sensorCollar = new THREE.Mesh(
-      new THREE.TorusGeometry(elite ? 0.27 : 0.22, 0.035, 6, 12),
-      glowMat,
-    );
+    const sensorCollar = new THREE.Mesh(new THREE.TorusGeometry(elite ? 0.27 : 0.22, 0.035, 6, 12), glowMat);
     sensorCollar.rotation.y = Math.PI / 2;
     sensorCollar.position.z = -size * 1.02;
     g.add(sensorCollar);
 
-    const edge = new THREE.Mesh(
-      new THREE.BoxGeometry(elite ? 1.8 : 1.35, 0.055, 0.06),
-      glowMat,
-    );
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(elite ? 1.8 : 1.35, 0.055, 0.06), glowMat);
     edge.position.set(0, -0.18, 0);
     g.add(edge);
 
-    const thruster = new THREE.Mesh(
-      new THREE.TorusGeometry(elite ? 0.62 : 0.45, 0.045, 6, 20),
-      glowMat,
-    );
+    const thruster = new THREE.Mesh(new THREE.TorusGeometry(elite ? 0.62 : 0.45, 0.045, 6, 20), glowMat);
     thruster.rotation.x = Math.PI / 2;
     thruster.position.z = size * 0.55;
     g.add(thruster);
 
-    const rearHousing = new THREE.Mesh(
-      new THREE.CylinderGeometry(elite ? 0.28 : 0.22, elite ? 0.34 : 0.27, 0.28, 8),
-      bodyMat,
-    );
+    const rearHousing = new THREE.Mesh(new THREE.CylinderGeometry(elite ? 0.28 : 0.22, elite ? 0.34 : 0.27, 0.28, 8), bodyMat);
     rearHousing.rotation.x = Math.PI / 2;
     rearHousing.position.z = size * 0.66;
     g.add(rearHousing);
 
     if (elite) {
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(1.15, 0.06, 8, 32),
-        new THREE.MeshBasicMaterial({ color: 0x8a2be2, transparent: true, opacity: 0.85 }),
-      );
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.06, 8, 32), new THREE.MeshBasicMaterial({ color: 0x8a2be2, transparent: true, opacity: 0.85 }));
       ring.rotation.x = Math.PI / 2;
       g.add(ring);
       g.userData.ring = ring;
     }
     g.userData.hit = false;
-    return g;
+    cache.set(elite, g);
+    return g.clone(true);
   }
-
   _checkComboMilestone(bonus) {
     const thresholds = GAME_CONFIG.comboMilestones || [];
     const index = thresholds.indexOf(bonus.combo);
@@ -747,6 +724,19 @@ export class GameEngine {
     });
     this._hunterNormalModel = null;
     this._hunterEliteModel = null;
+    if (this._hunterResources) {
+      for (const template of this._hunterResources.values()) {
+        template.traverse((node) => {
+          if (node.geometry) node.geometry.dispose();
+          if (node.material) {
+            if (Array.isArray(node.material)) node.material.forEach((m) => m?.dispose?.());
+            else node.material.dispose();
+          }
+        });
+      }
+      this._hunterResources.clear();
+      this._hunterResources = null;
+    }
     this.sceneMgr.dispose();
   }
 }
