@@ -1,4 +1,4 @@
-name: Cyber Run Static Check
+name: Cyber Run Build Check
 
 on:
   push:
@@ -9,40 +9,54 @@ permissions:
   contents: read
 
 jobs:
-  validate:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22.12.0"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Production build
+        run: npm run build
+
       - name: Validate project shape
         shell: bash
         run: |
           test -f index.html
-          test -f README.md
-          test -f LICENSE
+          test -f package.json
           test -f src/main.js
-          test -f src/game.js
-          test -f src/audio.js
-          test -f src/textures.js
-          test -f src/styles.css
+          test -f src/core/GameEngine.js
+          test -f src/core/SceneManager.js
+          test -f src/core/InputManager.js
+          test -f src/core/AudioManager.js
+          test -f src/world/RoadManager.js
+          test -f src/world/CityManager.js
+          test -f src/entities/PlayerObject.js
+          test -f src/entities/ObstacleManager.js
+          test -f src/entities/PickupManager.js
+          test -f src/systems/CollisionSystem.js
+          test -f src/systems/ScoreSystem.js
+          test -f src/ui/UIManager.js
           test ! -d Assets
           test ! -d Packages
           test ! -d ProjectSettings
           test ! -d tools
           test ! -d web
+          test ! -f src/game.js
+          test ! -f src/audio.js
+          test ! -f src/textures.js
 
-      - name: Validate runner source
-        shell: bash
+      - name: Validate entry imports
         run: |
-          grep -q 'three.min.js' index.html
           grep -q 'type="module"' index.html
-          grep -q 'requestAnimationFrame' src/game.js
-          grep -q 'btn-start' index.html
-          grep -q 'btn-jump' index.html
-          grep -q 'moveLane' src/game.js
-          grep -q "./audio.js" src/game.js
-          grep -q "./textures.js" src/game.js
-
-      - name: Validate text and diff
-        run: git show --check --oneline HEAD
+          grep -q 'src="/src/main.js"' index.html
+          grep -q 'from "./core/GameEngine.js"' src/main.js
+          grep -q 'from "./ui/UIManager.js"' src/main.js
