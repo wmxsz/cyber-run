@@ -28,6 +28,18 @@ function makeCore() {
   g.userData.shell = shell;
   g.userData.shellCross = shellCross;
   g.userData.core = core;
+
+  // A compact containment collar gives the core a manufactured device silhouette.
+  const collar = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.5, 0.62, 0.12, 8),
+    new THREE.MeshStandardMaterial({
+      color: 0x10182b, metalness: 0.88, roughness: 0.18,
+      emissive: COLORS.cyan, emissiveIntensity: 0.18,
+    }),
+  );
+  collar.position.y = -0.34;
+  g.add(collar);
+  g.userData.collar = collar;
   return g;
 }
 function makeBonusCore() {
