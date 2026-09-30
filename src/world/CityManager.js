@@ -47,22 +47,34 @@ export class CityManager {
   _build() {
     const tex = buildingTexture();
     const box = new THREE.BoxGeometry(1, 1, 1);
+    const buildingMats = {
+      left: new THREE.MeshStandardMaterial({
+        map: tex, roughness: 0.3, metalness: 0.7,
+        emissive: COLORS.cyan, emissiveIntensity: 0.045,
+      }),
+      right: new THREE.MeshStandardMaterial({
+        map: tex, roughness: 0.3, metalness: 0.7,
+        emissive: COLORS.pink, emissiveIntensity: 0.045,
+      }),
+    };
+    const spireMats = {
+      cyan: new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
+      pink: new THREE.MeshBasicMaterial({ color: COLORS.pink }),
+    };
     for (let i = 0; i < 70; i++) {
       const left = Math.random() > 0.5;
       const x = (left ? -1 : 1) * (12 + Math.random() * 35);
       const z = -Math.random() * 480;
       const w = 8 + Math.random() * 12, d = 8 + Math.random() * 12, h = 25 + Math.random() * 70;
-      const b = new THREE.Mesh(box, new THREE.MeshStandardMaterial({
-        map: tex, roughness: 0.3, metalness: 0.7,
-        emissive: left ? COLORS.cyan : COLORS.pink, emissiveIntensity: 0.045,
-      }));
+      const b = new THREE.Mesh(box, left ? buildingMats.left : buildingMats.right);
       b.scale.set(w, h, d); b.position.set(x, h / 2, z);
       b.castShadow = true; b.receiveShadow = true;
       this.scene.add(b); this.buildings.push(b);
       if (Math.random() > 0.4) {
+        const spireColor = Math.random() > 0.5 ? "cyan" : "pink";
         const spire = new THREE.Mesh(
           new THREE.CylinderGeometry(0.1, 0.6, 12, 4),
-          new THREE.MeshBasicMaterial({ color: Math.random() > 0.5 ? COLORS.cyan : COLORS.pink }),
+          spireMats[spireColor],
         );
         spire.position.set(x, h + 6, z);
         this.scene.add(spire); this.buildings.push(spire);
