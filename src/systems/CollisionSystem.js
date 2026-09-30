@@ -5,6 +5,7 @@ export class CollisionSystem {
     const p = player.getHitbox();
     let obstacleHit = null;
     const picked = [];
+    const nearMisses = [];
 
     obstacles.forEachActive((item) => {
       if (item.obj.userData.hit) return;
@@ -12,11 +13,20 @@ export class CollisionSystem {
       const dz = Math.abs(item.obj.position.z - p.z);
       if (dx > item.def.hitbox.x + p.halfX || dz > GAME_CONFIG.collisionZ) return;
 
-      if (item.def.blocksAir) {
+      if (item.def.requiresSlide) {
+        if (!player.isSliding) {
+          item.obj.userData.hit = true;
+          obstacleHit = item;
+        } else {
+          item.obj.userData.passed = true;
+        }
+      } else if (item.def.blocksAir) {
         const dy = Math.abs((item.def.hitCenterY ?? item.def.hitbox.y) - (p.y + p.halfY));
         if (dy < item.def.hitbox.y + p.halfY && !player.isJumping) {
           item.obj.userData.hit = true;
           obstacleHit = item;
+        } else if (player.isJumping) {
+          item.obj.userData.passed = true;
         }
       } else if (item.def.blocksGround && !player.isJumping) {
         item.obj.userData.hit = true;
@@ -24,6 +34,11 @@ export class CollisionSystem {
       } else if (item.def.blocksGround && player.isJumping && p.y < item.def.hitbox.y * 1.2) {
         item.obj.userData.hit = true;
         obstacleHit = item;
+      }
+
+      if (!item.obj.userData.hit && !item.obj.userData.passed && item.obj.position.z > 0.8 && dx <= GAME_CONFIG.nearMissDistance) {
+        item.obj.userData.passed = true;
+        nearMisses.push(item);
       }
     });
 
@@ -38,6 +53,6 @@ export class CollisionSystem {
       }
     });
 
-    return { obstacleHit, picked };
+    return { obstacleHit, picked, nearMisses };
   }
 }
