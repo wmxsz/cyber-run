@@ -161,12 +161,12 @@ export class PickupManager {
         if (p.userData.ring2) p.userData.ring2.rotation.y -= dt * 2.8;
         const pulse = 1 + Math.sin(elapsed * 12) * 0.16;
         p.scale.setScalar(pulse);
-        p.userData.ring.material.opacity = 0.55 + Math.sin(elapsed * 15) * 0.25;
+        p.userData.ring.scale.setScalar(1 + Math.sin(elapsed * 15) * 0.05);
       }
       if ((p.userData.type === "core" || p.userData.type === "bonusCore") && p.userData.halo) {
         p.userData.halo.rotation.z += dt * 3.5;
         p.userData.halo.scale.setScalar(1 + Math.sin(elapsed * 9) * 0.16);
-        p.userData.halo.material.opacity = 0.48 + Math.sin(elapsed * 12) * 0.22;
+        p.userData.halo.scale.setScalar(1 + Math.sin(elapsed * 12) * 0.08);
       }
       if (p.userData.type === "shield") {
         const pulse = 1 + Math.sin(elapsed * 8) * 0.12;
