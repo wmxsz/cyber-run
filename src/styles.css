@@ -183,6 +183,15 @@
       text-shadow: 0 0 15px #00f0ff;
       line-height: 1;
     }
+    .speed-number.overdrive {
+      color: #ffe600;
+      text-shadow: 0 0 18px #ffe600, 0 0 35px rgba(255,0,119,.7);
+      animation: speed-pulse .22s infinite alternate;
+    }
+    @keyframes speed-pulse {
+      from { transform: skewX(-2deg) scale(1); }
+      to { transform: skewX(-2deg) scale(1.035); }
+    }
     .speed-unit {
       font-size: 13px;
       color: rgba(255, 255, 255, 0.6);
@@ -566,6 +575,11 @@ button.mobile-touch-btn {
   color: #ffe600;
   box-shadow: 0 0 9px rgba(255,230,0,.18);
 }
+.lane-threat.elite {
+  border-color: rgba(138,43,226,.8);
+  color: #caa8ff;
+  box-shadow: 0 0 12px rgba(138,43,226,.3);
+}
 .lane-threat.imminent {
   border-color: #ff0055;
   color: #ff668f;
@@ -598,6 +612,8 @@ button.mobile-touch-btn {
 #event-status{position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:9;min-height:18px;padding:3px 10px;font-size:10px;font-weight:900;letter-spacing:2px;color:#ffe600;text-shadow:0 0 8px rgba(255,230,0,.7);pointer-events:none;text-align:center}
 
 
+#event-status.elite{color:#b980ff;text-shadow:0 0 10px rgba(138,43,226,.95);animation:event-elite .35s infinite alternate}
+@keyframes event-elite{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.045)}}
 #multiplier-status{position:fixed;top:123px;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:8px;min-height:20px;padding:3px 9px;border:1px solid rgba(0,240,255,.25);background:rgba(4,8,24,.52);font:700 8px/1 Orbitron,monospace;letter-spacing:1.5px;pointer-events:none;opacity:.72}
 .multiplier-label{color:rgba(0,240,255,.65)}
 #hud-multiplier{color:#00f0ff;text-shadow:0 0 8px rgba(0,240,255,.7)}
