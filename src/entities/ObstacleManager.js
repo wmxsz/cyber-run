@@ -43,8 +43,6 @@ export class ObstacleManager {
 
   spawnRow(score, phase = 0) {
     const ramp = Math.min(1, score / GAME_CONFIG.spawnRampScore);
-    // Always keep one lane open. From sector 3 onward, paired obstacles form
-    // readable action combinations instead of two unrelated random hazards.
     const count = phase >= 4
       ? 2
       : phase >= 3
@@ -90,7 +88,7 @@ export class ObstacleManager {
     for (let i = this.active.length - 1; i >= 0; i--) {
       const item = this.active[i];
       item.obj.position.z += advance;
-      item.def.update?.(item.obj, item.type === "mine" ? dt : time);
+      item.def.update?.(item.obj, time, dt);
       if (item.obj.position.z > GAME_CONFIG.cullZ) this._removeAt(i);
     }
   }
