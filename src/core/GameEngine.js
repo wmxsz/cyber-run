@@ -515,6 +515,17 @@ export class GameEngine {
     this.active = false;
     this.over = true;
     this.boosting = false;
+    this.player.setBoost(false);
+    if (this._hunter) {
+      this.scene.remove(this._hunter);
+      this._hunter = null;
+    }
+    this._hunterTime = 0;
+    this._hunterElite = false;
+    this._eventTime = 0;
+    this._empTime = 0;
+    this._ghostTime = 0;
+    this.score.setEventMultiplier(1);
     this.player.group.visible = true;
     this.audio.stopBgm();
     this.audio.playGameOver();
