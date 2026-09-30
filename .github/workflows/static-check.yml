@@ -21,6 +21,11 @@ jobs:
           test -f index.html
           test -f README.md
           test -f LICENSE
+          test -f src/main.js
+          test -f src/game.js
+          test -f src/audio.js
+          test -f src/textures.js
+          test -f src/styles.css
           test ! -d Assets
           test ! -d Packages
           test ! -d ProjectSettings
@@ -30,11 +35,14 @@ jobs:
       - name: Validate runner source
         shell: bash
         run: |
-          grep -q "three.min.js" index.html
-          grep -q "requestAnimationFrame" index.html
-          grep -q "btn-start" index.html
-          grep -q "btn-jump" index.html
-          grep -q "moveLane" index.html
+          grep -q 'three.min.js' index.html
+          grep -q 'type="module"' index.html
+          grep -q 'requestAnimationFrame' src/game.js
+          grep -q 'btn-start' index.html
+          grep -q 'btn-jump' index.html
+          grep -q 'moveLane' src/game.js
+          grep -q "./audio.js" src/game.js
+          grep -q "./textures.js" src/game.js
 
       - name: Validate text and diff
         run: git show --check --oneline HEAD
