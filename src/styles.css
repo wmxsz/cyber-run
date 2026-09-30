@@ -594,3 +594,5 @@ button.mobile-touch-btn {
 .mission-fill{height:100%;width:0;background:#ffe600;box-shadow:0 0 10px rgba(255,230,0,.7);transition:width .2s ease}
 .mission-progress{margin-top:3px;text-align:right;font-size:9px;color:rgba(255,255,255,.65);letter-spacing:1px}
 @media (max-width:700px){#mission-panel{top:92px;width:min(270px,62vw);}.mission-label{font-size:11px}}
+
+#event-status{position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:9;min-height:18px;padding:3px 10px;font-size:10px;font-weight:900;letter-spacing:2px;color:#ffe600;text-shadow:0 0 8px rgba(255,230,0,.7);pointer-events:none;text-align:center}
