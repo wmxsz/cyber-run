@@ -171,10 +171,17 @@ export class GameEngine {
 
     for (const item of result.nearMisses) {
       const bonus = this.score.nearMiss();
+      this.boostEnergy = Math.min(
+        GAME_CONFIG.maxBoostEnergy,
+        this.boostEnergy + GAME_CONFIG.nearMissBoostGain,
+      );
       this.audio.playCollect();
       const p = item.obj.position;
       this.particles.burst(p.x, 1.0, p.z, 0xffe600, 8);
-      this._ui?.announce("NEAR MISS +" + bonus.points);
+      const comboText = bonus.multiplier > 1 ? " // COMBO x" + bonus.multiplier : "";
+      this._ui?.announce(
+        "NEAR MISS +" + bonus.points + " // +" + GAME_CONFIG.nearMissBoostGain + " BOOST" + comboText,
+      );
     }
 
     for (const pickup of result.picked) {
