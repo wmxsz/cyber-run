@@ -346,6 +346,7 @@ export class GameEngine {
       this.audio.playCollect();
       const p = item.obj.position;
       this.particles.burst(p.x, 1.0, p.z, 0xffe600, 8);
+      this.particles.streak(p.x, 1.0, p.z, 0xffe600, 4, 1.2);
       const comboText = bonus.multiplier > 1 ? " // COMBO x" + bonus.multiplier : "";
       this._ui?.announce(
         "NEAR MISS +" + bonus.points + " // +" + GAME_CONFIG.nearMissBoostGain + " BOOST" + comboText,
@@ -363,6 +364,7 @@ export class GameEngine {
         this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.hackNodeBoostGain);
         this.audio.playCollect();
         this.particles.burst(x, y, z, 0x8a2be2, 22);
+        this.particles.shockwave(x, y, z, 0x8a2be2, 1.8);
         if (this._hackNodes >= GAME_CONFIG.ghostProtocolTarget) {
           this._hackNodes = 0;
           this._ghostTime = GAME_CONFIG.ghostProtocolDuration;
@@ -377,6 +379,7 @@ export class GameEngine {
         this.player.setShield(true);
         this.audio.playPowerup();
         this.particles.burst(x, y, z, 0x00ffaa, 20);
+        this.particles.shockwave(x, y, z, 0x00ffaa, 2.0);
         this._ui?.announce("SHIELD ONLINE");
       } else if (pickup.userData.type === "bonusCore") {
         const bonus = this.score.collectBonusCore();
@@ -385,6 +388,7 @@ export class GameEngine {
         this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.bonusCoreBoostGain);
         this.audio.playPowerup();
         this.particles.burst(x, y, z, 0xff8800, bonus.riskChainComplete ? 48 : 28);
+        this.particles.shockwave(x, y, z, 0xff8800, bonus.riskChainComplete ? 3.0 : 2.1);
         if (bonus.riskChainComplete) {
           this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.riskChainBoost);
           this.audio.playPowerup();
@@ -400,6 +404,7 @@ export class GameEngine {
         this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.coreBoostGain);
         this.audio.playCollect();
         this.particles.burst(x, y, z, 0x00f0ff, 15);
+        this.particles.shockwave(x, y, z, 0x00f0ff, 1.6);
         this._ui?.announce("CORE +" + bonus.points);
       }
       this.pickups.markPicked(pickup);
@@ -605,6 +610,9 @@ export class GameEngine {
     if (this.boostEnergy < 10) { this._ui?.announce("BOOST CHARGE LOW"); return; }
     this.boosting = true;
     this.player.setBoost(true);
+    const p = this.player.group.position;
+    this.particles.shockwave(p.x, p.y + 0.45, p.z, 0xff2bd6, 2.4);
+    this.particles.streak(p.x, p.y + 0.35, p.z + 0.8, 0xff2bd6, 7, 2.4);
     this.sceneMgr.shake(0.12);
     this.audio.playPowerup();
     this._ui?.announce("OVERDRIVE ONLINE");
@@ -623,6 +631,7 @@ export class GameEngine {
       this.audio.playHit();
       this.sceneMgr.shake(0.35);
       this.particles.burst(p.x, p.y + 0.8, p.z, 0x00ffaa, 25);
+      this.particles.shockwave(p.x, p.y + 0.65, p.z, 0x00ffaa, 2.8);
       this._ui?.announce("SHIELD BROKEN!");
       this.invulnerable = 1;
       return;
@@ -633,6 +642,7 @@ export class GameEngine {
     this.audio.playHit();
     this.sceneMgr.shake(0.4);
     this.particles.burst(p.x, p.y + 0.5, p.z, 0xff0055, 30);
+    this.particles.shockwave(p.x, p.y + 0.5, p.z, 0xff0055, 3.0);
 
     if (this.hp <= 0) this.gameOver();
     else this.invulnerable = 1.5;
