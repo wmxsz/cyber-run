@@ -68,7 +68,7 @@ export class CityManager {
       const w = 8 + Math.random() * 12, d = 8 + Math.random() * 12, h = 25 + Math.random() * 70;
       const b = new THREE.Mesh(box, left ? buildingMats.left : buildingMats.right);
       b.scale.set(w, h, d); b.position.set(x, h / 2, z);
-      b.castShadow = true; b.receiveShadow = true;
+      b.castShadow = false; b.receiveShadow = false;
       this.scene.add(b); this.buildings.push(b);
       if (Math.random() > 0.4) {
         const spireColor = Math.random() > 0.5 ? "cyan" : "pink";
