@@ -36,6 +36,9 @@ export class PlayerObject {
     this.head=add(new THREE.SphereGeometry(.34,12,10),skin,0,2.34,0,.92,1.08,.82);
     this.helmet=add(new THREE.SphereGeometry(.37,12,8),dark,0,2.37,0,.98,1.04,.86);
     this.visor=add(new THREE.BoxGeometry(.48,.12,.08),visor,0,2.39,-.31);
+    this.eyeLine=add(new THREE.BoxGeometry(.34,.018,.018),glow,0,2.36,-.365);
+    this.facePlate=add(new THREE.BoxGeometry(.18,.07,.035),dark,.17,2.18,-.29,.8,1,1);
+    this.templeNode=add(new THREE.SphereGeometry(.055,8,6),pglow,.31,2.22,-.18);
     add(new THREE.BoxGeometry(.37,.025,.025),glow,0,2.39,-.36);
     this.neuralLine = add(new THREE.BoxGeometry(.025,.28,.025),pglow,0.27,2.12,-.31);
     this.chestCore = new THREE.Mesh(new THREE.TorusGeometry(.16,.035,8,24),new THREE.MeshBasicMaterial({color:COLORS.cyan,transparent:true,opacity:.86}));
@@ -48,6 +51,7 @@ export class PlayerObject {
     this.armParts=[]; for(const side of [-1,1]){
       const accent=side<0?cyan:pink;
       const shoulder=add(new THREE.SphereGeometry(.25,8,6),armor,side*.58,1.74,0,1.15,.82,1);
+      const shoulderPlate=add(new THREE.BoxGeometry(.26,.16,.24),joint,side*.62,1.72,-.06,1,.85,1);
       const upper=add(new THREE.CapsuleGeometry(.13,.38,4,7),dark,side*.72,1.4,.02);
       const elbow=add(new THREE.SphereGeometry(.14,8,6),joint,side*.76,1.12,0);
       const lower=add(new THREE.CapsuleGeometry(.12,.42,4,7),armor,side*.75,.88,-.06);
@@ -56,7 +60,8 @@ export class PlayerObject {
       const blade=add(new THREE.BoxGeometry(.045,.3,.07),accent,side*.91,.82,-.23);
       blade.rotation.z=side*.12;
       this.armBlades.push(blade);
-      this.armParts.push({shoulder,upper,elbow,lower,hand,strip,side});
+      const wristNode=add(new THREE.SphereGeometry(.045,7,5),accent,side*.77,.68,-.18);
+      this.armParts.push({shoulder,shoulderPlate,upper,elbow,lower,hand,strip,wristNode,side});
     }
 
     this.legParts=[]; for(const side of [-1,1]){
@@ -66,13 +71,15 @@ export class PlayerObject {
       const knee=add(new THREE.SphereGeometry(.17,8,6),joint,side*.25,.08,-.02);
       const shin=add(new THREE.CapsuleGeometry(.15,.48,5,8),dark,side*.25,-.28,0,1,1,.9);
       const boot=add(new THREE.BoxGeometry(.32,.28,.68),armor,side*.25,-.68,-.16);
+      const bootPlate=add(new THREE.BoxGeometry(.25,.1,.18),joint,side*.25,-.67,-.48);
       const sole=add(new THREE.BoxGeometry(.34,.055,.72),accent,side*.25,-.83,-.16);
-      this.legParts.push({hip,thigh,knee,shin,boot,sole,side});
+      const calfLine=add(new THREE.BoxGeometry(.035,.28,.025),accent,side*.25,-.3,-.17);
+      this.legParts.push({hip,thigh,knee,shin,boot,bootPlate,sole,calfLine,side});
     }
 
     this.spineSegments=[]; for(let i=0;i<6;i++) this.spineSegments.push(add(new THREE.BoxGeometry(.1,.13,.08),i%2?pglow:glow,0,.98+i*.19,.34));
     this.energyBack=add(new THREE.BoxGeometry(.08,1,.045),glow,0,1.46,.36);
-    this.backFins=[]; for(const side of [-1,1]){const f=add(new THREE.BoxGeometry(.09,.5,.3),side<0?glow:pglow,side*.43,1.56,.25);f.rotation.z=side*-.18;this.backFins.push(f);}
+    this.backFins=[]; for(const side of [-1,1]){const f=add(new THREE.BoxGeometry(.07,.34,.18),side<0?glow:pglow,side*.38,1.58,.28);f.rotation.z=side*-.24;this.backFins.push(f);}
 
     this.underGlow=new THREE.Mesh(new THREE.TorusGeometry(.58,.018,6,28),new THREE.MeshBasicMaterial({color:COLORS.cyan,transparent:true,opacity:.28,blending:THREE.AdditiveBlending,depthWrite:false}));
     this.underGlow.rotation.x=Math.PI/2;this.underGlow.position.y=-.78;this.group.add(this.underGlow);
@@ -174,6 +181,8 @@ export class PlayerObject {
     this.chestCore.rotation.z += dt * (this.boosting ? 7 : 2.2);
     this.chestCore.material.opacity = this.boosting ? 1 : 0.72 + Math.sin(elapsed * 8) * 0.12;
     this.chestCoreInner.material.emissiveIntensity = this.boosting ? 3.6 : 2.1;
+    this.eyeLine.material.opacity = this.boosting ? 1 : 0.72 + Math.sin(elapsed * 7) * 0.16;
+    this.templeNode.material.opacity = this.boosting ? 1 : 0.7 + Math.sin(elapsed * 9) * 0.18;
     this.neuralLine.material.emissiveIntensity = this.boosting ? 3.2 : 1.8;
     for (const blade of this.armBlades) blade.scale.y = this.boosting ? 1.2 + Math.sin(elapsed * 18) * 0.12 : 1;
     this.energyHalo.rotation.z += dt * (this.boosting ? 8 : 2.8);

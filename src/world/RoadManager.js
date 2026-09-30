@@ -36,7 +36,7 @@ export class RoadManager {
     bg.addColorStop(0.55, "#070719");
     bg.addColorStop(1, "#02030a");
     ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, 512, 512);
+    ctx.fillRect(0, 0, 1024, 1024);
 
     // Fine grid + perspective-like transverse bands make the track feel deeper at speed.
     ctx.strokeStyle = "rgba(0,240,255,.42)";
@@ -73,6 +73,24 @@ export class RoadManager {
         ctx.fillRect(x, y, 52, 5);
         ctx.fillRect(x + 8, y + 10, 18, 3);
       }
+    }
+
+    ctx.strokeStyle = "rgba(255,0,119,.16)";
+    ctx.lineWidth = 2;
+    for (let y = 88; y < 1024; y += 176) {
+      ctx.strokeRect(96, y, 176, 52);
+      ctx.strokeRect(752, y + 22, 176, 52);
+    }
+    ctx.fillStyle = "rgba(255,234,0,.16)";
+    for (let y = 112; y < 1024; y += 176) {
+      ctx.fillRect(302, y, 46, 4);
+      ctx.fillRect(676, y + 28, 46, 4);
+    }
+    ctx.strokeStyle = "rgba(0,240,255,.22)";
+    ctx.lineWidth = 1;
+    for (let y = 24; y < 1024; y += 96) {
+      ctx.beginPath(); ctx.moveTo(420, y); ctx.lineTo(472, y + 18); ctx.lineTo(496, y + 18); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(528, y + 18); ctx.lineTo(552, y + 18); ctx.lineTo(604, y); ctx.stroke();
     }
 
     const tex = new THREE.CanvasTexture(canvas);
