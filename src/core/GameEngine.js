@@ -299,13 +299,14 @@ export class GameEngine {
 
     const result = this.collision.check(this.player, this.obstacles, this.pickups);
 
-    if (result.obstacleHit) {
-      this.obstacles.remove(result.obstacleHit);
+    if (result.obstacleHits?.length) {
+      for (const obstacleHit of result.obstacleHits) this.obstacles.remove(obstacleHit);
       if (this._ghostTime > 0) {
         const p = this.player.group.position;
-        const ghostPoints = this.score.ghostBreak();
-        this.particles.burst(p.x, p.y + 0.5, p.z, 0x8a2be2, 20);
-        this._ui?.announce("GHOST PHASE // BYPASSED // +" + Math.floor(ghostPoints));
+        const ghostPoints = this.score.ghostBreak() * result.obstacleHits.length;
+        this.score.score += this.score.ghostBreak() * (result.obstacleHits.length - 1);
+        this.particles.burst(p.x, p.y + 0.5, p.z, 0x8a2be2, 20 + result.obstacleHits.length * 6);
+        this._ui?.announce("GHOST PHASE // BYPASSED x" + result.obstacleHits.length + " // +" + Math.floor(ghostPoints));
       } else {
         this.takeDamage();
       }
