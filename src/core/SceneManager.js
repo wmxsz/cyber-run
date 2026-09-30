@@ -64,11 +64,11 @@ export class SceneManager {
 
   setSpeedFeel(speed, boosting = false, phase = 0) {
     const target = Math.min(1, Math.max(0, (speed - 1.2) / 2)) + (boosting ? 0.28 : 0) + phase * 0.025;
-    this._speedFeel = THREE.MathUtils.lerp(this._speedFeel, Math.min(1.25, target), 0.12);
+    this._speedFeel = THREE.MathUtils.lerp(this._speedFeel, Math.min(1.25, target), 1 - Math.pow(1 - 0.12, dt * 60));
   }
 
   update(dt) {
-    this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this._baseX, Math.min(1, dt * 8));
+    this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this._baseX, 1 - Math.pow(1 - 0.08, dt * 60));
 
     const baseFov = GAME_CONFIG.baseFov || 65;
     const maxFov = Math.max(baseFov, GAME_CONFIG.boostFov || 78);
@@ -77,7 +77,7 @@ export class SceneManager {
       baseFov,
       maxFov,
     );
-    this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFov, Math.min(1, dt * 5));
+    this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFov, 1 - Math.pow(1 - 0.05, dt * 60));
     this.camera.updateProjectionMatrix();
 
     if (this._shake > 0) {
