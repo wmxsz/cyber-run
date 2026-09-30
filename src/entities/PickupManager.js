@@ -29,6 +29,7 @@ function makeBonusCore() {
   const shell = g.children[1];
   const halo = g.children[2];
   core.geometry.dispose();
+  core.material.dispose();
   core.geometry = new THREE.IcosahedronGeometry(0.58, 0);
   core.material = new THREE.MeshStandardMaterial({ color: COLORS.orange, emissive: COLORS.orange, emissiveIntensity: 1.9, metalness: 0.92, roughness: 0.08 });
   shell.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.48 });
