@@ -68,6 +68,8 @@ export class GameEngine {
     this._ghostTime = 0;
     this._ui = null;
     this._started = false;
+    this._disposed = false;
+    this._rafId = 0;
     this._onVisibilityChange = this._onVisibilityChange.bind(this);
     document.addEventListener("visibilitychange", this._onVisibilityChange);
 
@@ -81,17 +83,18 @@ export class GameEngine {
   }
 
   start() {
-    if (this._started) return;
+    if (this._started || this._disposed) return;
     this._started = true;
     let previous = performance.now();
     const loop = (now) => {
+      if (this._disposed) return;
       const dt = Math.min((now - previous) / 1000, 1 / 30);
       previous = now;
       this.update(dt);
       this.sceneMgr.render();
-      requestAnimationFrame(loop);
+      this._rafId = requestAnimationFrame(loop);
     };
-    requestAnimationFrame(loop);
+    this._rafId = requestAnimationFrame(loop);
   }
 
   startGame() {
@@ -593,6 +596,10 @@ export class GameEngine {
   }
 
   dispose() {
+    if (this._disposed) return;
+    this._disposed = true;
+    if (this._rafId) cancelAnimationFrame(this._rafId);
+    this._rafId = 0;
     document.removeEventListener("visibilitychange", this._onVisibilityChange);
     this.input.dispose();
     this.audio.dispose();
