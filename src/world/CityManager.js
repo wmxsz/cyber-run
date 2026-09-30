@@ -142,7 +142,7 @@ export class CityManager {
     this.scene.add(this.speedLines);
   }
 
-  update(speed) {
+  update(speed, phase = 0) {
     const positions = this.speedLines?.geometry.attributes.position.array;
     if (positions) {
       for (let i = 2; i < positions.length; i += 6) {
@@ -153,6 +153,7 @@ export class CityManager {
         }
       }
       this.speedLines.geometry.attributes.position.needsUpdate = true;
+      this.speedLines.material.opacity = 0.32 + Math.min(0.24, phase * 0.045) + Math.min(0.12, speed * 0.03);
     }
     const t = performance.now() * 0.001;
     for (const panel of this.holograms) {
@@ -160,12 +161,24 @@ export class CityManager {
       panel.material.opacity = 0.55 + Math.sin(t * 4 + panel.userData.phase) * 0.15;
       panel.rotation.z = Math.sin(t * 1.4 + panel.userData.phase) * 0.015;
     }
+    const droneBoost = 0.8 + Math.min(0.7, phase * 0.14);
     for (const drone of this.drones) {
-      drone.position.z += speed * 0.8 * drone.userData.speed;
-      drone.position.y += Math.sin(t * 2 + drone.userData.phase) * 0.008;
-      if (drone.position.z > 15) drone.position.z -= 470;
-      drone.rotation.z = Math.sin(t * 1.5 + drone.userData.phase) * 0.08;
+      drone.position.z += speed * droneBoost * drone.userData.speed;
+      const wave = Math.sin(t * (1.4 + phase * 0.12) + drone.userData.phase);
+      drone.position.y += wave * 0.012;
+      drone.position.x += Math.cos(t * 0.7 + drone.userData.phase) * (0.012 + phase * 0.004);
+      if (drone.position.z > 15) {
+        drone.position.z -= 470;
+        drone.position.x = (Math.random() > 0.5 ? 1 : -1) * (10 + Math.random() * 28);
+      }
+      drone.rotation.z = wave * 0.08;
+      drone.rotation.y = Math.cos(t * 1.1 + drone.userData.phase) * 0.06;
+      const light = drone.children[1];
+      if (light?.material) light.material.opacity = 0.65 + Math.sin(t * 5 + drone.userData.phase) * 0.25;
     }
-    if (this.sunRing) this.sunRing.rotation.z += 0.002 + speed * 0.0005;
+    if (this.sunRing) {
+      this.sunRing.rotation.z += 0.002 + speed * 0.0005 + phase * 0.0002;
+      this.sunRing.scale.setScalar(1 + Math.sin(t * 1.5) * (0.015 + phase * 0.003));
+    }
   }
 }
