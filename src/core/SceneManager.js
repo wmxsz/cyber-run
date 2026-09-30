@@ -70,6 +70,7 @@ export class SceneManager {
     topFill.position.set(0, 14, -35);
     this.scene.add(topFill);
     this._neonLights = [cyanFill, pinkFill, topFill];
+    this._baseExposure = 1.3;
   }
 
   setMouseOffset(x) {
@@ -91,7 +92,7 @@ export class SceneManager {
       this._neonLights[1].intensity = 2.8 + surge * 2.8;
       this._neonLights[2].intensity = 1.35 + surge * 0.8;
     }
-    this.renderer.toneMappingExposure = 1.3 + this._speedFeel * 0.12;
+    this.renderer.toneMappingExposure = this._baseExposure + this._speedFeel * 0.12;
   }
 
   update(dt) {
@@ -163,6 +164,11 @@ export class SceneManager {
 
   dispose() {
     window.removeEventListener("resize", this._resize);
+    if (this._neonLights) {
+      for (const light of this._neonLights) light.removeFromParent();
+      this._neonLights.length = 0;
+      this._neonLights = null;
+    }
     this.renderer.dispose();
   }
 }
