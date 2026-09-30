@@ -23,6 +23,8 @@ export const GAME_CONFIG = {
   comboMilestones: [4, 8, 12, 16, 20],
   comboBoostRewards: [8, 12, 16, 20, 25],
   coreBoostGain: 25,
+  bonusCoreScore: 300,
+  bonusCoreBoostGain: 40,
   maxBoostEnergy: 100,
   boostDrain: 42,
   boostSpeedMultiplier: 1.48,
