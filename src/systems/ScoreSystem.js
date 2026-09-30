@@ -49,4 +49,8 @@ export class ScoreSystem {
   nearMiss() {
     return this._chainBonus(GAME_CONFIG.nearMissScore);
   }
+
+  hunterBreak() {
+    return this._chainBonus(180);
+  }
 }
