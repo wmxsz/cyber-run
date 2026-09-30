@@ -71,4 +71,14 @@ export class ScoreSystem {
   hunterBreak() {
     return this._chainBonus(180);
   }
+
+  hackNode() {
+    return this._chainBonus(GAME_CONFIG.hackNodeScore);
+  }
+
+  ghostBreak() {
+    const points = 90 * this.eventMultiplier;
+    this.score += points;
+    return points;
+  }
 }
