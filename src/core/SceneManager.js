@@ -92,6 +92,16 @@ export class SceneManager {
     }
   }
 
+  resetView() {
+    this._baseX = 0;
+    this._shake = 0;
+    this._speedFeel = 0;
+    this._shakeBase.set(0, 4.5, 7.5);
+    this.camera.position.set(0, 4.5, 7.5);
+    this.camera.fov = GAME_CONFIG.baseFov || 65;
+    this.camera.updateProjectionMatrix();
+  }
+
   render() {
     this.renderer.render(this.scene, this.camera);
   }
