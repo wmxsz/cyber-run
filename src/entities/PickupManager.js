@@ -9,7 +9,13 @@ function makeCore() {
   );
 }
 function makeShield() {
-  return new THREE.Mesh(new THREE.DodecahedronGeometry(0.8), new THREE.MeshBasicMaterial({ color: COLORS.green, wireframe: true }));
+  const g = new THREE.Group();
+  const outer = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8), new THREE.MeshBasicMaterial({ color: COLORS.green, wireframe: true }));
+  const inner = new THREE.Mesh(new THREE.OctahedronGeometry(0.34), new THREE.MeshBasicMaterial({ color: COLORS.green, transparent: true, opacity: 0.55 }));
+  g.add(outer, inner);
+  g.userData.outer = outer;
+  g.userData.inner = inner;
+  return g;
 }
 
 export class PickupManager {
@@ -37,6 +43,14 @@ export class PickupManager {
       p.position.z += advance;
       p.rotation.y += dt * 2.5;
       p.rotation.x += dt * 1.2;
+      if (p.userData.type === "shield") {
+        const pulse = 1 + Math.sin(performance.now() * 0.008) * 0.12;
+        p.scale.setScalar(pulse);
+        if (p.userData.outer) p.userData.outer.rotation.z -= dt * 1.8;
+        if (p.userData.inner) p.userData.inner.rotation.y += dt * 2.6;
+      } else {
+        p.scale.setScalar(1 + Math.sin(performance.now() * 0.006) * 0.08);
+      }
       if (p.position.z > GAME_CONFIG.cullZ) this._removeAt(i);
     }
   }
