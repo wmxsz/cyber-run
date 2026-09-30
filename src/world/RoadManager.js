@@ -119,7 +119,7 @@ export class RoadManager {
     }
   }
 
-  update(speed, phase = this._phase, dt = 1 / 60) {
+  update(speed, phase = this._phase, dt = 1 / 60, elapsed = 0) {
     const phaseChanged = phase !== this._phase;
     this._phase = phase;
     const targetSurge = phase >= 4 ? 1 : phase >= 2 ? 0.65 : 0.25;
@@ -131,7 +131,7 @@ export class RoadManager {
     }
 
     const advance = speed * 60 * dt;
-    const pulse = 0.55 + Math.sin(performance.now() * 0.004 + speed) * 0.2;
+    const pulse = 0.55 + Math.sin(elapsed * 4 + speed) * 0.2;
     const laneOpacity = 0.55 + pulse * 0.28 + this._surge * 0.08;
     const edgeOpacity = 0.62 + pulse * 0.3 + this._surge * 0.08;
     for (const strip of this.laneStrips) {
