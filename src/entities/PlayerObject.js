@@ -127,6 +127,7 @@ export class PlayerObject {
   }
 
   setBoost(active) {
+    if (this.boosting === active) return;
     this.boosting = active;
     this.thrusterLight.color.setHex(active ? COLORS.pink : COLORS.cyan);
     this.thrusterLight.intensity = active ? 5 : 2;
