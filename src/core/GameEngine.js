@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import { ACTIONS } from "./InputManager.js";
 import { GAME_CONFIG } from "../config/gameConfig.js";
 import { SceneManager } from "./SceneManager.js";
@@ -135,10 +136,15 @@ export class GameEngine {
 
     if (this._hunterTime > 0) {
       this._hunterTime -= dt;
+      this._hunterLaneTimer -= dt;
+      if (this._hunterLaneTimer <= 0) {
+        this._hunterLaneTimer = 0.9;
+        this._hunterLane = this.player.currentLane;
+      }
       const target = LANES[this._hunterLane];
       this._hunterX += (target - this._hunterX) * 0.08;
       this._hunter.position.x = this._hunterX;
-      this._hunter.position.z = 3.8 - Math.sin(this._hunterTime * 5) * 0.8;
+      this._hunter.position.z = Math.max(0.6, 3.8 - (8 - this._hunterTime) * 0.42) + Math.sin(this._hunterTime * 5) * 0.12;
       if (this._hunterTime <= 0) {
         this.scene.remove(this._hunter);
         this.score.setEventMultiplier(1);
@@ -150,6 +156,7 @@ export class GameEngine {
         this._hunterTime = 8;
         this._hunterTimer = 20 + Math.random() * 12;
         this._hunterLane = Math.floor(Math.random() * 3);
+        this._hunterLaneTimer = 0;
         this._hunterX = this.player.group.position.x;
         this._hunter = this._makeHunter();
         this.scene.add(this._hunter);
