@@ -311,47 +311,61 @@ export class CityManager {
       new THREE.OctahedronGeometry(0.72, 0),
       new THREE.CylinderGeometry(0.58, 0.72, 1.5, 6),
     ];
+    const droneNoseGeo = new THREE.ConeGeometry(0.24, 0.65, 4);
+    const droneWingGeos = [
+      new THREE.BoxGeometry(2.25, 0.08, 0.42),
+      new THREE.BoxGeometry(2.5, 0.08, 0.42),
+      new THREE.BoxGeometry(2.25, 0.08, 0.55),
+    ];
+    const droneLightGeo = new THREE.BoxGeometry(1.2, 0.08, 0.08);
+    const droneCoreGeo = new THREE.IcosahedronGeometry(0.12, 0);
+    const droneRearGeo = new THREE.BoxGeometry(0.8, 0.06, 0.16);
+    const droneEngineRingGeos = {
+      wide: new THREE.TorusGeometry(0.38, 0.035, 6, 16),
+      narrow: new THREE.TorusGeometry(0.32, 0.035, 6, 16),
+    };
+    const droneBodyMat = new THREE.MeshStandardMaterial({
+      color: 0x0b1022, metalness: 0.92, roughness: 0.16, flatShading: true,
+    });
+    const droneGlowMats = {
+      cyan: new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
+      pink: new THREE.MeshBasicMaterial({ color: COLORS.pink }),
+    };
     for (let i = 0; i < 8; i++) {
       const drone = new THREE.Group();
       const variant = i % droneBodyGeos.length;
-      const accent = i % 2 ? COLORS.pink : COLORS.cyan;
-      const bodyMat = new THREE.MeshStandardMaterial({
-        color: 0x0b1022, metalness: 0.92, roughness: 0.16, flatShading: true,
-      });
-      const glowMat = new THREE.MeshBasicMaterial({ color: accent });
-      const body = new THREE.Mesh(droneBodyGeos[variant], bodyMat);
+      const accent = i % 2 ? "pink" : "cyan";
+      const body = new THREE.Mesh(droneBodyGeos[variant], droneBodyMat);
       if (variant === 2) body.rotation.z = Math.PI / 2;
       body.castShadow = false;
       drone.add(body);
 
-      const nose = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.65, 4), bodyMat);
+      const nose = new THREE.Mesh(droneNoseGeo, droneBodyMat);
       nose.rotation.x = -Math.PI / 2;
       nose.position.z = -0.55;
       drone.add(nose);
 
-      const wing = new THREE.Mesh(
-        new THREE.BoxGeometry(variant === 1 ? 2.5 : 2.25, 0.08, variant === 2 ? 0.55 : 0.42),
-        bodyMat,
-      );
+      const wing = new THREE.Mesh(droneWingGeos[variant], droneBodyMat);
       wing.rotation.z = variant === 1 ? Math.PI / 6 : 0;
       wing.position.y = 0.01;
       drone.add(wing);
 
-      const light = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.08, 0.08), glowMat);
+      const glowMat = droneGlowMats[accent];
+      const light = new THREE.Mesh(droneLightGeo, glowMat);
       light.position.y = -0.05;
       drone.add(light);
 
-      const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.12, 0), glowMat);
+      const core = new THREE.Mesh(droneCoreGeo, glowMat);
       core.position.set(0, -0.13, 0.18);
       drone.add(core);
 
-      const rear = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.06, 0.16), glowMat);
+      const rear = new THREE.Mesh(droneRearGeo, glowMat);
       rear.position.z = 0.48;
       drone.add(rear);
 
       if (variant !== 0) {
         const engineRing = new THREE.Mesh(
-          new THREE.TorusGeometry(variant === 1 ? 0.38 : 0.32, 0.035, 6, 16),
+          droneEngineRingGeos[variant === 1 ? "wide" : "narrow"],
           glowMat,
         );
         engineRing.rotation.x = Math.PI / 2;
@@ -365,6 +379,7 @@ export class CityManager {
       drone.userData.baseX = drone.position.x;
       drone.userData.baseY = drone.position.y;
       drone.userData.variant = variant;
+      drone.userData.light = light;
       this.scene.add(drone); this.drones.push(drone);
     }
 
@@ -474,8 +489,11 @@ export class CityManager {
       }
       drone.rotation.z = wave * 0.08;
       drone.rotation.y = Math.cos(t * 1.1 + drone.userData.phase) * 0.06;
-      const light = drone.children[1];
-      if (light?.material) light.material.opacity = 0.65 + Math.sin(t * 5 + drone.userData.phase) * 0.25;
+      const light = drone.userData.light;
+      if (light) {
+        const pulse = 1 + Math.sin(t * 5 + drone.userData.phase) * 0.16;
+        light.scale.x = pulse;
+      }
       if (phase >= 3) drone.scale.setScalar(1 + Math.sin(t * 3 + drone.userData.phase) * 0.035);
     }
     if (this.sunRing) {
