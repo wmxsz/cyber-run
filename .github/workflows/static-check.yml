@@ -1,0 +1,40 @@
+name: Cyber Run Static Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate project shape
+        shell: bash
+        run: |
+          test -f index.html
+          test -f README.md
+          test -f LICENSE
+          test ! -d Assets
+          test ! -d Packages
+          test ! -d ProjectSettings
+          test ! -d tools
+          test ! -d web
+
+      - name: Validate runner source
+        shell: bash
+        run: |
+          grep -q "three.min.js" index.html
+          grep -q "requestAnimationFrame" index.html
+          grep -q "btn-start" index.html
+          grep -q "btn-jump" index.html
+          grep -q "moveLane" index.html
+
+      - name: Validate text and diff
+        run: git show --check --oneline HEAD
