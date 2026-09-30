@@ -36,6 +36,8 @@ export class SceneManager {
     this._baseZ = 7.5;
     this._shake = 0;
     this._speedFeel = 0;
+    this._eventVisual = 0;
+    this._eventVisualTarget = 0;
     this._shakeBase = this.camera.position.clone();
     this._lastFov = this.camera.fov;
 
@@ -71,6 +73,8 @@ export class SceneManager {
     this.scene.add(topFill);
     this._neonLights = [cyanFill, pinkFill, topFill];
     this._baseExposure = 1.3;
+    this._eventVisual = 0;
+    this._eventVisualTarget = 0;
   }
 
   setMouseOffset(x) {
@@ -82,10 +86,17 @@ export class SceneManager {
     this._shakeBase.copy(this.camera.position);
   }
 
+  setEventVisual(intensity = 0) {
+    this._eventVisualTarget = THREE.MathUtils.clamp(intensity, 0, 1);
+  }
+
   setSpeedFeel(speed, boosting = false, phase = 0, dt = 1 / 60) {
     const target = Math.min(1, Math.max(0, (speed - 1.2) / 2)) + (boosting ? 0.28 : 0) + phase * 0.025;
     const alpha = 1 - Math.pow(1 - 0.12, Math.max(0, dt) * 60);
     this._speedFeel = THREE.MathUtils.lerp(this._speedFeel, Math.min(1.25, target), alpha);
+    this._eventVisual = THREE.MathUtils.lerp(this._eventVisual, this._eventVisualTarget, 1 - Math.pow(1 - 0.1, Math.max(0, dt) * 60));
+    const eventPulse = Math.sin(performance.now() * 0.008) * this._eventVisual;
+    this.scene.fog.density = 0.015 + this._eventVisual * 0.004 + Math.max(0, eventPulse) * 0.002;
     if (this._neonLights) {
       const surge = this._speedFeel;
       this._neonLights[0].intensity = 3.2 + surge * 2.4;
