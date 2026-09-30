@@ -7,6 +7,8 @@ export class ObstacleManager {
     this.scene = scene;
     this.active = [];
     this.lastSafeLane = 1;
+    this._patternStep = 0;
+    this._recentTypes = [];
     this.pools = Object.fromEntries(
       Object.entries(OBSTACLE_TYPES).map(([name, def]) => [name, new ObjectPool(def.build, 2)]),
     );
@@ -48,17 +50,16 @@ export class ObstacleManager {
       : phase >= 3
         ? (Math.random() < 0.82 ? 2 : 1)
         : (Math.random() < 0.35 + ramp * 0.35 ? 2 : 1);
-    const safeChoices = [
-      this.lastSafeLane - 1,
-      this.lastSafeLane,
-      this.lastSafeLane + 1,
-    ].filter((lane) => lane >= 0 && lane <= 2);
-    if (phase >= 4) {
-      safeChoices.push(
-        ...[this.lastSafeLane - 2, this.lastSafeLane + 2]
-          .filter((lane) => lane >= 0 && lane <= 2),
-      );
-    }
+    // Mature runner pacing: the safe lane moves predictably enough to be readable,
+    // but not so predictably that the route becomes automatic. Every few rows we
+    // deliberately ask for a one-lane transition instead of a random teleport.
+    const direction = this._patternStep % 3 === 0
+      ? (this.lastSafeLane === 0 ? 1 : this.lastSafeLane === 2 ? -1 : (Math.random() < 0.5 ? -1 : 1))
+      : 0;
+    const preferredSafe = Math.max(0, Math.min(2, this.lastSafeLane + direction));
+    const safeChoices = [preferredSafe, this.lastSafeLane]
+      .concat(phase >= 3 ? [preferredSafe - 1, preferredSafe + 1] : [])
+      .filter((lane) => lane >= 0 && lane <= 2);
     const uniqueSafeChoices = [...new Set(safeChoices)];
     const safeLane = uniqueSafeChoices[Math.floor(Math.random() * uniqueSafeChoices.length)];
     const candidates = [0, 1, 2].filter((lane) => lane !== safeLane);
@@ -66,7 +67,11 @@ export class ObstacleManager {
 
     for (let i = 0; i < count; i++) {
       const lane = count === 2 ? candidates[i] : candidates[Math.floor(Math.random() * candidates.length)];
-      const type = this._pickType(phase, i, count === 2);
+      let type = this._pickType(phase, i, count === 2);
+      // Avoid repeating the same visual threat too many rows in a row.
+      if (this._recentTypes.length >= 2 && this._recentTypes.every((t) => t === type)) {
+        type = type === "barrier" ? "mine" : type === "mine" ? "block" : "barrier";
+      }
       const obj = this.pools[type].acquire();
       obj.position.set(LANES[lane], 0, GAME_CONFIG.spawnZ);
       obj.rotation.set(0, 0, 0);
@@ -77,8 +82,11 @@ export class ObstacleManager {
       this.scene.add(obj);
       this.active.push({ obj, type, lane, def: OBSTACLE_TYPES[type] });
       placed.push(lane);
+      this._recentTypes.push(type);
+      if (this._recentTypes.length > 4) this._recentTypes.shift();
     }
 
+    this._patternStep++;
     this.lastSafeLane = safeLane;
     return placed;
   }
@@ -112,6 +120,8 @@ export class ObstacleManager {
   clear() {
     for (let i = this.active.length - 1; i >= 0; i--) this._removeAt(i);
     this.lastSafeLane = 1;
+    this._patternStep = 0;
+    this._recentTypes.length = 0;
   }
 
   dispose() {
