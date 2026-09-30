@@ -97,8 +97,7 @@ export class CityManager {
       right: new THREE.InstancedMesh(antennaGeo, antennaMats.right, 36),
     };
     const dummy = new THREE.Object3D();
-    let leftCount = 0;
-    let rightCount = 0;
+    const buildingCounts = { leftblock: 0, lefthex: 0, leftcrown: 0, rightblock: 0, righthex: 0, rightcrown: 0 };
     let leftCrestCount = 0;
     let rightCrestCount = 0;
 
@@ -113,18 +112,14 @@ export class CityManager {
       const archetypes = ["block", "hex", "crown"];
       const archetype = archetypes[Math.floor(Math.random() * archetypes.length)];
       const mesh = buildingInstances[side + archetype];
-      const index = left
-        ? leftCount++
-        : rightCount++;
+      const key = side + archetype;
+      const index = buildingCounts[key]++;
 
-      // Cylinder/cone archetypes use the same unit-height source mesh and are
-      // scaled to the same city proportions as the original towers.
       dummy.position.set(x, h / 2, z);
       dummy.rotation.set(0, archetype === "hex" ? Math.random() * Math.PI : Math.PI / 4, 0);
       dummy.scale.set(w, h, d);
       dummy.updateMatrix();
       mesh.setMatrixAt(index, dummy.matrix);
-      mesh.count = index + 1;
 
       if (Math.random() > 0.48) {
         const crest = left ? rooftopCrests.left : rooftopCrests.right;
@@ -146,6 +141,7 @@ export class CityManager {
     }
 
     for (const [key, mesh] of Object.entries(buildingInstances)) {
+      mesh.count = buildingCounts[key];
       mesh.instanceMatrix.needsUpdate = true;
       this.scene.add(mesh);
       this.buildings.push(mesh);
