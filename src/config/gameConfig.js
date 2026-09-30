@@ -13,10 +13,16 @@ export const GAME_CONFIG = {
   laneChangeLerp: 0.16,
   gravity: 0.018,
   jumpForce: 0.38,
-  obstacleRowMax: 2,
+  slideDuration: 0.58,
   collisionZ: 2.5,
   pickupRadius: 1.8,
-  nearMissDistance: 2.2,
+  nearMissDistance: 3.2,
+  nearMissScore: 35,
+  comboWindow: 2.8,
+  coreBoostGain: 25,
+  maxBoostEnergy: 100,
+  boostDrain: 42,
+  boostSpeedMultiplier: 1.48,
 };
 
 export const COLORS = {
