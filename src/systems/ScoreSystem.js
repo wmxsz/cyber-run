@@ -34,7 +34,7 @@ export class ScoreSystem {
     const multiplier = 1 + Math.min(4, Math.floor(this.combo / 4));
     const points = base * multiplier * this.eventMultiplier;
     this.score += points;
-    return { points, multiplier };
+    return { points, multiplier, combo: this.combo };
   }
 
   collectCore() {
