@@ -9,30 +9,39 @@ function makeCore() {
     new THREE.MeshStandardMaterial({ color: COLORS.cyan, emissive: COLORS.cyan, emissiveIntensity: 1.45, metalness: 0.92, roughness: 0.08 }),
   );
   const shell = new THREE.Mesh(
-    new THREE.BoxGeometry(0.72, 0.12, 0.72),
-    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.42 }),
+    new THREE.TorusGeometry(0.68, 0.045, 6, 8),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.5 }),
   );
-  shell.rotation.y = Math.PI / 4;
+  shell.rotation.x = Math.PI / 2;
+  const shellCross = new THREE.Mesh(
+    new THREE.BoxGeometry(0.08, 0.72, 0.08),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.46 }),
+  );
+  shellCross.rotation.z = Math.PI / 4;
   const halo = new THREE.Mesh(
-    new THREE.TorusGeometry(0.78, 0.06, 8, 24),
+    new THREE.TorusGeometry(0.82, 0.045, 6, 24),
     new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.72 }),
   );
   halo.rotation.x = Math.PI / 2;
-  g.add(core, shell, halo);
+  g.add(core, shell, shellCross, halo);
   g.userData.halo = halo;
+  g.userData.shell = shell;
+  g.userData.shellCross = shellCross;
   g.userData.core = core;
   return g;
 }
 function makeBonusCore() {
   const g = makeCore();
   const core = g.children[0];
-  const shell = g.children[1];
-  const halo = g.children[2];
+  const shell = g.userData.shell;
+  const shellCross = g.userData.shellCross;
+  const halo = g.userData.halo;
   core.geometry.dispose();
   core.material.dispose();
   core.geometry = new THREE.IcosahedronGeometry(0.58, 0);
   core.material = new THREE.MeshStandardMaterial({ color: COLORS.orange, emissive: COLORS.orange, emissiveIntensity: 1.9, metalness: 0.92, roughness: 0.08 });
-  shell.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.48 });
+  shell.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.56 });
+  shellCross.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.52 });
   halo.material = new THREE.MeshBasicMaterial({ color: COLORS.orange, transparent: true, opacity: 0.84 });
   return g;
 }
