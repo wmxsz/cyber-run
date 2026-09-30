@@ -18,7 +18,7 @@ export class AudioManager {
   toggleMute() {
     this.muted = !this.muted;
     if (this.ctx) {
-      if (this.muted) this.ctx.suspend();
+      if (this.muted) this.ctx.suspend().catch(() => {});
       else this.ctx.resume().catch(() => {});
     }
     return this.muted;
