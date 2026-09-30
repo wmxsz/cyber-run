@@ -213,7 +213,7 @@ export class GameEngine {
     if (spawn.shouldSpawn) {
       const occupied = this.obstacles.spawnRow(this.score.score, spawn.phase);
       const safe = [0, 1, 2].filter((lane) => !occupied.includes(lane));
-      this.pickups.spawn(safe);
+      this.pickups.spawn(safe, occupied, spawn.phase);
       this.difficulty.armSpawn(spawn.interval);
     }
 
@@ -275,6 +275,14 @@ export class GameEngine {
         this.audio.playPowerup();
         this.particles.burst(x, y, z, 0x00ffaa, 20);
         this._ui?.announce("SHIELD ONLINE");
+      } else if (pickup.userData.type === "bonusCore") {
+        const bonus = this.score.collectBonusCore();
+        this._checkComboMilestone(bonus);
+        this.missions.recordCore();
+        this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.bonusCoreBoostGain);
+        this.audio.playPowerup();
+        this.particles.burst(x, y, z, 0xff8800, 28);
+        this._ui?.announce("BONUS CORE +" + bonus.points + " // +" + GAME_CONFIG.bonusCoreBoostGain + " BOOST");
       } else {
         const bonus = this.score.collectCore();
         this._checkComboMilestone(bonus);
