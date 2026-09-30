@@ -45,8 +45,14 @@ export class ObstacleManager {
     const ramp = Math.min(1, score / GAME_CONFIG.spawnRampScore);
     // Always keep one lane open. From sector 3 onward, paired obstacles form
     // readable action combinations instead of two unrelated random hazards.
-    const count = phase >= 3 ? 2 : (Math.random() < 0.35 + ramp * 0.35 ? 2 : 1);
-    const safeChoices = [this.lastSafeLane - 1, this.lastSafeLane, this.lastSafeLane + 1]
+    const count = phase >= 4
+      ? 2
+      : phase >= 3
+        ? (Math.random() < 0.82 ? 2 : 1)
+        : (Math.random() < 0.35 + ramp * 0.35 ? 2 : 1);
+    const safeChoices = phase >= 4
+      ? [this.lastSafeLane, this.lastSafeLane - 1, this.lastSafeLane + 1]
+      : [this.lastSafeLane - 1, this.lastSafeLane, this.lastSafeLane + 1]
       .filter((lane) => lane >= 0 && lane <= 2);
     const safeLane = safeChoices[Math.floor(Math.random() * safeChoices.length)];
     const candidates = [0, 1, 2].filter((lane) => lane !== safeLane);
