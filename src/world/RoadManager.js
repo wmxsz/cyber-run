@@ -50,6 +50,7 @@ export class RoadManager {
     const railGeo = new THREE.CylinderGeometry(0.2, 0.2, 500, 8);
     for (const [x, color] of [[-7, COLORS.cyan], [7, COLORS.pink]]) {
       const rail = new THREE.Mesh(railGeo, new THREE.MeshBasicMaterial({ color }));
+      rail.userData.cyberRunRoadRail = true;
       rail.rotation.x = Math.PI / 2;
       rail.position.set(x, 0.3, -240);
       this.scene.add(rail);
@@ -115,7 +116,28 @@ export class RoadManager {
   }
 
   dispose() {
-    this.track?.geometry.dispose();
-    this.track?.material.dispose();
+    const nodes = [
+      this.track,
+      ...this.laneStrips,
+      ...this.edgeLights,
+      ...this.scene.children.filter((child) => child.userData?.cyberRunRoadRail),
+    ];
+    const geometries = new Set();
+    const materials = new Set();
+    for (const node of nodes) {
+      if (!node) continue;
+      if (node.geometry) geometries.add(node.geometry);
+      const mats = Array.isArray(node.material) ? node.material : [node.material];
+      mats.forEach((material) => material && materials.add(material));
+      node.removeFromParent?.();
+    }
+    geometries.forEach((geometry) => geometry.dispose());
+    materials.forEach((material) => {
+      material.map?.dispose?.();
+      material.dispose();
+    });
+    this.track = null;
+    this.laneStrips = [];
+    this.edgeLights = [];
   }
 }
