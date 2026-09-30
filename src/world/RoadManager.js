@@ -9,7 +9,21 @@ export class RoadManager {
     this.edgeLights = [];
     this._phase = 0;
     this._surge = 0;
+    this._lastAccent = null;
+    this._lastSecondary = null;
+    this._laneMaterials = new Map();
+    this._edgeMaterials = new Map();
     this._build();
+  }
+
+  _material(cache, color, opacity) {
+    const key = color.toString(16);
+    let material = cache.get(key);
+    if (!material) {
+      material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity });
+      cache.set(key, material);
+    }
+    return material;
   }
 
   _build() {
@@ -58,12 +72,10 @@ export class RoadManager {
 
     for (const x of [-2, 2]) {
       for (let i = 0; i < 28; i++) {
+        const color = i % 2 ? COLORS.cyan : COLORS.violet;
         const strip = new THREE.Mesh(
           new THREE.BoxGeometry(0.055, 0.045, 5.5),
-          new THREE.MeshBasicMaterial({
-            color: i % 2 ? COLORS.cyan : COLORS.violet,
-            transparent: true, opacity: 0.72,
-          }),
+          this._material(this._laneMaterials, color, 0.72),
         );
         strip.position.set(x, 0.035, -i * 18 - 4);
         this.scene.add(strip);
@@ -72,45 +84,66 @@ export class RoadManager {
     }
 
     for (const x of [-6.65, 6.65]) {
+      const color = x < 0 ? COLORS.cyan : COLORS.pink;
+      const material = this._material(this._edgeMaterials, color, 0.85);
       for (let i = 0; i < 22; i++) {
         const light = new THREE.Mesh(
           new THREE.BoxGeometry(0.12, 0.28, 1.8),
-          new THREE.MeshBasicMaterial({
-            color: x < 0 ? COLORS.cyan : COLORS.pink,
-            transparent: true, opacity: 0.85,
-          }),
+          material,
         );
         light.position.set(x, 0.18, -i * 22);
         this.scene.add(light);
         this.edgeLights.push(light);
       }
     }
+    this._applyPhaseMaterials();
+  }
+
+  _applyPhaseMaterials() {
+    const accent = this._phase >= 4 ? COLORS.yellow : this._phase >= 2 ? COLORS.pink : COLORS.cyan;
+    const secondary = this._phase >= 4 ? COLORS.pink : COLORS.violet;
+    if (accent === this._lastAccent && secondary === this._lastSecondary) return;
+    this._lastAccent = accent;
+    this._lastSecondary = secondary;
+
+    const leftLaneMat = this._material(this._laneMaterials, this._phase >= 2 ? accent : secondary, 0.72);
+    const rightLaneMat = this._material(this._laneMaterials, secondary, 0.72);
+    for (const strip of this.laneStrips) {
+      strip.material = strip.position.x < 0 ? leftLaneMat : rightLaneMat;
+    }
+
+    const leftEdgeMat = this._material(this._edgeMaterials, accent, 0.85);
+    const rightEdgeMat = this._material(this._edgeMaterials, secondary, 0.85);
+    for (const light of this.edgeLights) {
+      light.material = light.position.x < 0 ? leftEdgeMat : rightEdgeMat;
+    }
   }
 
   update(speed, phase = this._phase, dt = 1 / 60) {
+    const phaseChanged = phase !== this._phase;
     this._phase = phase;
     const targetSurge = phase >= 4 ? 1 : phase >= 2 ? 0.65 : 0.25;
     this._surge += (targetSurge - this._surge) * (1 - Math.pow(0.94, dt * 60));
+    if (phaseChanged) this._applyPhaseMaterials();
+
     if (this.track?.material?.map) {
       this.track.material.map.offset.y -= speed * (0.015 + this._surge * 0.006) * dt * 60;
     }
+
     const advance = speed * 60 * dt;
     const pulse = 0.55 + Math.sin(performance.now() * 0.004 + speed) * 0.2;
-    const accent = phase >= 4 ? COLORS.yellow : phase >= 2 ? COLORS.pink : COLORS.cyan;
-    const secondary = phase >= 4 ? COLORS.pink : COLORS.violet;
-    const pulseColor = phase >= 4 ? COLORS.yellow : phase >= 2 ? COLORS.pink : COLORS.cyan;
+    const laneOpacity = 0.55 + pulse * 0.28 + this._surge * 0.08;
+    const edgeOpacity = 0.62 + pulse * 0.3 + this._surge * 0.08;
     for (const strip of this.laneStrips) {
       strip.position.z += advance;
-      strip.material.opacity = 0.55 + pulse * 0.28 + this._surge * 0.08;
+      strip.material.opacity = laneOpacity;
       strip.scale.z = 1 + this._surge * 0.35;
-      strip.material.color.setHex((this._phase >= 2 && strip.position.x < 0) ? accent : secondary);
       if (strip.position.z > 18) strip.position.z -= 28 * 18;
     }
     for (const light of this.edgeLights) {
       light.position.z += advance * 0.92;
-      light.material.opacity = 0.62 + pulse * 0.3 + this._surge * 0.08;
+      light.material.opacity = edgeOpacity;
       light.scale.z = 1 + this._surge * 0.28;
-      light.material.color.setHex(light.position.x < 0 ? accent : secondary);
       if (light.position.z > 18) light.position.z -= 22 * 22;
     }
   }
@@ -136,6 +169,10 @@ export class RoadManager {
       material.map?.dispose?.();
       material.dispose();
     });
+    for (const material of this._laneMaterials.values()) material.dispose();
+    for (const material of this._edgeMaterials.values()) material.dispose();
+    this._laneMaterials.clear();
+    this._edgeMaterials.clear();
     this.track = null;
     this.laneStrips = [];
     this.edgeLights = [];

@@ -97,7 +97,7 @@ export class PickupManager {
       : (hackRoute ? "hackNode" : (Math.random() < 0.18 ? "shield" : "core"));
     spawnOne(lane, type);
   }
-  update(dt, speed) {
+  update(dt, speed, elapsed = performance.now() * 0.001) {
     const advance = speed * dt * 60;
     for (let i = this.active.length - 1; i >= 0; i--) {
       const p = this.active[i];
@@ -107,22 +107,22 @@ export class PickupManager {
       if (p.userData.type === "hackNode") {
         p.userData.core.rotation.y += dt * 4.5;
         p.userData.ring.rotation.z += dt * 3.5;
-        const pulse = 1 + Math.sin(performance.now() * 0.012) * 0.16;
+        const pulse = 1 + Math.sin(elapsed * 12) * 0.16;
         p.scale.setScalar(pulse);
-        p.userData.ring.material.opacity = 0.55 + Math.sin(performance.now() * 0.015) * 0.25;
+        p.userData.ring.material.opacity = 0.55 + Math.sin(elapsed * 15) * 0.25;
       }
       if ((p.userData.type === "core" || p.userData.type === "bonusCore") && p.userData.halo) {
         p.userData.halo.rotation.z += dt * 3.5;
-        p.userData.halo.scale.setScalar(1 + Math.sin(performance.now() * 0.009) * 0.16);
-        p.userData.halo.material.opacity = 0.48 + Math.sin(performance.now() * 0.012) * 0.22;
+        p.userData.halo.scale.setScalar(1 + Math.sin(elapsed * 9) * 0.16);
+        p.userData.halo.material.opacity = 0.48 + Math.sin(elapsed * 12) * 0.22;
       }
       if (p.userData.type === "shield") {
-        const pulse = 1 + Math.sin(performance.now() * 0.008) * 0.12;
+        const pulse = 1 + Math.sin(elapsed * 8) * 0.12;
         p.scale.setScalar(pulse);
         if (p.userData.outer) p.userData.outer.rotation.z -= dt * 1.8;
         if (p.userData.inner) p.userData.inner.rotation.y += dt * 2.6;
       } else {
-        p.scale.setScalar(1 + Math.sin(performance.now() * 0.006) * 0.08);
+        p.scale.setScalar(1 + Math.sin(elapsed * 6) * 0.08);
       }
       if (p.position.z > GAME_CONFIG.cullZ) this._removeAt(i);
     }

@@ -155,7 +155,7 @@ export class GameEngine {
     this.sceneMgr.update(dt);
 
     if (!this.active || this.over) {
-      this.city.update(0.12, this._lastPhase, dt);
+      this.city.update(0.12, this._lastPhase, dt, this._elapsed);
       this.particles.update(dt);
       this._ui?.update(this);
       return;
@@ -288,10 +288,10 @@ export class GameEngine {
     const missionProgress = this.missions.update(this.score.score);
     if (missionProgress) this._completeMission(missionProgress);
     this.road.update(speed, spawn.phase, dt);
-    this.city.update(speed, spawn.phase, dt);
+    this.city.update(speed, spawn.phase, dt, this._elapsed);
     this.player.update(dt, this._elapsed);
     this.obstacles.update(dt, speed, this._elapsed);
-    this.pickups.update(dt, speed);
+    this.pickups.update(dt, speed, this._elapsed);
     this._resolveHunterEncounter();
 
     this._exhaustTimer -= dt;

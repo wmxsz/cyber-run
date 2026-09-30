@@ -190,7 +190,7 @@ export class CityManager {
     this.speedLines = null;
   }
 
-  update(speed, phase = 0, dt = 1 / 60) {
+  update(speed, phase = 0, dt = 1 / 60, elapsed = performance.now() * 0.001) {
     this._phase = phase;
     const positions = this.speedLines?.geometry.attributes.position.array;
     if (positions) {
@@ -206,7 +206,7 @@ export class CityManager {
       this.speedLines.material.opacity = 0.32 + Math.min(0.24, phase * 0.045) + Math.min(0.12, speed * 0.03);
       this.speedLines.scale.z = 1 + Math.min(0.55, speed * 0.08 + phase * 0.05);
     }
-    const t = performance.now() * 0.001;
+    const t = elapsed;
     for (const panel of this.holograms) {
       panel.position.y = panel.userData.baseY + Math.sin(t * 2 + panel.userData.phase) * 0.12;
       panel.material.opacity = 0.55 + Math.sin(t * 4 + panel.userData.phase) * 0.15;
