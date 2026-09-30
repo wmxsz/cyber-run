@@ -17,55 +17,87 @@ export class PlayerObject {
   }
 
   _build() {
-    const body = new THREE.Mesh(
-      new THREE.ConeGeometry(1.1, 3.2, 5),
-      new THREE.MeshStandardMaterial({ color: 0x121528, metalness: 0.9, roughness: 0.2, flatShading: true }),
-    );
+    const hullMat = new THREE.MeshStandardMaterial({
+      color: 0x0b1022,
+      metalness: 0.92,
+      roughness: 0.18,
+      flatShading: true,
+    });
+    const darkMat = new THREE.MeshStandardMaterial({
+      color: 0x070a14,
+      metalness: 0.82,
+      roughness: 0.24,
+      flatShading: true,
+    });
+    const cyanMat = new THREE.MeshBasicMaterial({ color: COLORS.cyan });
+    const pinkMat = new THREE.MeshBasicMaterial({ color: COLORS.pink });
+
+    const body = new THREE.Mesh(new THREE.ConeGeometry(1.05, 3.25, 6), hullMat);
     body.rotation.x = -Math.PI / 2;
-    body.rotation.y = Math.PI;
-    body.position.set(0, 0.5, 0);
+    body.rotation.y = Math.PI / 6;
+    body.position.set(0, 0.52, 0);
+    body.scale.set(1, 1, 0.92);
     body.castShadow = true;
     this.group.add(body);
 
-    const wings = new THREE.Mesh(
-      new THREE.BoxGeometry(3.2, 0.1, 1.2),
-      new THREE.MeshStandardMaterial({ color: 0x0a0c16, metalness: 0.8, roughness: 0.3 }),
-    );
-    wings.position.set(0, 0.45, 0.4);
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.48, 1.25, 5), hullMat);
+    nose.rotation.x = -Math.PI / 2;
+    nose.position.set(0, 0.55, -1.65);
+    nose.castShadow = true;
+    this.group.add(nose);
+
+    const wings = new THREE.Mesh(new THREE.BoxGeometry(3.35, 0.12, 1.15), darkMat);
+    wings.position.set(0, 0.42, 0.35);
+    wings.rotation.z = Math.PI / 2;
+    wings.scale.x = 0.92;
     this.group.add(wings);
     this.wings = wings;
 
-    const trimGeo = new THREE.BoxGeometry(0.1, 0.15, 2.6);
-    const trimMat = new THREE.MeshBasicMaterial({ color: COLORS.cyan });
-    for (const x of [-0.7, 0.7]) {
-      const trim = new THREE.Mesh(trimGeo, trimMat);
-      trim.position.set(x, 0.5, 0);
+    const finGeo = new THREE.BoxGeometry(0.16, 0.22, 1.55);
+    for (const x of [-1.18, 1.18]) {
+      const fin = new THREE.Mesh(finGeo, hullMat);
+      fin.position.set(x, 0.58, 0.5);
+      fin.rotation.z = x < 0 ? -0.18 : 0.18;
+      this.group.add(fin);
+    }
+
+    const trimGeo = new THREE.BoxGeometry(0.09, 0.12, 2.55);
+    for (const x of [-0.68, 0.68]) {
+      const trim = new THREE.Mesh(trimGeo, cyanMat);
+      trim.position.set(x, 0.61, -0.05);
+      trim.rotation.y = x < 0 ? -0.04 : 0.04;
       this.group.add(trim);
     }
 
     const cockpit = new THREE.Mesh(
-      new THREE.SphereGeometry(0.45, 8, 8),
+      new THREE.SphereGeometry(0.48, 10, 8),
       new THREE.MeshStandardMaterial({
         color: COLORS.pink,
         emissive: COLORS.pink,
-        emissiveIntensity: 0.7,
-        roughness: 0.1,
+        emissiveIntensity: 0.72,
+        roughness: 0.08,
         metalness: 0.5,
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.88,
       }),
     );
-    cockpit.scale.set(0.9, 0.6, 1.6);
-    cockpit.position.set(0, 0.75, -0.2);
+    cockpit.scale.set(0.88, 0.58, 1.65);
+    cockpit.position.set(0, 0.78, -0.28);
     this.group.add(cockpit);
     this.cockpit = cockpit;
 
-    const engineGeo = new THREE.CylinderGeometry(0.25, 0.35, 0.5, 8);
+    const enginePodGeo = new THREE.CylinderGeometry(0.28, 0.38, 0.72, 8);
+    const engineGeo = new THREE.CylinderGeometry(0.2, 0.3, 0.46, 8);
     const engineMat = new THREE.MeshBasicMaterial({ color: COLORS.cyan });
-    for (const x of [-0.55, 0.55]) {
+    for (const x of [-0.58, 0.58]) {
+      const pod = new THREE.Mesh(enginePodGeo, darkMat);
+      pod.rotation.x = Math.PI / 2;
+      pod.position.set(x, 0.44, 1.18);
+      this.group.add(pod);
+
       const engine = new THREE.Mesh(engineGeo, engineMat);
       engine.rotation.x = Math.PI / 2;
-      engine.position.set(x, 0.45, 1.4);
+      engine.position.set(x, 0.44, 1.52);
       this.group.add(engine);
     }
 
@@ -74,7 +106,7 @@ export class PlayerObject {
     this.group.add(this.thrusterLight);
 
     this.hoverRing = new THREE.Mesh(
-      new THREE.TorusGeometry(1.35, 0.045, 8, 32),
+      new THREE.TorusGeometry(1.38, 0.045, 8, 32),
       new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.8 }),
     );
     this.hoverRing.rotation.x = Math.PI / 2;
@@ -82,18 +114,18 @@ export class PlayerObject {
     this.group.add(this.hoverRing);
 
     this.frontBar = new THREE.Mesh(
-      new THREE.BoxGeometry(1.2, 0.055, 0.08),
-      new THREE.MeshBasicMaterial({ color: COLORS.pink }),
+      new THREE.BoxGeometry(1.25, 0.055, 0.08),
+      pinkMat,
     );
-    this.frontBar.position.set(0, 0.7, -1.35);
+    this.frontBar.position.set(0, 0.73, -1.4);
     this.group.add(this.frontBar);
 
     this.energyHalo = new THREE.Mesh(
-      new THREE.TorusGeometry(0.82, 0.025, 6, 28),
+      new THREE.TorusGeometry(0.84, 0.025, 6, 28),
       new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.65 }),
     );
     this.energyHalo.rotation.x = Math.PI / 2;
-    this.energyHalo.position.set(0, 0.7, -1.28);
+    this.energyHalo.position.set(0, 0.7, -1.3);
     this.group.add(this.energyHalo);
 
     this.shield = new THREE.Mesh(
@@ -104,7 +136,6 @@ export class PlayerObject {
     this.shield.visible = false;
     this.group.add(this.shield);
   }
-
   moveLane(direction) {
     const next = this.currentLane + direction;
     if (next < 0 || next > 2) return;
