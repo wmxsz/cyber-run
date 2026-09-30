@@ -10,9 +10,12 @@
     "test": "node scripts/game-smoke.mjs"
   },
   "dependencies": {
-    "three": "0.186.0"
+    "three": "0.186.0",
+    "@capacitor/android": "6.2.1",
+    "@capacitor/core": "6.2.1"
   },
   "devDependencies": {
-    "vite": "8.3.1"
+    "vite": "8.3.1",
+    "@capacitor/cli": "6.2.1"
   }
 }
