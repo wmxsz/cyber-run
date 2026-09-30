@@ -389,7 +389,7 @@ export class GameEngine {
       this.pickups.markPicked(pickup);
     }
 
-    this.particles.update();
+    this.particles.update(dt);
     this._ui?.update(this);
   }
 
