@@ -16,6 +16,7 @@ import { DifficultySystem } from "../systems/DifficultySystem.js";
 import { PersistenceSystem } from "../systems/PersistenceSystem.js";
 import { MissionSystem } from "../systems/MissionSystem.js";
 import { LANES } from "../config/gameConfig.js";
+import { PerformanceMonitor } from "./PerformanceMonitor.js";
 
 export class GameEngine {
   constructor(canvas) {
@@ -72,6 +73,7 @@ export class GameEngine {
     this._started = false;
     this._disposed = false;
     this._rafId = 0;
+    this.performance = new PerformanceMonitor(this.sceneMgr.renderer);
     this._onVisibilityChange = this._onVisibilityChange.bind(this);
     document.addEventListener("visibilitychange", this._onVisibilityChange);
 
@@ -94,6 +96,7 @@ export class GameEngine {
       previous = now;
       this.update(dt);
       this.sceneMgr.render();
+      this.performance.sample(dt);
       this._rafId = requestAnimationFrame(loop);
     };
     this._rafId = requestAnimationFrame(loop);
@@ -737,6 +740,7 @@ export class GameEngine {
       this._hunterResources.clear();
       this._hunterResources = null;
     }
+    this.performance.dispose();
     this.sceneMgr.dispose();
   }
 }
