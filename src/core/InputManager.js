@@ -33,10 +33,12 @@ export class InputManager {
     this._onKey = this._onKey.bind(this);
     this._onTouchStart = this._onTouchStart.bind(this);
     this._onTouchEnd = this._onTouchEnd.bind(this);
+    this._onTouchCancel = this._onTouchCancel.bind(this);
     this._onMouseMove = this._onMouseMove.bind(this);
     window.addEventListener("keydown", this._onKey, { passive: false });
     window.addEventListener("touchstart", this._onTouchStart, { passive: true });
     window.addEventListener("touchend", this._onTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", this._onTouchCancel, { passive: true });
     window.addEventListener("mousemove", this._onMouseMove, { passive: true });
     this.bindButton("btn-left", ACTIONS.LEFT);
     this.bindButton("btn-right", ACTIONS.RIGHT);
@@ -66,7 +68,7 @@ export class InputManager {
     this._touch = { x: t.clientX, y: t.clientY, time: performance.now() };
   }
   _onTouchEnd(e) {
-    if (!this._touch) return;
+    if (!this._touch || !e.changedTouches.length) return;
     const target = e.target;
     if (target instanceof Element && target.closest(".mobile-touch-btn")) { this._touch = null; return; }
     const t = e.changedTouches[0];
@@ -80,6 +82,10 @@ export class InputManager {
     else if (dy < -threshold) this.emit(ACTIONS.JUMP);
     else if (dy > threshold) this.emit(ACTIONS.SLIDE);
   }
+  _onTouchCancel() {
+    this._touch = null;
+  }
+
   _onMouseMove(e) {
     const normalized = (e.clientX / window.innerWidth) * 2 - 1;
     this.emit("pointer", normalized);
@@ -88,6 +94,7 @@ export class InputManager {
     window.removeEventListener("keydown", this._onKey);
     window.removeEventListener("touchstart", this._onTouchStart);
     window.removeEventListener("touchend", this._onTouchEnd);
+    window.removeEventListener("touchcancel", this._onTouchCancel);
     window.removeEventListener("mousemove", this._onMouseMove);
     this.listeners.clear();
   }
