@@ -151,18 +151,23 @@ export class ParticleSystem {
     p.userData.maxScale = size;
   }
 
-  exhaust(x, y, z, speed) {
+  footTrail(x, y, z, speed, side = 0, boosting = false) {
     if (this.items.length >= this.maxItems) return;
-    const p = this._acquire("exhaust", 0x00f0ff);
+    const p = this._acquire("exhaust", boosting ? 0xff2bd6 : 0x00f0ff);
     if (!p) return;
-    p.position.set(x + (Math.random() - 0.5) * 0.4, y, z + 1.2);
-    p.rotation.set(Math.PI / 2, 0, 0);
-    p.scale.set(1, 1, 1);
-    p.userData.life = 0.7;
-    p.userData.decay = 0.05;
-    p.userData.vx = (Math.random() - 0.5) * 0.05;
-    p.userData.vy = (Math.random() - 0.5) * 0.05;
-    p.userData.vz = speed * 0.8 + Math.random() * 0.2;
+    const laneOffset = side * 0.22 + (Math.random() - 0.5) * 0.06;
+    p.position.set(x + laneOffset, y - 0.72, z + 0.28 + Math.random() * 0.08);
+    p.rotation.set(Math.PI / 2, 0, side * 0.12);
+    p.scale.set(boosting ? 0.72 : 0.58, boosting ? 1.45 : 1.05, boosting ? 0.72 : 0.58);
+    p.userData.life = boosting ? 0.52 : 0.42;
+    p.userData.decay = boosting ? 0.06 : 0.075;
+    p.userData.vx = side * 0.02 + (Math.random() - 0.5) * 0.025;
+    p.userData.vy = 0.025 + Math.random() * 0.02;
+    p.userData.vz = speed * (boosting ? 0.58 : 0.42) + Math.random() * 0.16;
+  }
+
+  exhaust(x, y, z, speed) {
+    this.footTrail(x, y, z, speed, 0, false);
   }
 
   clear() {
