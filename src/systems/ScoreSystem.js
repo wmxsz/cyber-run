@@ -42,6 +42,11 @@ export class ScoreSystem {
     return this._chainBonus(150);
   }
 
+  collectBonusCore() {
+    this.cores += 1;
+    return this._chainBonus(GAME_CONFIG.bonusCoreScore);
+  }
+
   setEventMultiplier(multiplier = 1) {
     this.eventMultiplier = Math.max(1, multiplier);
   }
