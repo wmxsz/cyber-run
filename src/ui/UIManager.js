@@ -21,6 +21,7 @@ export class UIManager {
     this.goRecord = this._el("go-record");
     this.audioIcon = this._el("audio-icon");
     this.phase = this._el("hud-phase");
+    this.laneThreats = [0, 1, 2].map((lane) => this._el(`lane-threat-${lane}`));
 
     this._setHighScore();
     this._el("btn-start")?.addEventListener("click", () => this.engine.startGame());
@@ -45,6 +46,24 @@ export class UIManager {
     }
     if (this.pauseButton) this.pauseButton.textContent = engine.paused ? "▶" : "Ⅱ";
     if (this.phase) this.phase.textContent = engine.difficulty.phaseName || "NIGHT CITY";
+
+    const threat = [0, 1, 2].map(() => null);
+    engine.obstacles.forEachActive((item) => {
+      const z = item.obj.position.z;
+      if (z < -60 || z > 10) return;
+      const lane = item.lane;
+      if (threat[lane] === null || z > threat[lane].z) threat[lane] = { z, type: item.type };
+    });
+    this.laneThreats.forEach((el, lane) => {
+      if (!el) return;
+      const hit = threat[lane];
+      const danger = Boolean(hit);
+      el.classList.toggle("danger", danger);
+      el.classList.toggle("imminent", Boolean(hit && hit.z > -18));
+      const label = danger ? (hit.type === "highLaser" ? "SLIDE" : hit.type === "barrier" ? "JUMP" : "CHANGE") : "SAFE";
+      const b = el.querySelector("b");
+      if (b) b.textContent = label;
+    });
   }
 
   setHp(hp) {
