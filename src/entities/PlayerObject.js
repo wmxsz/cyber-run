@@ -222,7 +222,7 @@ export class PlayerObject {
           blending: THREE.AdditiveBlending, depthWrite: false,
         }),
       );
-      exhaust.rotation.x = -Math.PI / 2;
+      exhaust.rotation.x = Math.PI / 2;
       exhaust.position.set(x, 0.44, 1.86);
       exhaust.scale.set(0.72, 0.9, 0.72);
       this.group.add(exhaust);
