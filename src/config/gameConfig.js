@@ -18,6 +18,7 @@ export const GAME_CONFIG = {
   pickupRadius: 1.8,
   nearMissDistance: 3.2,
   nearMissScore: 35,
+  nearMissBoostGain: 8,
   comboWindow: 2.8,
   coreBoostGain: 25,
   maxBoostEnergy: 100,
