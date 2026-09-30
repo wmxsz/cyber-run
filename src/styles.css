@@ -766,10 +766,29 @@ button.mobile-touch-btn {
   }
 
   #announcement {
-    top: 38%;
-    font-size: clamp(24px, 8vw, 38px);
-    letter-spacing: 2px;
-    text-shadow: 0 0 16px #ffe600, 0 0 32px rgba(255,119,0,.8);
+    top: 34%;
+    width: min(92vw, 520px);
+    padding: 0 10px;
+    box-sizing: border-box;
+    font-size: clamp(17px, 5.2vw, 28px);
+    line-height: 1.08;
+    letter-spacing: 1.5px;
+    text-align: center;
+    white-space: normal;
+    text-shadow: 0 0 12px #ffe600, 0 0 24px rgba(255,119,0,.65);
+  }
+  #announcement.show {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  #event-status {
+    max-width: min(82vw, 420px);
+    padding: 4px 8px;
+    font-size: 8px;
+    letter-spacing: 1.4px;
+    line-height: 1.2;
+  }
+  #mission-panel {
+    max-width: calc(100vw - 120px);
   }
 
   #mobile-controls {
