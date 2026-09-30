@@ -1,52 +1,59 @@
 # Cyber Run
 
-一个可直接部署到 GitHub Pages 的 3D 赛博朋克无限跑酷小游戏。
+3D 赛博朋克无限跑酷小游戏。
 
-## 项目结构
+当前采用成熟 Three.js 跑酷项目常见的分层方式：核心引擎、世界、实体、系统、UI 和配置分别负责自己的工作。这样后续加角色、道具、障碍、排行榜或 APK 壳时，不需要再把一个大文件越改越乱。
+
+## 结构
 
 ```text
-cyber-run/
-├── index.html
-├── src/
-│   ├── main.js              # 启动入口
-│   ├── game.js              # Three.js 场景、生成、碰撞、循环等核心逻辑
-│   ├── audio.js             # Web Audio 音效与循环 BGM
-│   ├── textures.js          # 程序化纹理生成
-│   └── styles.css           # HUD、弹窗、移动端界面
-├── README.md
-├── LICENSE
-└── .github/workflows/static-check.yml
+src/
+├── config/
+│   └── gameConfig.js
+├── core/
+│   ├── GameEngine.js
+│   ├── SceneManager.js
+│   ├── InputManager.js
+│   ├── AudioManager.js
+│   └── ObjectPool.js
+├── world/
+│   ├── RoadManager.js
+│   ├── CityManager.js
+│   └── ParticleSystem.js
+├── entities/
+│   ├── PlayerObject.js
+│   ├── ObstacleManager.js
+│   ├── obstacleTypes.js
+│   └── PickupManager.js
+├── systems/
+│   ├── CollisionSystem.js
+│   ├── ScoreSystem.js
+│   ├── DifficultySystem.js
+│   └── PersistenceSystem.js
+├── ui/
+│   └── UIManager.js
+├── styles.css
+└── main.js
 ```
 
-这种拆分参考了近期仍在维护的 Three.js / 3D 项目常见的模块化组织方式，同时保留本项目已经验证过的单文件跑酷实现作为代码基础。
+## 我们保留的特色
 
-## 玩法
+三车道霓虹赛博公路、悬浮未来车、赛博城市与巨型霓虹太阳环、能源核心、一次性护盾、生命值、激光/地雷/危险方块，以及键盘、鼠标、手机按钮和滑动操作。
 
-- 三车道自动前进
-- 左右换道
-- 跳跃躲避障碍
-- 数据核心收集
-- 护盾道具
-- 无限距离与最高分
-- 赛博朋克霓虹城市
-- 手机触控按钮和手势
+## 借鉴原则
 
-## 运行
+同类项目的成熟架构可以借鉴；没有明确开放许可证的仓库只参考结构和设计思路，不直接复制代码。
 
-推荐直接部署到 GitHub Pages，或者使用任意静态 HTTP 服务器运行。由于项目现在使用 ES Modules，某些浏览器会限制直接双击 `index.html` 的 `file://` 模式。
-
-## 技术
-
-- Three.js r128
-- WebGL
-- Web Audio API
-- 原生 HTML / CSS / JavaScript ES Modules
-- 无本地 3D 模型和音频资源
-
-## 来源与授权
-
-游戏核心代码基于 MIT License 项目：
+本项目的早期游戏核心来自 MIT License 项目：
 
 https://github.com/jeiel85/cyberpunk-neon-runner-3d
 
-本仓库保留 MIT 授权与来源说明。参考其它项目时仅借鉴其公开的架构思路；没有明确开放许可证的项目不直接复制其代码。
+## 开发
+
+```bash
+npm install
+npm run dev
+npm run build
+```
+
+当前使用 Three.js 0.186.0 + Vite 8.3.1，并采用 ES Modules。
