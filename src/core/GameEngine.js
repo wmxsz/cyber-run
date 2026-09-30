@@ -145,7 +145,7 @@ export class GameEngine {
     this.sceneMgr.update(dt);
 
     if (!this.active || this.over) {
-      this.city.update(0.12, this._lastPhase);
+      this.city.update(0.12, this._lastPhase, dt);
       this.particles.update();
       this._ui?.update(this);
       return;
@@ -278,8 +278,8 @@ export class GameEngine {
     this.score.update(dt, speed, this.hasShield, this.boosting);
     const missionProgress = this.missions.update(this.score.score);
     if (missionProgress) this._completeMission(missionProgress);
-    this.road.update(speed, spawn.phase);
-    this.city.update(speed, spawn.phase);
+    this.road.update(speed, spawn.phase, dt);
+    this.city.update(speed, spawn.phase, dt);
     this.player.update(dt, this._elapsed);
     this.obstacles.update(dt, speed, this._elapsed);
     this.pickups.update(dt, speed);
