@@ -86,7 +86,7 @@ export class CityManager {
       panel.rotation.y = side < 0 ? -Math.PI / 2 : Math.PI / 2;
       panel.userData.baseY = panel.position.y; panel.userData.phase = i * 0.9;
       this.scene.add(panel); this.holograms.push(panel);
-    }
+    });
 
     for (let i = 0; i < 8; i++) {
       const drone = new THREE.Group();
