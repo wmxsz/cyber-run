@@ -126,6 +126,38 @@ export class PlayerObject {
       this.group.add(engine);
     }
 
+    // Rear spine and underside hover housings complete the craft silhouette from side/rear views.
+    const spine = new THREE.Mesh(
+      new THREE.ConeGeometry(0.24, 1.35, 5),
+      darkMat,
+    );
+    spine.rotation.x = Math.PI / 2;
+    spine.position.set(0, 0.5, 1.18);
+    spine.scale.z = 0.72;
+    this.group.add(spine);
+
+    const spineLight = new THREE.Mesh(
+      new THREE.BoxGeometry(0.08, 0.07, 0.72),
+      pinkMat,
+    );
+    spineLight.position.set(0, 0.64, 1.02);
+    this.group.add(spineLight);
+
+    const hoverHousingGeo = new THREE.CylinderGeometry(0.16, 0.24, 0.58, 6);
+    for (const x of [-0.9, 0.9]) {
+      const housing = new THREE.Mesh(hoverHousingGeo, darkMat);
+      housing.rotation.x = Math.PI / 2;
+      housing.position.set(x, 0.22, 0.72);
+      this.group.add(housing);
+      const housingRing = new THREE.Mesh(
+        new THREE.TorusGeometry(0.18, 0.025, 6, 12),
+        x < 0 ? cyanMat : pinkMat,
+      );
+      housingRing.rotation.x = Math.PI / 2;
+      housingRing.position.set(x, 0.22, 1.02);
+      this.group.add(housingRing);
+    }
+
     this.thrusterLight = new THREE.PointLight(COLORS.cyan, 2, 8);
     this.thrusterLight.position.set(0, 0.5, 2);
     this.group.add(this.thrusterLight);
