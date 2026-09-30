@@ -13,6 +13,9 @@ export class ObjectPool {
     item.userData.hit = false;
     item.userData.passed = false;
     item.userData.picked = false;
+    item.position?.set?.(0, 0, 0);
+    item.rotation?.set?.(0, 0, 0);
+    item.scale?.set?.(1, 1, 1);
     this.items.push(item);
   }
 
