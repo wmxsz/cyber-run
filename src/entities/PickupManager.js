@@ -52,6 +52,11 @@ export class PickupManager {
       p.position.z += advance;
       p.rotation.y += dt * 2.5;
       p.rotation.x += dt * 1.2;
+      if (p.userData.type === "core" && p.userData.halo) {
+        p.userData.halo.rotation.z += dt * 3.5;
+        p.userData.halo.scale.setScalar(1 + Math.sin(performance.now() * 0.009) * 0.16);
+        p.userData.halo.material.opacity = 0.48 + Math.sin(performance.now() * 0.012) * 0.22;
+      }
       if (p.userData.type === "shield") {
         const pulse = 1 + Math.sin(performance.now() * 0.008) * 0.12;
         p.scale.setScalar(pulse);
