@@ -36,6 +36,9 @@ export class GameEngine {
 
     this.hp = GAME_CONFIG.maxHp;
     this.hasShield = false;
+    this.boostEnergy = 0;
+    this.boosting = false;
+    this.paused = false;
     this.active = false;
     this.over = false;
     this.invulnerable = 0;
@@ -49,6 +52,7 @@ export class GameEngine {
   setUI(ui) {
     this._ui = ui;
     ui.setHp(this.hp);
+    ui.setPaused(false);
   }
 
   start() {
@@ -76,6 +80,9 @@ export class GameEngine {
     this.player.reset();
     this.hp = GAME_CONFIG.maxHp;
     this.hasShield = false;
+    this.boostEnergy = 0;
+    this.boosting = false;
+    this.paused = false;
     this.invulnerable = 0;
     this.active = true;
     this.over = false;
@@ -84,7 +91,12 @@ export class GameEngine {
     this._ui?.hideStart();
     this._ui?.hideGameOver();
     this._ui?.setHp(this.hp);
+    this._ui?.setPaused(false);
     this._ui?.setHighScore?.(this.persistence.getHighScore());
+  }
+
+  _effectiveSpeed() {
+    return this.difficulty.speed * (this.boosting ? GAME_CONFIG.boostSpeedMultiplier : 1);
   }
 
   update(dt) {
@@ -98,6 +110,16 @@ export class GameEngine {
       return;
     }
 
+    if (this.paused) {
+      this._ui?.update(this);
+      return;
+    }
+
+    if (this.boosting) {
+      this.boostEnergy = Math.max(0, this.boostEnergy - GAME_CONFIG.boostDrain * dt);
+      if (this.boostEnergy <= 0) this.boosting = false;
+    }
+
     const spawn = this.difficulty.update(dt, this.score.score);
     if (spawn.shouldSpawn) {
       const occupied = this.obstacles.spawnRow(this.score.score);
@@ -106,17 +128,18 @@ export class GameEngine {
       this.difficulty.armSpawn(spawn.interval);
     }
 
-    this.score.update(dt, this.difficulty.speed, this.hasShield);
-    this.road.update(this.difficulty.speed);
-    this.city.update(this.difficulty.speed);
+    const speed = this._effectiveSpeed();
+    this.score.update(dt, speed, this.hasShield);
+    this.road.update(speed);
+    this.city.update(speed);
     this.player.update(dt, this._elapsed);
-    this.obstacles.update(dt, this.difficulty.speed, this._elapsed);
-    this.pickups.update(dt, this.difficulty.speed);
+    this.obstacles.update(dt, speed, this._elapsed);
+    this.pickups.update(dt, speed);
 
     this._exhaustTimer -= dt;
     if (this._exhaustTimer <= 0) {
       const p = this.player.group.position;
-      this.particles.exhaust(p.x, p.y + 0.4, p.z, this.difficulty.speed);
+      this.particles.exhaust(p.x, p.y + 0.4, p.z, speed);
       this._exhaustTimer = 0.05;
     }
 
@@ -133,6 +156,14 @@ export class GameEngine {
       this.takeDamage();
     }
 
+    for (const item of result.nearMisses) {
+      const bonus = this.score.nearMiss();
+      this.audio.playCollect();
+      const p = item.obj.position;
+      this.particles.burst(p.x, 1.0, p.z, 0xffe600, 8);
+      this._ui?.announce("NEAR MISS +" + bonus.points);
+    }
+
     for (const pickup of result.picked) {
       const x = pickup.position.x;
       const y = pickup.position.y;
@@ -144,15 +175,34 @@ export class GameEngine {
         this.particles.burst(x, y, z, 0x00ffaa, 20);
         this._ui?.announce("SHIELD ONLINE");
       } else {
-        this.score.collectCore();
+        const bonus = this.score.collectCore();
+        this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.coreBoostGain);
         this.audio.playCollect();
         this.particles.burst(x, y, z, 0x00f0ff, 15);
+        this._ui?.announce("CORE +" + bonus.points);
       }
       this.pickups.markPicked(pickup);
     }
 
     this.particles.update();
     this._ui?.update(this);
+  }
+
+  togglePause() {
+    if (!this.active || this.over) return;
+    this.paused = !this.paused;
+    if (this.paused) this.boosting = false;
+    this._ui?.setPaused(this.paused);
+    this._ui?.announce(this.paused ? "PAUSED" : "RESUMED");
+  }
+
+  toggleBoost() {
+    if (!this.active || this.over || this.paused) return;
+    if (this.boosting) { this.boosting = false; return; }
+    if (this.boostEnergy < 10) { this._ui?.announce("BOOST CHARGE LOW"); return; }
+    this.boosting = true;
+    this.audio.playPowerup();
+    this._ui?.announce("OVERDRIVE ONLINE");
   }
 
   takeDamage() {
@@ -183,6 +233,7 @@ export class GameEngine {
   gameOver() {
     this.active = false;
     this.over = true;
+    this.boosting = false;
     this.player.group.visible = true;
     this.audio.stopBgm();
     this.audio.playGameOver();
@@ -193,6 +244,7 @@ export class GameEngine {
       score: this.score.score,
       distance: this.score.distance,
       cores: this.score.cores,
+      maxCombo: this.score.maxCombo,
       newRecord,
     });
     this._ui?.setHighScore?.(high);
@@ -208,11 +260,17 @@ export class GameEngine {
       this._ui?.setMuted?.(muted);
       return;
     }
-    if (!this.active || this.over) return;
+    if (action === ACTIONS.PAUSE) {
+      this.togglePause();
+      return;
+    }
+    if (!this.active || this.over || this.paused) return;
 
-    if (action === ACTIONS.LEFT) this.player.moveLane(-1);
+    if (action === ACTIONS.BOOST) this.toggleBoost();
+    else if (action === ACTIONS.LEFT) this.player.moveLane(-1);
     else if (action === ACTIONS.RIGHT) this.player.moveLane(1);
     else if (action === ACTIONS.JUMP && this.player.jump()) this.audio.playJump();
+    else if (action === ACTIONS.SLIDE && this.player.slide()) this.audio.playJump();
   }
 
   dispose() {
