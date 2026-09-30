@@ -13,6 +13,7 @@ import { CollisionSystem } from "../systems/CollisionSystem.js";
 import { ScoreSystem } from "../systems/ScoreSystem.js";
 import { DifficultySystem } from "../systems/DifficultySystem.js";
 import { PersistenceSystem } from "../systems/PersistenceSystem.js";
+import { MissionSystem } from "../systems/MissionSystem.js";
 
 export class GameEngine {
   constructor(canvas) {
@@ -22,6 +23,7 @@ export class GameEngine {
     this.input = new InputManager();
     this.audio = new AudioManager();
     this.persistence = new PersistenceSystem();
+    this.missions = new MissionSystem();
 
     const scene = this.sceneMgr.scene;
     this.road = new RoadManager(scene);
@@ -78,6 +80,7 @@ export class GameEngine {
     this.particles.clear?.();
 
     this.score.reset();
+    this.missions.reset();
     this.difficulty.reset();
     this.player.reset();
     this.hp = GAME_CONFIG.maxHp;
@@ -143,6 +146,8 @@ export class GameEngine {
 
     const speed = this._effectiveSpeed();
     this.score.update(dt, speed, this.hasShield, this.boosting);
+    const missionProgress = this.missions.update(this.score.score);
+    if (missionProgress) this._completeMission(missionProgress);
     this.road.update(speed, spawn.phase);
     this.city.update(speed, spawn.phase);
     this.player.update(dt, this._elapsed);
@@ -171,6 +176,7 @@ export class GameEngine {
 
     for (const item of result.nearMisses) {
       const bonus = this.score.nearMiss();
+      this.missions.recordNearMiss();
       this.boostEnergy = Math.min(
         GAME_CONFIG.maxBoostEnergy,
         this.boostEnergy + GAME_CONFIG.nearMissBoostGain,
@@ -196,6 +202,7 @@ export class GameEngine {
         this._ui?.announce("SHIELD ONLINE");
       } else {
         const bonus = this.score.collectCore();
+        this.missions.recordCore();
         this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.coreBoostGain);
         this.audio.playCollect();
         this.particles.burst(x, y, z, 0x00f0ff, 15);
@@ -206,6 +213,14 @@ export class GameEngine {
 
     this.particles.update();
     this._ui?.update(this);
+  }
+
+  _completeMission(mission) {
+    this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + mission.reward);
+    const p = this.player.group.position;
+    this.particles.burst(p.x, p.y + 0.6, p.z, 0xffe600, 28);
+    this.audio.playPowerup();
+    this._ui?.announce("OBJECTIVE COMPLETE // +" + mission.reward + " BOOST");
   }
 
   togglePause() {
