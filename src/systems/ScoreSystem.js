@@ -14,6 +14,7 @@ export class ScoreSystem {
     this.maxCombo = 0;
     this.overdriveScore = 0;
     this.eventMultiplier = 1;
+    this.riskChain = 0;
   }
 
   update(dt, speed, shieldActive, boosting = false) {
@@ -44,7 +45,19 @@ export class ScoreSystem {
 
   collectBonusCore() {
     this.cores += 1;
-    return this._chainBonus(GAME_CONFIG.bonusCoreScore);
+    this.riskChain += 1;
+    const bonus = this._chainBonus(GAME_CONFIG.bonusCoreScore);
+    if (this.riskChain >= GAME_CONFIG.riskChainTarget) {
+      this.riskChain = 0;
+      const reward = GAME_CONFIG.riskChainScore * this.eventMultiplier;
+      this.score += reward;
+      return { ...bonus, riskChainComplete: true, riskReward: reward };
+    }
+    return { ...bonus, riskChainComplete: false, riskReward: 0 };
+  }
+
+  breakRiskChain() {
+    this.riskChain = 0;
   }
 
   setEventMultiplier(multiplier = 1) {
