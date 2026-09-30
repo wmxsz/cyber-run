@@ -19,8 +19,8 @@ export class ScoreSystem {
 
   update(dt, speed, shieldActive, boosting = false) {
     this.distance += speed * dt * 6;
-    const base = (speed * 4 + (shieldActive ? 1.5 : 1)) * dt * 8;
-    const overdriveBonus = boosting ? speed * dt * 4 : 0;
+    const base = (speed * 3 + (shieldActive ? 1.25 : 0.75)) * dt * 6;
+    const overdriveBonus = boosting ? speed * dt * 2.5 : 0;
     this.overdriveScore += overdriveBonus;
     this.score += (base + overdriveBonus) * this.eventMultiplier;
 
@@ -61,7 +61,7 @@ export class ScoreSystem {
   }
 
   setEventMultiplier(multiplier = 1) {
-    this.eventMultiplier = Math.max(1, multiplier);
+    this.eventMultiplier = Math.min(GAME_CONFIG.eventMultiplierCap || 2.25, Math.max(1, multiplier));
   }
 
   nearMiss() {
