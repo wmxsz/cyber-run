@@ -129,8 +129,10 @@ export class PlayerObject {
     const prevX = this.group.position.x;
     this.group.position.x = THREE.MathUtils.lerp(this.group.position.x, this.targetX, alpha);
     const lateralVelocity = (this.group.position.x - prevX) / Math.max(dt, 0.001);
-    this.group.rotation.z = THREE.MathUtils.lerp(this.group.rotation.z, -lateralVelocity * 0.035, 0.18);
-    this.group.rotation.y = THREE.MathUtils.lerp(this.group.rotation.y, (this.targetX - this.group.position.x) * 0.025, 0.18);
+    const tilt = GAME_CONFIG.laneChangeTilt ?? 0.030;
+    const yaw = GAME_CONFIG.laneChangeYaw ?? 0.020;
+    this.group.rotation.z = THREE.MathUtils.lerp(this.group.rotation.z, -lateralVelocity * tilt, 0.22);
+    this.group.rotation.y = THREE.MathUtils.lerp(this.group.rotation.y, (this.targetX - this.group.position.x) * yaw, 0.22);
 
     if (this.isJumping) {
       this.group.position.y += this.jumpVelocity * dt * 60;
