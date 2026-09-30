@@ -96,7 +96,40 @@ function makeBlock() {
   return g;
 }
 
+function makePulseGate() {
+  const g = new THREE.Group();
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(1.35, 0.14, 10, 32),
+    new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.8 }),
+  );
+  ring.position.y = 1.15;
+  const core = new THREE.Mesh(
+    new THREE.SphereGeometry(0.48, 12, 12),
+    new THREE.MeshStandardMaterial({ color: COLORS.pink, emissive: COLORS.pink, emissiveIntensity: 1.4 }),
+  );
+  core.position.y = 1.15;
+  g.add(ring, core, disc(1.45, COLORS.cyan));
+  g.userData.ring = ring;
+  g.userData.pulse = core;
+  return g;
+}
+
 export const OBSTACLE_TYPES = {
+  pulseGate: {
+    build: makePulseGate,
+    requiredAction: "change",
+    hitbox: { x: 1.65, y: 1.2, z: 1.15 },
+    blocksAir: true,
+    blocksGround: true,
+    hitCenterY: 1.15,
+    update(obj, time) {
+      obj.rotation.y += 0.012;
+      const pulse = 1 + Math.sin(time * 9) * 0.08;
+      if (obj.userData.ring) obj.userData.ring.scale.setScalar(pulse);
+      if (obj.userData.pulse) obj.userData.pulse.scale.setScalar(1 + Math.sin(time * 12) * 0.12);
+    },
+  },
+
   barrier: {
     build: makeBarrier,
     requiredAction: "jump",
