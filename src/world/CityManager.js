@@ -46,7 +46,13 @@ export class CityManager {
 
   _build() {
     const tex = buildingTexture();
-    const box = new THREE.BoxGeometry(1, 1, 1);
+    // City towers use a small set of low-poly silhouettes instead of a wall of identical boxes.
+    // Each archetype stays instanced so the skyline gains shape variety without multiplying draw calls.
+    const towerGeos = {
+      block: new THREE.BoxGeometry(1, 1, 1),
+      hex: new THREE.CylinderGeometry(0.58, 0.7, 1, 6),
+      crown: new THREE.ConeGeometry(0.62, 1, 4),
+    };
     const buildingMats = {
       left: new THREE.MeshStandardMaterial({
         map: tex, roughness: 0.3, metalness: 0.7,
@@ -57,31 +63,113 @@ export class CityManager {
         emissive: COLORS.pink, emissiveIntensity: 0.045,
       }),
     };
-    const buildingInstances = {
-      left: new THREE.InstancedMesh(box, buildingMats.left, 70),
-      right: new THREE.InstancedMesh(box, buildingMats.right, 70),
+    const buildingInstances = {};
+    for (const side of ["left", "right"]) {
+      for (const archetype of Object.keys(towerGeos)) {
+        buildingInstances[side + archetype] = new THREE.InstancedMesh(
+          towerGeos[archetype],
+          buildingMats[side],
+          70,
+        );
+        buildingInstances[side + archetype].count = 0;
+        buildingInstances[side + archetype].castShadow = false;
+        buildingInstances[side + archetype].receiveShadow = false;
+      }
+    }
+
+    // Rooftop mechanical crowns add a readable second layer to the skyline.
+    const crownGeo = new THREE.BoxGeometry(1, 1, 1);
+    const crownMats = {
+      left: new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
+      right: new THREE.MeshBasicMaterial({ color: COLORS.pink }),
+    };
+    const rooftopCrests = {
+      left: new THREE.InstancedMesh(crownGeo, crownMats.left, 36),
+      right: new THREE.InstancedMesh(crownGeo, crownMats.right, 36),
+    };
+    const antennaGeo = new THREE.CylinderGeometry(0.035, 0.08, 1, 6);
+    const antennaMats = {
+      left: new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
+      right: new THREE.MeshBasicMaterial({ color: COLORS.pink }),
+    };
+    const rooftopAntennas = {
+      left: new THREE.InstancedMesh(antennaGeo, antennaMats.left, 36),
+      right: new THREE.InstancedMesh(antennaGeo, antennaMats.right, 36),
     };
     const dummy = new THREE.Object3D();
+    let leftCount = 0;
+    let rightCount = 0;
+    let leftCrestCount = 0;
+    let rightCrestCount = 0;
+
+    for (let i = 0; i < 70; i++) {
+      const left = Math.random() > 0.5;
+      const side = left ? "left" : "right";
+      const x = (left ? -1 : 1) * (12 + Math.random() * 35);
+      const z = -Math.random() * 480;
+      const w = 7 + Math.random() * 13;
+      const d = 7 + Math.random() * 13;
+      const h = 25 + Math.random() * 70;
+      const archetypes = ["block", "hex", "crown"];
+      const archetype = archetypes[Math.floor(Math.random() * archetypes.length)];
+      const mesh = buildingInstances[side + archetype];
+      const index = left
+        ? leftCount++
+        : rightCount++;
+
+      // Cylinder/cone archetypes use the same unit-height source mesh and are
+      // scaled to the same city proportions as the original towers.
+      dummy.position.set(x, h / 2, z);
+      dummy.rotation.set(0, archetype === "hex" ? Math.random() * Math.PI : Math.PI / 4, 0);
+      dummy.scale.set(w, h, d);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(index, dummy.matrix);
+      mesh.count = index + 1;
+
+      if (Math.random() > 0.48) {
+        const crest = left ? rooftopCrests.left : rooftopCrests.right;
+        const antenna = left ? rooftopAntennas.left : rooftopAntennas.right;
+        const crestIndex = left ? leftCrestCount++ : rightCrestCount++;
+
+        dummy.position.set(x, h + 0.7, z);
+        dummy.rotation.set(0, Math.PI / 4, 0);
+        dummy.scale.set(Math.min(w * 0.72, 8), 1.4, Math.min(d * 0.72, 8));
+        dummy.updateMatrix();
+        crest.setMatrixAt(crestIndex, dummy.matrix);
+
+        dummy.position.set(x, h + 1.8 + Math.random() * 2.5, z);
+        dummy.rotation.set(0, 0, 0);
+        dummy.scale.set(1, 3.2 + Math.random() * 2.5, 1);
+        dummy.updateMatrix();
+        antenna.setMatrixAt(crestIndex, dummy.matrix);
+      }
+    }
+
+    for (const [key, mesh] of Object.entries(buildingInstances)) {
+      mesh.instanceMatrix.needsUpdate = true;
+      this.scene.add(mesh);
+      this.buildings.push(mesh);
+    }
+    for (const side of ["left", "right"]) {
+      rooftopCrests[side].count = side === "left" ? leftCrestCount : rightCrestCount;
+      rooftopCrests[side].instanceMatrix.needsUpdate = true;
+      rooftopAntennas[side].count = side === "left" ? leftCrestCount : rightCrestCount;
+      rooftopAntennas[side].instanceMatrix.needsUpdate = true;
+      this.scene.add(rooftopCrests[side], rooftopAntennas[side]);
+      this.buildings.push(rooftopCrests[side], rooftopAntennas[side]);
+    }
+
     const spireGeo = new THREE.CylinderGeometry(0.1, 0.6, 12, 4);
     const spireMats = {
       cyan: new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
       pink: new THREE.MeshBasicMaterial({ color: COLORS.pink }),
     };
-    let leftCount = 0;
-    let rightCount = 0;
     for (let i = 0; i < 70; i++) {
       const left = Math.random() > 0.5;
       const x = (left ? -1 : 1) * (12 + Math.random() * 35);
       const z = -Math.random() * 480;
-      const w = 8 + Math.random() * 12, d = 8 + Math.random() * 12, h = 25 + Math.random() * 70;
-      const mesh = left ? buildingInstances.left : buildingInstances.right;
-      const index = left ? leftCount++ : rightCount++;
-      dummy.position.set(x, h / 2, z);
-      dummy.rotation.set(0, 0, 0);
-      dummy.scale.set(w, h, d);
-      dummy.updateMatrix();
-      mesh.setMatrixAt(index, dummy.matrix);
-      if (Math.random() > 0.4) {
+      const h = 25 + Math.random() * 70;
+      if (Math.random() > 0.68) {
         const spireColor = Math.random() > 0.5 ? "cyan" : "pink";
         const spire = new THREE.Mesh(spireGeo, spireMats[spireColor]);
         spire.position.set(x, h + 6, z);
@@ -90,14 +178,6 @@ export class CityManager {
         this.scene.add(spire);
         this.buildings.push(spire);
       }
-    }
-    for (const [key, mesh] of Object.entries(buildingInstances)) {
-      mesh.count = key === "left" ? leftCount : rightCount;
-      mesh.instanceMatrix.needsUpdate = true;
-      mesh.castShadow = false;
-      mesh.receiveShadow = false;
-      this.scene.add(mesh);
-      this.buildings.push(mesh);
     }
 
     const signs = [
