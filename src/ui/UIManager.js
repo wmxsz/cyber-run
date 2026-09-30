@@ -24,6 +24,7 @@ export class UIManager {
     this.mission = this._el("hud-mission");
     this.missionFill = this._el("hud-mission-fill");
     this.missionProgress = this._el("hud-mission-progress");
+    this.eventPanel = this._el("event-status");
     this.laneThreats = [0, 1, 2].map((lane) => this._el(`lane-threat-${lane}`));
 
     this._setHighScore();
@@ -49,6 +50,11 @@ export class UIManager {
     }
     if (this.pauseButton) this.pauseButton.textContent = engine.paused ? "▶" : "Ⅱ";
     if (this.phase) this.phase.textContent = engine.difficulty.phaseName || "NIGHT CITY";
+    if (this.eventPanel) {
+      if (engine._hunterTime > 0) this.eventPanel.textContent = "HUNTER // EVADE";
+      else if (engine._eventTime > 0) this.eventPanel.textContent = "DATA STORM // x1.75";
+      else this.eventPanel.textContent = "";
+    }
     const mission = engine.missions?.getStatus?.();
     if (mission) {
       if (this.mission) this.mission.textContent = mission.label;
