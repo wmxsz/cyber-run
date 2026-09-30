@@ -616,23 +616,23 @@ button.mobile-touch-btn {
 
 #event-status.elite{color:#b980ff;text-shadow:0 0 10px rgba(138,43,226,.95);animation:event-elite .35s infinite alternate}
 @keyframes event-elite{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.045)}}
-#multiplier-status{position:fixed;top:123px;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:8px;min-height:20px;padding:3px 9px;border:1px solid rgba(0,240,255,.25);background:rgba(4,8,24,.52);font:700 8px/1 Orbitron,monospace;letter-spacing:1.5px;pointer-events:none;opacity:.72}
+#multiplier-status{position:fixed;top:154px;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:8px;min-height:20px;padding:3px 9px;border:1px solid rgba(0,240,255,.25);background:rgba(4,8,24,.52);font:700 8px/1 Orbitron,monospace;letter-spacing:1.5px;pointer-events:none;opacity:.72}
 .multiplier-label{color:rgba(0,240,255,.65)}
 #hud-multiplier{color:#00f0ff;text-shadow:0 0 8px rgba(0,240,255,.7)}
 #hud-multiplier.boosted{color:#ffe600;text-shadow:0 0 10px rgba(255,230,0,.85)}
-@media (max-width:700px){#multiplier-status{top:116px;font-size:7px}}
+@media (max-width:700px){#multiplier-status{top:148px;font-size:7px}}
 
 
-#risk-status{position:fixed;top:149px;left:50%;transform:translateX(-50%);z-index:9;display:flex;gap:7px;align-items:center;padding:3px 9px;border:1px solid rgba(255,136,0,.28);background:rgba(24,8,2,.5);font:700 8px/1 Orbitron,monospace;letter-spacing:1.3px;pointer-events:none;opacity:.55}
+#risk-status{position:fixed;top:180px;left:50%;transform:translateX(-50%);z-index:9;display:flex;gap:7px;align-items:center;padding:3px 9px;border:1px solid rgba(255,136,0,.28);background:rgba(24,8,2,.5);font:700 8px/1 Orbitron,monospace;letter-spacing:1.3px;pointer-events:none;opacity:.55}
 #risk-status span{color:rgba(255,136,0,.65)}
 #hud-risk{color:#ff8800;text-shadow:0 0 8px rgba(255,136,0,.55)}
 #risk-status:has(#hud-risk.active){opacity:1;box-shadow:0 0 12px rgba(255,136,0,.16)}
-@media (max-width:700px){#risk-status{top:140px;font-size:7px}}
+@media (max-width:700px){#risk-status{top:174px;font-size:7px}}
 
 
-#ghost-status{position:fixed;top:176px;left:50%;transform:translateX(-50%);z-index:9;display:flex;gap:7px;align-items:center;padding:3px 9px;border:1px solid rgba(138,43,226,.35);background:rgba(14,4,30,.52);font:700 8px/1 Orbitron,monospace;letter-spacing:1.3px;pointer-events:none;opacity:.5}
+#ghost-status{position:fixed;top:207px;left:50%;transform:translateX(-50%);z-index:9;display:flex;gap:7px;align-items:center;padding:3px 9px;border:1px solid rgba(138,43,226,.35);background:rgba(14,4,30,.52);font:700 8px/1 Orbitron,monospace;letter-spacing:1.3px;pointer-events:none;opacity:.5}
 #ghost-status span{color:rgba(138,43,226,.8)}
 #hud-ghost{color:#b980ff;text-shadow:0 0 8px rgba(138,43,226,.7)}
 #ghost-status:has(#hud-ghost.active){opacity:1;box-shadow:0 0 14px rgba(138,43,226,.24);animation:ghost-pulse .7s infinite alternate}
 @keyframes ghost-pulse{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.035)}}
-@media (max-width:700px){#ghost-status{top:165px;font-size:7px}}
+@media (max-width:700px){#ghost-status{top:200px;font-size:7px}}
