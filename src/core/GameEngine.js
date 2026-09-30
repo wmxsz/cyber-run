@@ -414,8 +414,7 @@ export class GameEngine {
       this._ui?.announce(this._hunterElite ? "PURSUER DESTROYED // +100 // +15 BOOST" : "HUNTER DESTROYED // +100 // +15 BOOST");
       this._hunterElite = false;
     } else {
-      this.scene.remove(this._hunter);
-      this._hunter = null;
+      this._removeHunter();
       this._hunterTime = 0;
       this._refreshEventMultiplier();
       this._ui?.announce(this._hunterElite ? "PURSUER STRIKE // EVADE FASTER" : "HUNTER STRIKE // EVADE FASTER");
@@ -531,10 +530,7 @@ export class GameEngine {
     this.over = true;
     this.boosting = false;
     this.player.setBoost(false);
-    if (this._hunter) {
-      this.scene.remove(this._hunter);
-      this._hunter = null;
-    }
+    if (this._hunter) this._removeHunter();
     this._hunterTime = 0;
     this._hunterElite = false;
     this._eventTime = 0;
