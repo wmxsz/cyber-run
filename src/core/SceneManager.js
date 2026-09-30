@@ -118,6 +118,11 @@ export class SceneManager {
       this._neonLights[2].intensity = 1.35 + surge * 0.8;
     }
     this.renderer.toneMappingExposure = this._baseExposure + this._speedFeel * 0.12;
+    if (this._bloom) {
+      this._bloom.strength = 0.66 + this._speedFeel * 0.18 + this._eventVisual * 0.16;
+      this._bloom.radius = 0.58 + this._speedFeel * 0.08;
+      this._bloom.threshold = 0.32 - this._eventVisual * 0.08;
+    }
   }
 
   update(dt) {
