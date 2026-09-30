@@ -11,6 +11,7 @@ import { PerformanceMonitor } from "../src/core/PerformanceMonitor.js";
 import { ObstacleManager } from "../src/entities/ObstacleManager.js";
 import { PickupManager } from "../src/entities/PickupManager.js";
 import { OBSTACLE_TYPES } from "../src/entities/obstacleTypes.js";
+import { PlayerObject } from "../src/entities/PlayerObject.js";
 
 const finite = (value, label) => assert.ok(Number.isFinite(value), label + " must stay finite");
 
@@ -152,6 +153,24 @@ const finite = (value, label) => assert.ok(Number.isFinite(value), label + " mus
   assert.deepEqual(pickups.pools, {}, "pickup pools must be cleared on dispose");
 }
 
+// Protagonist contract: the player remains a human-scale runner with articulated limbs.
+{
+  const scene = new THREE.Scene();
+  const player = new PlayerObject(scene);
+  assert.ok(player.armParts?.length === 2, "cyber runner must have two articulated arms");
+  assert.ok(player.legParts?.length === 2, "cyber runner must have two articulated legs");
+  assert.ok(player.head && player.torso && player.visor, "cyber runner must have a head, torso and visor");
+  const hitbox = player.getHitbox();
+  assert.ok(hitbox.halfX < 0.8 && hitbox.halfZ < 0.8, "human runner hitbox should not use vehicle width/depth");
+  player.jump();
+  player.update(1 / 60, 1);
+  player.slide();
+  player.update(1 / 60, 2);
+  player.setBoost(true);
+  player.update(1 / 60, 3);
+  player.setBoost(false);
+  player.dispose();
+}
 console.log("Cyber Run smoke checks passed.");
 
 // Particle lifecycle and geometry invariants.
