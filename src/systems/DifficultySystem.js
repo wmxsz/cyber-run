@@ -27,7 +27,7 @@ export class DifficultySystem {
       interval,
       phase,
       phaseName: this.phaseName,
-      stormChance: GAME_CONFIG.phaseStormChance?.[phase] || 0,
+      stormPressure: GAME_CONFIG.phaseStormPressure?.[phase] || 0,
       hunterGap: GAME_CONFIG.phaseHunterGap?.[phase] || 3.8,
     };
   }
