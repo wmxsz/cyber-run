@@ -20,6 +20,8 @@ export const GAME_CONFIG = {
   nearMissScore: 35,
   nearMissBoostGain: 8,
   comboWindow: 2.8,
+  comboMilestones: [4, 8, 12, 16, 20],
+  comboBoostRewards: [8, 12, 16, 20, 25],
   coreBoostGain: 25,
   maxBoostEnergy: 100,
   boostDrain: 42,
