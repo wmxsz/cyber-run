@@ -199,8 +199,9 @@ export class GameEngine {
       this._eventTimer -= dt;
       if (this._eventTimer <= 0 && this._lastPhase >= 1) {
         this._eventTime = 5;
-        const stormChance = GAME_CONFIG.phaseStormChance?.[this._lastPhase] || 0;
-        this._eventTimer = (stormChance > 0 ? 13 : 16) + Math.random() * (stormChance > 0 ? 7 : 8);
+        const stormPressure = GAME_CONFIG.phaseStormPressure?.[this._lastPhase] || 0;
+        const stormBase = 18 - stormPressure * 12;
+        this._eventTimer = stormBase + Math.random() * 8;
         this._refreshEventMultiplier();
         this.audio.playPowerup();
         const p = this.player.group.position;
@@ -274,9 +275,9 @@ export class GameEngine {
       this.obstacles.remove(result.obstacleHit);
       if (this._ghostTime > 0) {
         const p = this.player.group.position;
-        this.score.ghostBreak();
+        const ghostPoints = this.score.ghostBreak();
         this.particles.burst(p.x, p.y + 0.5, p.z, 0x8a2be2, 20);
-        this._ui?.announce("GHOST PHASE // BYPASSED");
+        this._ui?.announce("GHOST PHASE // BYPASSED // +" + Math.floor(ghostPoints));
       } else {
         this.takeDamage();
       }
@@ -306,6 +307,7 @@ export class GameEngine {
       if (pickup.userData.type === "hackNode") {
         this._hackNodes += 1;
         const bonus = this.score.hackNode();
+        this._checkComboMilestone(bonus);
         this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + GAME_CONFIG.hackNodeBoostGain);
         this.audio.playCollect();
         this.particles.burst(x, y, z, 0x8a2be2, 22);
