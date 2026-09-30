@@ -169,8 +169,8 @@ export class CityManager {
     for (const drone of this.drones) {
       drone.position.z += speed * droneBoost * drone.userData.speed * dt * 60;
       const wave = Math.sin(t * (1.4 + phase * 0.12) + drone.userData.phase);
-      drone.position.y += wave * 0.012;
-      drone.position.x += Math.cos(t * 0.7 + drone.userData.phase) * (0.012 + phase * 0.004);
+      drone.position.y += wave * 0.012 * dt * 60;
+      drone.position.x += Math.cos(t * 0.7 + drone.userData.phase) * (0.012 + phase * 0.004) * dt * 60;
       if (drone.position.z > 15) {
         drone.position.z -= 470;
         drone.position.x = (Math.random() > 0.5 ? 1 : -1) * (10 + Math.random() * 28);
@@ -182,7 +182,7 @@ export class CityManager {
       if (phase >= 3) drone.scale.setScalar(1 + Math.sin(t * 3 + drone.userData.phase) * 0.035);
     }
     if (this.sunRing) {
-      this.sunRing.rotation.z += 0.002 + speed * 0.0005 + phase * 0.0002;
+      this.sunRing.rotation.z += (0.002 + speed * 0.0005 + phase * 0.0002) * dt * 60;
       this.sunRing.scale.setScalar(1 + Math.sin(t * 1.5) * (0.015 + phase * 0.003));
     }
   }
