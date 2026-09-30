@@ -596,3 +596,10 @@ button.mobile-touch-btn {
 @media (max-width:700px){#mission-panel{top:92px;width:min(270px,62vw);}.mission-label{font-size:11px}}
 
 #event-status{position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:9;min-height:18px;padding:3px 10px;font-size:10px;font-weight:900;letter-spacing:2px;color:#ffe600;text-shadow:0 0 8px rgba(255,230,0,.7);pointer-events:none;text-align:center}
+
+
+#multiplier-status{position:fixed;top:123px;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:8px;min-height:20px;padding:3px 9px;border:1px solid rgba(0,240,255,.25);background:rgba(4,8,24,.52);font:700 8px/1 Orbitron,monospace;letter-spacing:1.5px;pointer-events:none;opacity:.72}
+.multiplier-label{color:rgba(0,240,255,.65)}
+#hud-multiplier{color:#00f0ff;text-shadow:0 0 8px rgba(0,240,255,.7)}
+#hud-multiplier.boosted{color:#ffe600;text-shadow:0 0 10px rgba(255,230,0,.85)}
+@media (max-width:700px){#multiplier-status{top:116px;font-size:7px}}
