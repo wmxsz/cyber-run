@@ -220,12 +220,14 @@ export class GameEngine {
     }
 
     if (this._eventTime > 0) {
+      this.sceneMgr.setEventVisual?.(1);
       this._eventTime -= dt;
       if (this._eventTime <= 0) {
         this._refreshEventMultiplier();
         this._ui?.announce("DATA STORM // OFFLINE");
       }
     } else {
+      this.sceneMgr.setEventVisual?.(0);
       this._eventTimer -= dt;
       if (this._eventTimer <= 0 && this._lastPhase >= 1) {
         this._eventTime = 5;
@@ -251,6 +253,7 @@ export class GameEngine {
     }
 
     if (this._empTime > 0) {
+      this.sceneMgr.setEventVisual?.(0.72);
       this._empTime -= dt;
       this.boosting = false;
       this.player.setBoost(false);
@@ -258,6 +261,7 @@ export class GameEngine {
         this._ui?.announce("EMP // BOOST LINK RESTORED");
       }
     } else {
+      if (this._eventTime <= 0) this.sceneMgr.setEventVisual?.(0);
       this._empTimer -= dt;
       if (this._empTimer <= 0 && this._lastPhase >= 3) {
         this._empTime = GAME_CONFIG.empDuration;
