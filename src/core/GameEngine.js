@@ -303,8 +303,8 @@ export class GameEngine {
       for (const obstacleHit of result.obstacleHits) this.obstacles.remove(obstacleHit);
       if (this._ghostTime > 0) {
         const p = this.player.group.position;
-        const ghostPoints = this.score.ghostBreak() * result.obstacleHits.length;
-        this.score.score += this.score.ghostBreak() * (result.obstacleHits.length - 1);
+        const ghostPoints = 50 * this.score.eventMultiplier * result.obstacleHits.length;
+        this.score.score += ghostPoints;
         this.particles.burst(p.x, p.y + 0.5, p.z, 0x8a2be2, 20 + result.obstacleHits.length * 6);
         this._ui?.announce("GHOST PHASE // BYPASSED x" + result.obstacleHits.length + " // +" + Math.floor(ghostPoints));
       } else {
@@ -484,6 +484,8 @@ export class GameEngine {
 
   takeDamage() {
     if (this.invulnerable > 0) return;
+    this.boosting = false;
+    this.player.setBoost(false);
     this.score.breakRiskChain();
 
     const p = this.player.group.position;
