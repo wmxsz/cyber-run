@@ -55,6 +55,9 @@ export class GameEngine {
     this._hunterTimer = 22;
     this._hunterTime = 0;
     this._hunterLane = 1;
+    this._hunterLaneTimer = 0;
+    this._hunterX = 0;
+    this._hunter = null;
     this._ui = null;
 
     this.input.onAction((action, payload) => this._onAction(action, payload));
@@ -105,6 +108,9 @@ export class GameEngine {
     this._hunterTimer = 22;
     this._hunterTime = 0;
     this._hunterLane = 1;
+    this._hunterLaneTimer = 0;
+    this._hunterX = 0;
+    this._hunter = null;
     this.score.setEventMultiplier(1);
 
     this._ui?.hideStart();
@@ -147,7 +153,8 @@ export class GameEngine {
       this._hunter.position.z = Math.max(0.6, 3.8 - (8 - this._hunterTime) * 0.42) + Math.sin(this._hunterTime * 5) * 0.12;
       if (this._hunterTime <= 0) {
         this.scene.remove(this._hunter);
-        this.score.setEventMultiplier(1);
+        this._hunter = null;
+        this._refreshEventMultiplier();
         this._ui?.announce("HUNTER DRONE // ESCAPED");
       }
     } else {
@@ -160,7 +167,7 @@ export class GameEngine {
         this._hunterX = this.player.group.position.x;
         this._hunter = this._makeHunter();
         this.scene.add(this._hunter);
-        this.score.setEventMultiplier(1.35);
+        this._refreshEventMultiplier();
         this._ui?.announce("HUNTER DRONE // EVADE // SCORE x1.35");
       }
     }
@@ -168,7 +175,7 @@ export class GameEngine {
     if (this._eventTime > 0) {
       this._eventTime -= dt;
       if (this._eventTime <= 0) {
-        this.score.setEventMultiplier(1);
+        this._refreshEventMultiplier();
         this._ui?.announce("DATA STORM // OFFLINE");
       }
     } else {
@@ -176,7 +183,7 @@ export class GameEngine {
       if (this._eventTimer <= 0 && this._lastPhase >= 1) {
         this._eventTime = 6;
         this._eventTimer = 16 + Math.random() * 8;
-        this.score.setEventMultiplier(1.75);
+        this._refreshEventMultiplier();
         this.audio.playPowerup();
         const p = this.player.group.position;
         this.particles.burst(p.x, p.y + 1, p.z, 0xff00aa, 36);
@@ -216,6 +223,7 @@ export class GameEngine {
     this.player.update(dt, this._elapsed);
     this.obstacles.update(dt, speed, this._elapsed);
     this.pickups.update(dt, speed);
+    this._resolveHunterEncounter();
 
     this._exhaustTimer -= dt;
     if (this._exhaustTimer <= 0) {
@@ -276,6 +284,40 @@ export class GameEngine {
 
     this.particles.update();
     this._ui?.update(this);
+  }
+
+  _refreshEventMultiplier() {
+    const storm = this._eventTime > 0 ? 1.75 : 1;
+    const hunter = this._hunterTime > 0 ? 1.35 : 1;
+    this.score.setEventMultiplier(storm * hunter);
+  }
+
+  _resolveHunterEncounter() {
+    if (!this._hunter || this._hunterTime <= 0) return;
+    const p = this.player.group.position;
+    const h = this._hunter.position;
+    const sameLane = Math.abs(p.x - h.x) < 1.65;
+    const close = Math.abs(h.z - p.z) < 1.65;
+    if (!sameLane || !close) return;
+
+    if (this.boosting) {
+      this.score.hunterBreak();
+      this.boostEnergy = Math.min(GAME_CONFIG.maxBoostEnergy, this.boostEnergy + 20);
+      this.particles.burst(h.x, h.y, h.z, 0xffe600, 32);
+      this.audio.playPowerup();
+      this.scene.remove(this._hunter);
+      this._hunter = null;
+      this._hunterTime = 0;
+      this._refreshEventMultiplier();
+      this._ui?.announce("HUNTER DESTROYED // +180 // +20 BOOST");
+    } else {
+      this.scene.remove(this._hunter);
+      this._hunter = null;
+      this._hunterTime = 0;
+      this._refreshEventMultiplier();
+      this._ui?.announce("HUNTER STRIKE // EVADE FASTER");
+      this.takeDamage();
+    }
   }
 
   _makeHunter() {
