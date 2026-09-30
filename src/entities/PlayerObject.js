@@ -211,4 +211,18 @@ export class PlayerObject {
   setShield(active) {
     this.shield.visible = active;
   }
+
+  dispose() {
+    const geometries = new Set();
+    const materials = new Set();
+    this.group.traverse((node) => {
+      if (!node.isMesh) return;
+      if (node.geometry) geometries.add(node.geometry);
+      const mats = Array.isArray(node.material) ? node.material : [node.material];
+      mats.forEach((material) => material && materials.add(material));
+    });
+    geometries.forEach((geometry) => geometry.dispose());
+    materials.forEach((material) => material.dispose());
+    this.group.removeFromParent();
+  }
 }
