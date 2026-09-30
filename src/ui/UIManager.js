@@ -137,6 +137,10 @@ export class UIManager {
     this.pauseOverlay?.classList.toggle("hidden", !paused);
   }
 
+  setMuted(muted) {
+    if (this.audioIcon) this.audioIcon.textContent = muted ? "🔇" : "🔊";
+  }
+
   setHighScore(value) {
     if (this.high) this.high.textContent = String(Math.floor(value)).padStart(5, "0");
   }
