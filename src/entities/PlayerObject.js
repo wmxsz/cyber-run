@@ -108,14 +108,12 @@ export class PlayerObject {
   }
 
   update(dt, elapsed) {
-    this.group.position.x = THREE.MathUtils.lerp(
-      this.group.position.x,
-      this.targetX,
-      1 - Math.pow(1 - GAME_CONFIG.laneChangeLerp, dt * 60),
-    );
-    const offset = this.targetX - this.group.position.x;
-    this.group.rotation.z = -offset * 0.18;
-    this.group.rotation.y = offset * 0.1;
+    const alpha = 1 - Math.pow(1 - GAME_CONFIG.laneChangeLerp, dt * 60);
+    const prevX = this.group.position.x;
+    this.group.position.x = THREE.MathUtils.lerp(this.group.position.x, this.targetX, alpha);
+    const lateralVelocity = (this.group.position.x - prevX) / Math.max(dt, 0.001);
+    this.group.rotation.z = THREE.MathUtils.lerp(this.group.rotation.z, -lateralVelocity * 0.035, 0.18);
+    this.group.rotation.y = THREE.MathUtils.lerp(this.group.rotation.y, (this.targetX - this.group.position.x) * 0.025, 0.18);
 
     if (this.isJumping) {
       this.group.position.y += this.jumpVelocity * dt * 60;
@@ -130,23 +128,51 @@ export class PlayerObject {
       if (this.slideTimer <= 0) this.isSliding = false;
     }
 
-    const targetY = this.isJumping
-      ? this.group.position.y
-      : (this.isSliding ? 0.15 : Math.sin(elapsed * 6) * 0.08);
-    this.group.position.y = THREE.MathUtils.lerp(this.group.position.y, targetY, 1 - Math.pow(1 - 0.18, dt * 60));
-    this.group.scale.y = THREE.MathUtils.lerp(this.group.scale.y, this.isSliding ? 0.62 : 1, 1 - Math.pow(1 - 0.25, dt * 60));
+    if (!this.isJumping) {
+      const baseY = this.isSliding ? 0.88 : 0.84 + Math.sin(elapsed * 11) * 0.025;
+      this.group.position.y = THREE.MathUtils.lerp(this.group.position.y, baseY, 1 - Math.pow(1 - 0.2, dt * 60));
+    }
+
+    const phase = elapsed * (this.boosting ? 18 : 12);
+    const stride = Math.sin(phase);
+    const counter = -stride;
+    const amount = this.isJumping ? 0.12 : (this.isSliding ? 0.04 : 0.2);
+
+    for (const part of this.legParts) {
+      const s = part.side < 0 ? stride : counter;
+      part.thigh.rotation.x = this.isSliding ? -0.9 : s * amount;
+      part.shin.rotation.x = this.isSliding ? 0.7 : -s * amount * 1.2;
+      part.boot.rotation.x = this.isSliding ? -0.22 : s * amount * 0.35;
+      part.sole.material.opacity = this.boosting ? 0.95 : 0.7;
+      part.sole.scale.z = this.boosting ? 1.25 : 1;
+    }
+    for (const part of this.armParts) {
+      const s = part.side < 0 ? counter : stride;
+      part.upper.rotation.x = -s * amount * 1.35;
+      part.lower.rotation.x = s * amount * 0.9;
+      part.shoulder.rotation.z = s * amount * 0.25;
+    }
+
+    const crouch = this.isSliding ? 0.58 : 1;
+    this.group.scale.y = THREE.MathUtils.lerp(this.group.scale.y, crouch, 1 - Math.pow(1 - 0.28, dt * 60));
+    this.group.rotation.x = THREE.MathUtils.lerp(
+      this.group.rotation.x,
+      this.isSliding ? 0.55 : (this.isJumping ? -0.08 : 0),
+      1 - Math.pow(1 - 0.2, dt * 60),
+    );
 
     this.energyHalo.rotation.z += dt * (this.boosting ? 8 : 2.8);
     this.energyHalo.scale.setScalar(1 + Math.sin(elapsed * (this.boosting ? 18 : 9)) * (this.boosting ? 0.1 : 0.045));
     this.energyHalo.material.opacity = (this.boosting ? 0.78 : 0.42) + Math.sin(elapsed * 10) * 0.1;
     this.underGlow.material.color.setHex(this.boosting ? COLORS.pink : COLORS.cyan);
     this.underGlow.material.opacity = this.boosting ? 0.5 : 0.24 + Math.sin(elapsed * 8) * 0.04;
-    this.underGlow.scale.setScalar(this.boosting ? 1.14 + Math.sin(elapsed * 16) * 0.08 : 1);
+    this.underGlow.scale.setScalar(this.boosting ? 1.14 : 1);
     this.boostTrail.visible = this.boosting;
     this.boostTrail.scale.set(1, this.boosting ? 1.3 + Math.sin(elapsed * 20) * 0.18 : 0.8, 1);
     this.thrusterLight.intensity = this.boosting ? 3.4 + Math.sin(elapsed * 24) * 0.8 : 1.2;
     this.visor.material.emissiveIntensity = this.boosting ? 1.8 + Math.sin(elapsed * 16) * 0.3 : 1.05;
     this.energyBack.material.opacity = this.boosting ? 1 : 0.72;
+
     for (let i = 0; i < this.spineSegments.length; i++) {
       const pulse = 0.7 + 0.3 * Math.sin(elapsed * (8 + i * 0.4) - i * 0.8);
       this.spineSegments[i].scale.x = this.boosting ? 1 + pulse * 0.8 : 0.8 + pulse * 0.25;
@@ -156,9 +182,9 @@ export class PlayerObject {
     if (this.shield.visible) {
       this.shield.rotation.y += dt * 1.8;
       this.shield.rotation.x += dt * 1.2;
+      this.shield.material.opacity = 0.3 + Math.sin(elapsed * 9) * 0.06;
     }
   }
-
   reset() {
     this.currentLane = 1;
     this.targetX = LANES[1];
@@ -177,11 +203,11 @@ export class PlayerObject {
   getHitbox() {
     return {
       x: this.group.position.x,
-      y: this.group.position.y,
+      y: this.group.position.y + 0.95,
       z: this.group.position.z,
-      halfX: 1.1,
-      halfY: this.isSliding ? 0.48 : 0.8,
-      halfZ: 1.2,
+      halfX: 0.58,
+      halfY: this.isSliding ? 0.48 : 1.02,
+      halfZ: 0.48,
       isJumping: this.isJumping,
       isSliding: this.isSliding,
     };
