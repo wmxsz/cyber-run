@@ -38,6 +38,7 @@ export class GameEngine {
     this.hasShield = false;
     this.boostEnergy = 0;
     this.boosting = false;
+    this.player.setBoost(false);
     this.paused = false;
     this.active = false;
     this.over = false;
@@ -117,7 +118,7 @@ export class GameEngine {
 
     if (this.boosting) {
       this.boostEnergy = Math.max(0, this.boostEnergy - GAME_CONFIG.boostDrain * dt);
-      if (this.boostEnergy <= 0) this.boosting = false;
+      if (this.boostEnergy <= 0) { this.boosting = false; this.player.setBoost(false); }
     }
 
     const spawn = this.difficulty.update(dt, this.score.score);
@@ -129,7 +130,7 @@ export class GameEngine {
     }
 
     const speed = this._effectiveSpeed();
-    this.score.update(dt, speed, this.hasShield);
+    this.score.update(dt, speed, this.hasShield, this.boosting);
     this.road.update(speed);
     this.city.update(speed);
     this.player.update(dt, this._elapsed);
@@ -198,9 +199,10 @@ export class GameEngine {
 
   toggleBoost() {
     if (!this.active || this.over || this.paused) return;
-    if (this.boosting) { this.boosting = false; return; }
+    if (this.boosting) { this.boosting = false; this.player.setBoost(false); return; }
     if (this.boostEnergy < 10) { this._ui?.announce("BOOST CHARGE LOW"); return; }
     this.boosting = true;
+    this.player.setBoost(true);
     this.audio.playPowerup();
     this._ui?.announce("OVERDRIVE ONLINE");
   }
