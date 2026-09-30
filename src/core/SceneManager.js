@@ -24,7 +24,8 @@ export class SceneManager {
 
     this.scene = new THREE.Scene();
     this._composer = new EffectComposer(this.renderer);
-    this._composer.addPass(new RenderPass(this.scene, null));
+    this._renderPass = new RenderPass(this.scene, null);
+    this._composer.addPass(this._renderPass);
     this._bloom = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
       0.72,
@@ -42,6 +43,7 @@ export class SceneManager {
     );
     this.camera.position.set(0, 4.5, 7.5);
     this.camera.lookAt(0, 1.5, -10);
+    this._renderPass.camera = this.camera;
 
     this._baseX = 0;
     this._baseY = 4.5;
