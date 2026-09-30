@@ -119,9 +119,10 @@ export class CityManager {
       const w = 7 + Math.random() * 13;
       const d = 7 + Math.random() * 13;
       const h = 25 + Math.random() * 70;
-      towerAnchors.push({ x, z, h, w, d, side });
+      towerAnchors.push({ x, z, h, w, d, side, archetype: null });
       const archetypes = ["block", "hex", "crown"];
       const archetype = archetypes[Math.floor(Math.random() * archetypes.length)];
+      towerAnchors[towerAnchors.length - 1].archetype = archetype;
       const mesh = buildingInstances[side + archetype];
       const key = side + archetype;
       const index = buildingCounts[key]++;
@@ -164,6 +165,9 @@ export class CityManager {
       this.scene.add(mesh);
       this.buildings.push(mesh);
     }
+    // Facade detailing follows the actual tower silhouette:
+    // box towers get vertical spines/bands; hex towers get low-poly wrap rings;
+    // crown towers keep detailing below the taper so nothing floats outside the mesh.
     const facadeRailGeo = new THREE.BoxGeometry(0.11, 1, 0.11);
     const facadeRails = {
       left: new THREE.InstancedMesh(facadeRailGeo, new THREE.MeshBasicMaterial({ color: COLORS.cyan }), 70),
@@ -171,6 +175,7 @@ export class CityManager {
     };
     const railCounts = { left: 0, right: 0 };
     for (const anchor of towerAnchors) {
+      if (anchor.archetype !== "block") continue;
       const side = anchor.side;
       const index = railCounts[side]++;
       dummy.position.set(
@@ -190,7 +195,6 @@ export class CityManager {
       this.buildings.push(facadeRails[side]);
     }
 
-    // Horizontal facade bands break up tall silhouettes without adding per-building meshes.
     const bandGeo = new THREE.BoxGeometry(1, 0.08, 0.08);
     const facadeBands = {
       left: new THREE.InstancedMesh(bandGeo, new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.72 }), 140),
@@ -198,6 +202,7 @@ export class CityManager {
     };
     const bandCounts = { left: 0, right: 0 };
     for (const anchor of towerAnchors) {
+      if (anchor.archetype !== "block") continue;
       const bandTotal = anchor.h > 62 ? 3 : 2;
       for (let b = 1; b <= bandTotal; b++) {
         const index = bandCounts[anchor.side]++;
@@ -217,6 +222,37 @@ export class CityManager {
       facadeBands[side].instanceMatrix.needsUpdate = true;
       this.scene.add(facadeBands[side]);
       this.buildings.push(facadeBands[side]);
+    }
+
+    const wrapRingGeo = new THREE.TorusGeometry(1, 0.045, 6, 12);
+    const wrapRings = {
+      left: new THREE.InstancedMesh(wrapRingGeo, new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.66 }), 120),
+      right: new THREE.InstancedMesh(wrapRingGeo, new THREE.MeshBasicMaterial({ color: COLORS.pink, transparent: true, opacity: 0.66 }), 120),
+    };
+    const wrapCounts = { left: 0, right: 0 };
+    for (const anchor of towerAnchors) {
+      if (anchor.archetype === "block") continue;
+      const levels = anchor.archetype === "hex" ? 2 : 2;
+      for (let b = 1; b <= levels; b++) {
+        const ratio = b / (levels + 1);
+        const index = wrapCounts[anchor.side]++;
+        const taper = anchor.archetype === "crown" ? (1 - ratio * 0.46) : 1;
+        dummy.position.set(anchor.x, anchor.h * ratio, anchor.z);
+        dummy.rotation.set(Math.PI / 2, 0, 0);
+        dummy.scale.set(
+          Math.max(1.2, anchor.w * 0.46 * taper),
+          Math.max(1.2, anchor.d * 0.46 * taper),
+          1,
+        );
+        dummy.updateMatrix();
+        wrapRings[anchor.side].setMatrixAt(index, dummy.matrix);
+      }
+    }
+    for (const side of ["left", "right"]) {
+      wrapRings[side].count = wrapCounts[side];
+      wrapRings[side].instanceMatrix.needsUpdate = true;
+      this.scene.add(wrapRings[side]);
+      this.buildings.push(wrapRings[side]);
     }
 
     for (const side of ["left", "right"]) {
