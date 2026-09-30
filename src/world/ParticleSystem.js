@@ -4,9 +4,12 @@ export class ParticleSystem {
   constructor(scene) {
     this.scene = scene;
     this.items = [];
+    this.maxItems = 520;
   }
 
   burst(x, y, z, color = 0xff0077, count = 25) {
+    const allowed = Math.max(0, this.maxItems - this.items.length);
+    count = Math.min(count, allowed);
     for (let i = 0; i < count; i++) {
       const p = new THREE.Mesh(
         new THREE.BoxGeometry(0.18, 0.18, 0.18),
@@ -24,6 +27,7 @@ export class ParticleSystem {
   }
 
   exhaust(x, y, z, speed) {
+    if (this.items.length >= this.maxItems) return;
     const p = new THREE.Mesh(
       new THREE.BoxGeometry(0.1, 0.1, 0.2),
       new THREE.MeshBasicMaterial({ color: 0x00f0ff }),
@@ -36,6 +40,15 @@ export class ParticleSystem {
     p.userData.vz = speed * 0.8 + Math.random() * 0.2;
     this.scene.add(p);
     this.items.push(p);
+  }
+
+  clear() {
+    for (const p of this.items) {
+      this.scene.remove(p);
+      p.geometry.dispose();
+      p.material.dispose();
+    }
+    this.items.length = 0;
   }
 
   update() {
