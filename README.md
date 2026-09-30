@@ -1,121 +1,52 @@
 # Cyber Run
 
-Version 0.4.0
+一个可直接运行的 3D 赛博朋克无限跑酷小游戏。
 
-赛博朋克风第三人称自动跑酷，目标平台为 Android 64 位。
+## 项目结构
 
-## 技术基线
+这个仓库现在采用和同类型开源项目一致的极简结构：
 
-- Unity 6000.3.16f1
-- URP 17.3.0
-- Input System 1.20.0
-- Android ARM64
-- IL2CPP / Master + OptimizeSpeed
-- Android Target API 36
-- 数据跃迁门路线玩法
-- 连续跃迁门连击奖励与渐增极速
-- Sector 突破奖励与连击推进
-- 短时极速 Burst 与速度线反馈
-- Vulkan → OpenGLES3
-- Linear Color Space
-- Mobile Multithreaded Rendering
-- Portrait
-- APK 输出
+```text
+cyber-run/
+├── index.html
+├── README.md
+├── LICENSE
+└── .github/
+    └── workflows/
+        └── static-check.yml
+```
 
-## 核心玩法
+游戏主体只有一个 `index.html`，里面包含 HTML、CSS、Three.js 场景、游戏逻辑、移动端触控和 Web Audio 音效。
 
-- 第三人称自动向前奔跑
-- 3 条赛道
-- 左右滑动换道
-- 上滑跳跃
-- 下滑滑铲
-- 跳跃障碍
-- 顶部滑铲障碍
-- 高速位移 swept collision
-- 死亡与完整重开
-- 无限赛道分段循环
-- 相机平滑跟随与速度 FOV
-- Android 后台自动暂停/恢复
-- 开始界面与暂停界面
+## 玩法
 
-## 内容系统
+- 三车道自动前进
+- 左右换道
+- 跳跃躲避障碍
+- 数据核心收集
+- 护盾道具
+- 无限距离与最高分
+- 赛博朋克霓虹城市
+- 手机触控按钮和左右/上滑手势
 
-- 金币收集
-- 连击倍率
-- Overdrive 数据核心
-- Magnet 磁吸核心
-- Shield 护盾核心
-- 最佳分数持久化
-- 程序化赛博朋克角色
-- 程序化跑步动画
-- 悬浮车辆与动态交通
-- 赛博霓虹广告牌
-- 高架霓虹轨道
-- 道路霓虹反射
-- 赛博粒子拖尾与收集爆发
-- 环境雾
-- Bloom
-- ACES Tonemapping
-- Color Adjustments
-- Vignette
-- 程序化 Android 应用图标
-- 程序化音效与环境氛围声
-- 赛博雨幕与高空无人机
-- 触控/跳跃/滑铲/死亡振动反馈
+## 运行
 
-## Android 稳定性
+直接打开 `index.html` 即可运行。
 
-- 运行时强制竖屏
-- 防止跑酷中屏幕自动休眠
-- 触控阈值按屏幕尺寸自适应
-- touch cancel 后恢复正常输入
-- Input System / Legacy Input 双后端
-- 非障碍物移除无用 Collider
-- 共享材质缓存
-- GPU Instancing
-- 关闭装饰物不需要的阴影、Light Probe 与 Reflection Probe
-- 远距离分段 Renderer 裁剪
-- IL2CPP link.xml 防止核心运行时类型被裁剪
+也可以把仓库部署到 GitHub Pages，作为网页小游戏使用。
 
-## 构建入口
+## 技术
 
-BuildScript.BuildAndroid
+- Three.js r128
+- WebGL
+- Web Audio API
+- 原生 HTML / CSS / JavaScript
+- 无本地 3D 模型和音频资源
 
-输出：
+## 来源与授权
 
-build/CyberRun.apk
+游戏核心代码基于：
 
-构建脚本会再次强制执行项目设置，不依赖云端编辑器当前状态。
+https://github.com/jeiel85/cyberpunk-neon-runner-3d
 
-`Assets/Scenes/Main.unity`、其 `.meta` 文件以及 `ProjectSettings` 中的构建
-场景和 Android PlayerSettings 都已纳入版本控制，因此干净的批处理构建无需先
-打开编辑器来生成首个场景或项目设置文件。
-
-## 自动质量门禁
-
-.github/workflows/static-check.yml 会检查：
-
-- Unity / URP / Input System 版本
-- Android 图形 API
-- IL2CPP 配置
-- 核心玩法脚本
-- 内容系统
-- Shader
-- Animator
-- link.xml
-- Android 图标
-- 构建入口
-
-这个门禁属于静态结构检查，不等价于真实 Android 真机测试。
-
-## 当前状态
-
-- 移动激光障碍会随无限赛道回收重新换道
-- 障碍和金币路线会在赛道回收时变化
-- 4 套城市分区色彩主题会随距离切换
-- 高速阶段会增强 Bloom、雨幕和色彩强度
-- Overdrive / Magnet / Shield 会显示对应的角色环形 VFX
-- 数据跃迁门会按循环生成不同车道，并主动避开门后临近障碍
-- 连续跃迁门会增加奖励与极速持续时间
-
-核心玩法、赛博城市第一轮成品内容、三类核心道具、动态障碍、动态金币路线、程序化角色与动画、赛博 HUD、音频、粒子、雨幕、远景天际线、全息广告、道路/建筑专用 Shader 和 Android 性能稳定化已经完成。
+原项目使用 MIT License。本仓库保留原 MIT 授权文件，并在此基础上用于本项目。

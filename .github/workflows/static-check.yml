@@ -1,9 +1,5 @@
 name: Cyber Run Static Check
 
-concurrency:
-  group: cyber-run-static-${{ github.ref }}
-  cancel-in-progress: true
-
 on:
   push:
     branches: [ main ]
@@ -17,13 +13,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
-      - name: Validate CI Python
-        run: python3 -m py_compile tools/*.py
+      - name: Validate project shape
+        shell: bash
+        run: |
+          test -f index.html
+          test -f README.md
+          test -f LICENSE
+          test ! -d Assets
+          test ! -d Packages
+          test ! -d ProjectSettings
+          test ! -d tools
+          test ! -d web
 
-      - name: Validate latest commit formatting
+      - name: Validate runner source
+        shell: bash
+        run: |
+          grep -q "three.min.js" index.html
+          grep -q "requestAnimationFrame" index.html
+          grep -q "btn-start" index.html
+          grep -q "btn-jump" index.html
+          grep -q "moveLane" index.html
+
+      - name: Validate text and diff
         run: git show --check --oneline HEAD
-
-      - name: Validate project
-        run: python3 tools/validate_project.py
