@@ -36,7 +36,6 @@ export class ParticleSystem {
   _releaseAt(index) {
     const p = this.items[index];
     p.visible = false;
-    p.visible = false;
     this.pool.push(p);
     this.items.splice(index, 1);
   }
@@ -70,7 +69,6 @@ export class ParticleSystem {
 
   clear() {
     for (const p of this.items) {
-      p.visible = false;
       p.visible = false;
       this.pool.push(p);
     }
