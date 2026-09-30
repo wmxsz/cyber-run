@@ -58,6 +58,13 @@ function makeBonusCore() {
   shell.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.56 });
   shellCross.material = new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.52 });
   halo.material = new THREE.MeshBasicMaterial({ color: COLORS.orange, transparent: true, opacity: 0.84 });
+  if (g.userData.collar) {
+    g.userData.collar.material.dispose();
+    g.userData.collar.material = new THREE.MeshStandardMaterial({
+      color: 0x24180b, metalness: 0.9, roughness: 0.16,
+      emissive: COLORS.orange, emissiveIntensity: 0.2,
+    });
+  }
   return g;
 }
 function makeHackNode() {
