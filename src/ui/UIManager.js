@@ -34,13 +34,15 @@ export class UIManager {
     this.laneThreatLabels = this.laneThreats.map((el) => el?.querySelector("b"));
 
     this._last = Object.create(null);
+    this._listeners = [];
     this._lastThreatAt = 0;
     this._setHighScore();
-    this._el("btn-start")?.addEventListener("click", () => this.engine.startGame());
-    this._el("btn-restart")?.addEventListener("click", () => this.engine.startGame());
-    this._el("btn-resume")?.addEventListener("click", () => this.engine.togglePause());
+    this._bind("btn-start", "click", () => this.engine?.startGame());
+    this._bind("btn-restart", "click", () => this.engine?.startGame());
+    this._bind("btn-resume", "click", () => this.engine?.togglePause());
     // Pause is owned by InputManager's pointerdown binding; don't add a second click handler.
-    this._el("btn-audio")?.addEventListener("click", () => {
+    this._bind("btn-audio", "click", () => {
+      if (!this.engine) return;
       const muted = this.engine.audio.toggleMute();
       this.setMuted(muted);
     });
@@ -195,7 +197,16 @@ export class UIManager {
   dispose() {
     clearTimeout(this._announceTimer);
     this._announceTimer = null;
+    for (const { el, type, handler } of this._listeners) el.removeEventListener(type, handler);
+    this._listeners.length = 0;
     this.engine = null;
+  }
+
+  _bind(id, type, handler) {
+    const el = this._el(id);
+    if (!el) return;
+    el.addEventListener(type, handler);
+    this._listeners.push({ el, type, handler });
   }
 
   _setHighScore() {
