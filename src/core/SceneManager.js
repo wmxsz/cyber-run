@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { COLORS } from "../config/gameConfig.js";
+import { COLORS, GAME_CONFIG } from "../config/gameConfig.js";
 
 export class SceneManager {
   constructor(canvas) {
@@ -70,7 +70,7 @@ export class SceneManager {
   update(dt) {
     this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this._baseX, Math.min(1, dt * 8));
 
-    const targetFov = 65 + this._speedFeel * 10;
+    const targetFov = (GAME_CONFIG.baseFov || 65) + this._speedFeel * ((GAME_CONFIG.boostFov || 78) - (GAME_CONFIG.baseFov || 65));
     this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFov, Math.min(1, dt * 5));
     this.camera.updateProjectionMatrix();
 
