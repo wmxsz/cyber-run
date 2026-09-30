@@ -10,7 +10,12 @@ export class AudioManager {
     if (!this.ctx) {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return;
-      this.ctx = new Ctx();
+      try {
+        this.ctx = new Ctx();
+      } catch {
+        this.ctx = null;
+        return;
+      }
     }
     if (this.ctx.state === "suspended") this.ctx.resume().catch(() => {});
   }
@@ -18,8 +23,12 @@ export class AudioManager {
   toggleMute() {
     this.muted = !this.muted;
     if (this.ctx) {
-      if (this.muted) this.ctx.suspend().catch(() => {});
-      else this.ctx.resume().catch(() => {});
+      if (this.muted) {
+        this.ctx.suspend().catch(() => {});
+      } else {
+        this.ctx.resume().catch(() => {});
+        this.startBgm();
+      }
     }
     return this.muted;
   }
