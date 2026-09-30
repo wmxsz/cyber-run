@@ -28,6 +28,7 @@
       </div>
 
       <div class="hud-controls-top">
+        <button class="hud-btn" id="btn-pause" type="button" title="Pause / Resume">Ⅱ</button>
         <button class="hud-btn" id="btn-audio" type="button" title="Audio toggle">
           <span id="audio-icon">🔊</span> AUDIO
         </button>
@@ -45,6 +46,11 @@
         </div>
       </div>
 
+      <div class="glass-panel boost-panel">
+        <div class="title-banner">OVERDRIVE</div>
+        <div class="boost-track"><div class="boost-fill" id="hud-boost"></div></div>
+        <div class="combo-label" id="hud-combo">COMBO READY</div>
+      </div>
       <div class="glass-panel" style="text-align:right;">
         <div class="title-banner" style="justify-content:flex-end;">High Score</div>
         <div class="stat-value" style="font-size:20px;color:#ff0077;" id="hud-highscore">00000</div>
@@ -72,11 +78,21 @@
       <div class="key-guide-grid">
         <div class="key-item"><span>换道</span><span class="key-badge">A / D / ◀ ▶</span></div>
         <div class="key-item"><span>跳跃</span><span class="key-badge">W / SPACE / ▲</span></div>
+        <div class="key-item"><span>下滑</span><span class="key-badge">S / ↓ / 滑动</span></div>
+        <div class="key-item"><span>超载</span><span class="key-badge">E / SHIFT / ⚡</span></div>
         <div class="key-item"><span>能源核心</span><span style="color:#00f0ff;font-weight:700;">+150 PTS</span></div>
         <div class="key-item"><span>霓虹护盾</span><span style="color:#00ffaa;font-weight:700;">抵挡一次碰撞</span></div>
       </div>
 
       <button class="primary-btn" id="btn-start" type="button">INITIALIZE RUN</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="pause-overlay">
+    <div class="modal-card pause-card">
+      <div class="game-logo">RUN PAUSED</div>
+      <div class="game-sub">SYSTEM STANDBY</div>
+      <button class="primary-btn" id="btn-resume" type="button">RESUME</button>
     </div>
   </div>
 
@@ -91,6 +107,7 @@
         <div class="stat-box"><div class="stat-label">FINAL SCORE</div><div class="stat-num" id="go-score">0</div></div>
         <div class="stat-box"><div class="stat-label">DISTANCE TRAVELED</div><div class="stat-num" id="go-distance">0m</div></div>
         <div class="stat-box"><div class="stat-label">ENERGY CORES</div><div class="stat-num" id="go-cores">0</div></div>
+        <div class="stat-box"><div class="stat-label">BEST COMBO</div><div class="stat-num" id="go-combo">x0</div></div>
         <div class="stat-box"><div class="stat-label">RECORD STATUS</div><div class="stat-num" id="go-record" style="font-size:18px;color:#ffe600;">STANDBY</div></div>
       </div>
 
