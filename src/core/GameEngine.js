@@ -59,6 +59,7 @@ export class GameEngine {
     this._hunterX = 0;
     this._hunter = null;
     this._hunterElite = false;
+    this._sectorHunterGap = 3.8;
     this._comboMilestones = new Set();
     this._hackNodes = 0;
     this._ghostTime = 0;
@@ -117,6 +118,7 @@ export class GameEngine {
     this._hunterX = 0;
     this._hunter = null;
     this._hunterElite = false;
+    this._sectorHunterGap = 3.8;
     this._comboMilestones.clear();
     this._hackNodes = 0;
     this._ghostTime = 0;
@@ -159,7 +161,7 @@ export class GameEngine {
       const target = LANES[this._hunterLane];
       this._hunterX += (target - this._hunterX) * 0.08;
       this._hunter.position.x = this._hunterX;
-      const gap = this._hunterElite ? GAME_CONFIG.eliteHunterGap : (this._lastPhase >= 3 ? 4.5 : 3.8);
+      const gap = this._hunterElite ? GAME_CONFIG.eliteHunterGap : this._sectorHunterGap;
       const duration = this._hunterElite ? GAME_CONFIG.eliteHunterDuration : GAME_CONFIG.hunterDuration;
       const approach = this._hunterElite ? 0.48 : 0.42;
       this._hunter.position.z = Math.max(0.6, gap - (duration - this._hunterTime) * approach) + Math.sin(this._hunterTime * 5) * 0.12;
@@ -223,6 +225,7 @@ export class GameEngine {
     const spawn = this.difficulty.update(dt, this.score.score);
     if (spawn.phase !== this._lastPhase) {
       this._lastPhase = spawn.phase;
+      this._sectorHunterGap = spawn.hunterGap || 3.8;
       if (spawn.phase > 0) {
         this.audio.playPowerup();
         this.sceneMgr.shake(0.18 + spawn.phase * 0.035);
