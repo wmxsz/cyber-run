@@ -67,6 +67,9 @@ export class GameEngine {
     this._hackNodes = 0;
     this._ghostTime = 0;
     this._ui = null;
+    this._started = false;
+    this._onVisibilityChange = this._onVisibilityChange.bind(this);
+    document.addEventListener("visibilitychange", this._onVisibilityChange);
 
     this.input.onAction((action, payload) => this._onAction(action, payload));
   }
@@ -78,6 +81,8 @@ export class GameEngine {
   }
 
   start() {
+    if (this._started) return;
+    this._started = true;
     let previous = performance.now();
     const loop = (now) => {
       const dt = Math.min((now - previous) / 1000, 1 / 30);
@@ -92,6 +97,7 @@ export class GameEngine {
   startGame() {
     this.audio.init();
     this.audio.startBgm();
+    this.sceneMgr.resetView?.();
 
     this.obstacles.clear();
     this.pickups.clear();
@@ -475,6 +481,16 @@ export class GameEngine {
     this._ui?.announce("OBJECTIVE COMPLETE // +" + mission.reward + " BOOST");
   }
 
+  _onVisibilityChange() {
+    if (document.hidden && this.active && !this.over && !this.paused) {
+      this.paused = true;
+      this.boosting = false;
+      this.player.setBoost(false);
+      this._ui?.setPaused(true);
+      this._ui?.announce("PAUSED // APP BACKGROUND");
+    }
+  }
+
   togglePause() {
     if (!this.active || this.over) return;
     this.paused = !this.paused;
@@ -577,6 +593,7 @@ export class GameEngine {
   }
 
   dispose() {
+    document.removeEventListener("visibilitychange", this._onVisibilityChange);
     this.input.dispose();
     this.audio.dispose();
     this.sceneMgr.dispose();
