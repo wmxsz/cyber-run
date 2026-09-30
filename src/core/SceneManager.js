@@ -17,6 +17,7 @@ export class SceneManager {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.3;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.FogExp2(COLORS.bg, 0.015);
@@ -56,6 +57,19 @@ export class SceneManager {
     const pink = new THREE.DirectionalLight(COLORS.pink, 1.2);
     pink.position.set(-20, 30, -30);
     this.scene.add(pink);
+
+    // Low-frequency neon fill lights give the player, obstacles and road-side metal
+    // a readable cyberpunk color separation without relying on heavy post-processing.
+    const cyanFill = new THREE.PointLight(COLORS.cyan, 3.2, 24, 2);
+    cyanFill.position.set(-7, 5, -8);
+    this.scene.add(cyanFill);
+    const pinkFill = new THREE.PointLight(COLORS.pink, 2.8, 24, 2);
+    pinkFill.position.set(7, 4, -14);
+    this.scene.add(pinkFill);
+    const topFill = new THREE.PointLight(0x7b5cff, 1.35, 30, 2);
+    topFill.position.set(0, 14, -35);
+    this.scene.add(topFill);
+    this._neonLights = [cyanFill, pinkFill, topFill];
   }
 
   setMouseOffset(x) {
@@ -71,6 +85,13 @@ export class SceneManager {
     const target = Math.min(1, Math.max(0, (speed - 1.2) / 2)) + (boosting ? 0.28 : 0) + phase * 0.025;
     const alpha = 1 - Math.pow(1 - 0.12, Math.max(0, dt) * 60);
     this._speedFeel = THREE.MathUtils.lerp(this._speedFeel, Math.min(1.25, target), alpha);
+    if (this._neonLights) {
+      const surge = this._speedFeel;
+      this._neonLights[0].intensity = 3.2 + surge * 2.4;
+      this._neonLights[1].intensity = 2.8 + surge * 2.8;
+      this._neonLights[2].intensity = 1.35 + surge * 0.8;
+    }
+    this.renderer.toneMappingExposure = 1.3 + this._speedFeel * 0.12;
   }
 
   update(dt) {
