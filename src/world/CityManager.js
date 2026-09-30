@@ -71,16 +71,34 @@ function buildingTexture() {
 
 function hologramTexture(label, accent) {
   const canvas = document.createElement("canvas");
-  canvas.width = 512; canvas.height = 256;
+  canvas.width = 1024; canvas.height = 512;
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, 512, 256);
   ctx.strokeStyle = accent; ctx.shadowColor = accent; ctx.shadowBlur = 18; ctx.lineWidth = 5;
   ctx.strokeRect(10, 10, 492, 236);
-  ctx.font = "900 42px Orbitron, monospace"; ctx.textAlign = "center";
-  ctx.fillStyle = "#ffffff"; ctx.fillText(label, 256, 112);
-  ctx.font = "700 18px monospace"; ctx.fillStyle = accent;
-  ctx.fillText("NEURAL // CITY NETWORK", 256, 154);
-  ctx.fillText("LINK ESTABLISHED", 256, 185);
+  ctx.font = "900 76px Orbitron, monospace"; ctx.textAlign = "center";
+  ctx.fillStyle = "#ffffff"; ctx.fillText(label, 512, 222);
+  ctx.font = "700 30px monospace"; ctx.fillStyle = accent;
+  ctx.fillText("NEURAL // CITY NETWORK", 512, 310);
+  ctx.fillText("LINK ESTABLISHED", 512, 360);
+  ctx.font = "700 18px monospace";
+  ctx.globalAlpha = 0.72;
+  ctx.fillText("NODE 07 // CYBER-RUN", 512, 406);
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.32;
+  for (let y = 22; y < 512; y += 16) {
+    ctx.beginPath(); ctx.moveTo(20, y); ctx.lineTo(1004, y); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = "#ffffff";
+  ctx.globalAlpha = 0.75;
+  for (let i = 0; i < 18; i++) {
+    const x = 42 + i * 51;
+    ctx.fillRect(x, 444 + (i % 3) * 9, 24 + (i % 4) * 7, 3);
+  }
+  ctx.globalAlpha = 1;
   return new THREE.CanvasTexture(canvas);
 }
 
@@ -91,6 +109,7 @@ export class CityManager {
     this.holograms = [];
     this.drones = [];
     this.speedLines = null;
+    this.cityGuides = [];
     this._phase = 0;
     this._build();
   }
@@ -356,6 +375,58 @@ export class CityManager {
       this.scene.add(panel); this.holograms.push(panel);
     });
 
+    // Elevated cyber-infrastructure: suspended conduits and maintenance pylons break up the skyline
+    // while remaining instanced, so the extra visual density does not become a draw-call explosion.
+    const pylonGeo = new THREE.CylinderGeometry(0.12, 0.2, 12, 6);
+    const pylonMat = new THREE.MeshStandardMaterial({
+      color: 0x11162b, metalness: 0.9, roughness: 0.2,
+      emissive: COLORS.cyan, emissiveIntensity: 0.08,
+    });
+    const pylonMesh = new THREE.InstancedMesh(pylonGeo, pylonMat, 18);
+    const conduitGeo = new THREE.BoxGeometry(1, 0.16, 0.16);
+    const conduitMat = new THREE.MeshBasicMaterial({ color: COLORS.pink });
+    const conduitMesh = new THREE.InstancedMesh(conduitGeo, conduitMat, 9);
+    let pc = 0, cc = 0;
+    for (let i = 0; i < 9; i++) {
+      const z = -35 - i * 48;
+      const side = i % 2 ? 1 : -1;
+      for (const x of [side * 10.5, side * 17.5]) {
+        dummy.position.set(x, 6 + (i % 3) * 2, z);
+        dummy.rotation.set(0, 0, 0);
+        dummy.scale.setScalar(1);
+        dummy.scale.y = 1 + (i % 3) * 0.18;
+        dummy.updateMatrix();
+        pylonMesh.setMatrixAt(pc++, dummy.matrix);
+      }
+      dummy.position.set(0, 12 + (i % 2) * 2, z);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(28 + (i % 3) * 3, 1, 1);
+      dummy.updateMatrix();
+      conduitMesh.setMatrixAt(cc++, dummy.matrix);
+    }
+    pylonMesh.count = pc;
+    conduitMesh.count = cc;
+    pylonMesh.instanceMatrix.needsUpdate = true;
+    conduitMesh.instanceMatrix.needsUpdate = true;
+    this.scene.add(pylonMesh, conduitMesh);
+    this.buildings.push(pylonMesh, conduitMesh);
+
+    // Animated guide strips make the elevated infrastructure feel powered rather than static.
+    const guideGeo = new THREE.BoxGeometry(0.055, 0.055, 10);
+    const guideMats = [
+      new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.7 }),
+      new THREE.MeshBasicMaterial({ color: COLORS.pink, transparent: true, opacity: 0.7 }),
+    ];
+    this.cityGuides = [];
+    for (let i = 0; i < 12; i++) {
+      const guide = new THREE.Mesh(guideGeo, guideMats[i % 2]);
+      guide.position.set((i % 2 ? 1 : -1) * (9.5 + (i % 3) * 3), 5.4 + (i % 4) * 0.65, -28 - i * 34);
+      guide.userData.phase = i * 0.7;
+      this.scene.add(guide);
+      this.cityGuides.push(guide);
+      this.buildings.push(guide);
+    }
+
     // A small set of drone silhouettes prevents the skyline traffic from looking cloned.
     const droneBodyGeos = [
       new THREE.BoxGeometry(1.5, 0.25, 0.7),
@@ -526,6 +597,13 @@ export class CityManager {
       panel.position.y = panel.userData.baseY + Math.sin(t * 2 + panel.userData.phase) * 0.12;
       panel.material.opacity = 0.55 + Math.sin(t * 4 + panel.userData.phase) * 0.15;
       panel.rotation.z = Math.sin(t * 1.4 + panel.userData.phase) * 0.015;
+    }
+    if (this.cityGuides) {
+      for (const guide of this.cityGuides) {
+        const pulse = 0.52 + Math.sin(t * 5 + guide.userData.phase) * 0.22;
+        guide.material.opacity = pulse + Math.min(0.16, phase * 0.025);
+        guide.scale.z = 0.72 + Math.min(0.38, speed * 0.035);
+      }
     }
     const droneBoost = 0.8 + Math.min(0.7, phase * 0.14);
     for (const drone of this.drones) {
