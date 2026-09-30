@@ -267,6 +267,7 @@ export class GameEngine {
         this.particles.burst(p.x, p.y + 0.7, p.z, 0x8a2be2, 42);
         this.particles.shockwave(p.x, p.y + 0.7, p.z, 0x8a2be2, 2.8);
         this.particles.flash(p.x, p.y + 0.7, p.z, 0xc56cff, 1.6);
+        this.particles.streak(p.x, p.y + 0.7, p.z, 0x8a2be2, 5, 1.6);
         this.sceneMgr.shake(0.2);
         this._ui?.announce("EMP BLACKOUT // BOOST OFFLINE // " + GAME_CONFIG.empDuration.toFixed(1) + " SEC");
       }
@@ -316,7 +317,10 @@ export class GameEngine {
     if (this._exhaustTimer <= 0) {
       const p = this.player.group.position;
       this.particles.exhaust(p.x, p.y + 0.4, p.z, speed);
-      this._exhaustTimer = 0.05;
+      if (this.boosting) {
+        this.particles.streak(p.x, p.y + 0.35, p.z + 0.65, 0xff2bd6, 4, 2.1);
+      }
+      this._exhaustTimer = this.boosting ? 0.045 : 0.05;
     }
 
     if (this.invulnerable > 0) {
@@ -651,6 +655,7 @@ export class GameEngine {
     this.particles.burst(p.x, p.y + 0.5, p.z, 0xff0055, 30);
     this.particles.shockwave(p.x, p.y + 0.5, p.z, 0xff0055, 3.0);
     this.particles.flash(p.x, p.y + 0.5, p.z, 0xff6688, 1.8);
+    this.particles.streak(p.x, p.y + 0.45, p.z, 0xff0055, 5, 1.5);
 
     if (this.hp <= 0) this.gameOver();
     else this.invulnerable = 1.5;
