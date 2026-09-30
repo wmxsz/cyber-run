@@ -62,9 +62,10 @@ export class SceneManager {
     this._shakeBase.copy(this.camera.position);
   }
 
-  setSpeedFeel(speed, boosting = false, phase = 0) {
+  setSpeedFeel(speed, boosting = false, phase = 0, dt = 1 / 60) {
     const target = Math.min(1, Math.max(0, (speed - 1.2) / 2)) + (boosting ? 0.28 : 0) + phase * 0.025;
-    this._speedFeel = THREE.MathUtils.lerp(this._speedFeel, Math.min(1.25, target), 1 - Math.pow(1 - 0.12, dt * 60));
+    const alpha = 1 - Math.pow(1 - 0.12, Math.max(0, dt) * 60);
+    this._speedFeel = THREE.MathUtils.lerp(this._speedFeel, Math.min(1.25, target), alpha);
   }
 
   update(dt) {
