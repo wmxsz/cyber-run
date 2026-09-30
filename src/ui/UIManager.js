@@ -25,6 +25,7 @@ export class UIManager {
     this.missionFill = this._el("hud-mission-fill");
     this.missionProgress = this._el("hud-mission-progress");
     this.eventPanel = this._el("event-status");
+    this.multiplier = this._el("hud-multiplier");
     this.laneThreats = [0, 1, 2].map((lane) => this._el(`lane-threat-${lane}`));
 
     this._setHighScore();
@@ -55,6 +56,11 @@ export class UIManager {
       else if (engine._hunterTime > 0) this.eventPanel.textContent = "HUNTER // EVADE // x1.35";
       else if (engine._eventTime > 0) this.eventPanel.textContent = "DATA STORM // x1.75";
       else this.eventPanel.textContent = "";
+    }
+    if (this.multiplier) {
+      const multiplier = Number(engine.score.eventMultiplier || 1);
+      this.multiplier.textContent = "x" + multiplier.toFixed(2);
+      this.multiplier.classList.toggle("boosted", multiplier > 1);
     }
     const mission = engine.missions?.getStatus?.();
     if (mission) {
