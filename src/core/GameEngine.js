@@ -52,6 +52,7 @@ export class GameEngine {
     this._elapsed = 0;
     this._lastPhase = 0;
     this._exhaustTimer = 0;
+    this._footTrailSide = 0;
     this._eventTimer = 18;
     this._eventTime = 0;
     this._empTimer = GAME_CONFIG.empCooldown;
@@ -323,9 +324,10 @@ export class GameEngine {
     this._exhaustTimer -= dt;
     if (this._exhaustTimer <= 0) {
       const p = this.player.group.position;
-      this.particles.exhaust(p.x, p.y + 0.4, p.z, speed);
+      this._footTrailSide = this._footTrailSide === 0 ? 1 : 0;
+      this.particles.footTrail(p.x, p.y, p.z, speed, this._footTrailSide ? 1 : -1, this.boosting);
       if (this.boosting) {
-        this.particles.streak(p.x, p.y + 0.35, p.z + 0.65, 0xff2bd6, 4, 2.1);
+        this.particles.streak(p.x, p.y + 0.18, p.z + 0.45, 0xff2bd6, 4, 2.1);
       }
       this._exhaustTimer = this.boosting ? 0.045 : 0.05;
     }
