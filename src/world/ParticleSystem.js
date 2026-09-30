@@ -51,13 +51,14 @@ export class ParticleSystem {
     this.items.length = 0;
   }
 
-  update() {
+  update(dt = 1 / 60) {
+    const frameScale = dt * 60;
     for (let i = this.items.length - 1; i >= 0; i--) {
       const p = this.items[i];
-      p.position.x += p.userData.vx;
-      p.position.y += p.userData.vy;
-      p.position.z += p.userData.vz;
-      p.userData.life -= p.userData.decay;
+      p.position.x += p.userData.vx * frameScale;
+      p.position.y += p.userData.vy * frameScale;
+      p.position.z += p.userData.vz * frameScale;
+      p.userData.life -= p.userData.decay * frameScale;
       const scale = Math.max(p.userData.life, 0.01);
       p.scale.setScalar(scale);
       if (p.userData.life <= 0) {
