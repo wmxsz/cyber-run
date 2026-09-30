@@ -98,6 +98,7 @@ export class CityManager {
     };
     const dummy = new THREE.Object3D();
     const buildingCounts = { leftblock: 0, lefthex: 0, leftcrown: 0, rightblock: 0, righthex: 0, rightcrown: 0 };
+    const towerAnchors = [];
     let leftCrestCount = 0;
     let rightCrestCount = 0;
 
@@ -109,6 +110,7 @@ export class CityManager {
       const w = 7 + Math.random() * 13;
       const d = 7 + Math.random() * 13;
       const h = 25 + Math.random() * 70;
+      towerAnchors.push({ x, z, h, w, d, side });
       const archetypes = ["block", "hex", "crown"];
       const archetype = archetypes[Math.floor(Math.random() * archetypes.length)];
       const mesh = buildingInstances[side + archetype];
@@ -161,21 +163,13 @@ export class CityManager {
       cyan: new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
       pink: new THREE.MeshBasicMaterial({ color: COLORS.pink }),
     };
-    const spireAnchors = [];
-    for (let i = 0; i < 70; i++) {
-      const left = Math.random() > 0.5;
-      const side = left ? "left" : "right";
-      const x = (left ? -1 : 1) * (12 + Math.random() * 35);
-      const z = -Math.random() * 480;
-      const h = 25 + Math.random() * 70;
-      spireAnchors.push({ x, z, h, side });
-    }
-    for (const anchor of spireAnchors) {
+    for (const anchor of towerAnchors) {
       if (Math.random() <= 0.68) continue;
       const spireColor = Math.random() > 0.5 ? "cyan" : "pink";
       const spire = new THREE.Mesh(spireGeo, spireMats[spireColor]);
       spire.position.set(anchor.x, anchor.h + 6, anchor.z);
-      spire.scale.setScalar(0.8 + Math.random() * 0.6);
+      const base = Math.min(anchor.w, anchor.d);
+      spire.scale.setScalar(Math.min(1.5, Math.max(0.65, base * 0.09)));
       spire.castShadow = false;
       spire.receiveShadow = false;
       this.scene.add(spire);
