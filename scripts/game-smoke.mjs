@@ -8,6 +8,9 @@ import { GAME_CONFIG } from "../src/config/gameConfig.js";
 import { ParticleSystem } from "../src/world/ParticleSystem.js";
 import * as THREE from "three";
 import { PerformanceMonitor } from "../src/core/PerformanceMonitor.js";
+import { ObstacleManager } from "../src/entities/ObstacleManager.js";
+import { PickupManager } from "../src/entities/PickupManager.js";
+import { OBSTACLE_TYPES } from "../src/entities/obstacleTypes.js";
 
 const finite = (value, label) => assert.ok(Number.isFinite(value), label + " must stay finite");
 
@@ -128,7 +131,24 @@ const finite = (value, label) => assert.ok(Number.isFinite(value), label + " mus
   assert.ok(snapshot.fps >= 59 && snapshot.fps <= 61, "stable simulation FPS baseline");
   assert.ok(snapshot.drawCalls <= 180, "draw-call budget");
   assert.ok(snapshot.triangles <= 180000, "triangle budget");
+  assert.ok(snapshot.maxFrameTime < 20, "stable frame-time window");
   monitor.dispose();
+}
+
+// Pooled 3D managers must release both active and cached resources during teardown.
+{
+  const scene = new THREE.Scene();
+  const obstacles = new ObstacleManager(scene);
+  const pickups = new PickupManager(scene);
+  const obstacle = obstacles.pools.barrier.acquire();
+  const pickup = pickups.pools.core.acquire();
+  scene.add(obstacle, pickup);
+  obstacles.active.push({ obj: obstacle, type: "barrier", lane: 1, def: OBSTACLE_TYPES?.barrier });
+  pickups.active.push(pickup);
+  obstacles.dispose();
+  pickups.dispose();
+  assert.deepEqual(obstacles.pools, {}, "obstacle pools must be cleared on dispose");
+  assert.deepEqual(pickups.pools, {}, "pickup pools must be cleared on dispose");
 }
 
 console.log("Cyber Run smoke checks passed.");
