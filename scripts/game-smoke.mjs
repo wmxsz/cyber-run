@@ -83,4 +83,31 @@ const finite = (value, label) => assert.ok(Number.isFinite(value), label + " mus
   assert.equal(collision.check(player, obstacles, pickups).obstacleHits.length, 0);
 }
 
+
+// Event multiplier must compose and respect the configured cap.
+{
+  const score = new ScoreSystem();
+  score.setEventMultiplier(GAME_CONFIG.dataStormMultiplier * GAME_CONFIG.hunterMultiplier * GAME_CONFIG.ghostProtocolMultiplier);
+  assert.ok(score.eventMultiplier <= GAME_CONFIG.eventMultiplierCap);
+  score.setEventMultiplier(0);
+  assert.equal(score.eventMultiplier, 1);
+}
+
+// Multiple simultaneous collision hits must be reported together.
+{
+  const collision = new CollisionSystem();
+  const player = {
+    isJumping: false,
+    isSliding: false,
+    getHitbox: () => ({ x: 0, y: 0, z: 0, halfX: 1.1, halfY: 0.8, halfZ: 1.2 }),
+  };
+  const makeBarrier = () => ({
+    obj: { position: { x: 0, z: 0 }, userData: {} },
+    def: { hitbox: { x: 1.55, y: 1.25 }, blocksAir: true, blocksGround: false, hitCenterY: 1.25 },
+  });
+  const obstacles = { forEachActive(fn) { fn(makeBarrier()); fn(makeBarrier()); } };
+  const pickups = { forEachActive() {} };
+  assert.equal(collision.check(player, obstacles, pickups).obstacleHits.length, 2);
+}
+
 console.log("Cyber Run smoke checks passed.");
