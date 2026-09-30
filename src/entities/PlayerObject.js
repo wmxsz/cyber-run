@@ -17,264 +17,62 @@ export class PlayerObject {
   }
 
   _build() {
-    const hullMat = new THREE.MeshStandardMaterial({
-      color: 0x111a33,
-      metalness: 0.94,
-      roughness: 0.15,
-      emissive: 0x07112d,
-      emissiveIntensity: 0.28,
-      flatShading: true,
-    });
-    const darkMat = new THREE.MeshStandardMaterial({
-      color: 0x050914,
-      metalness: 0.88,
-      roughness: 0.2,
-      flatShading: true,
-    });
-    const cyanMat = new THREE.MeshBasicMaterial({ color: COLORS.cyan });
-    const pinkMat = new THREE.MeshBasicMaterial({ color: COLORS.pink });
+    // The protagonist is a human cyber-runner, not a vehicle.
+    const armor = new THREE.MeshStandardMaterial({color:0x151b2e,metalness:0.9,roughness:0.2,emissive:0x07112d,emissiveIntensity:0.3,flatShading:true});
+    const dark = new THREE.MeshStandardMaterial({color:0x070a13,metalness:0.82,roughness:0.28,flatShading:true});
+    const joint = new THREE.MeshStandardMaterial({color:0x30384a,metalness:0.96,roughness:0.15,flatShading:true});
+    const cyan = new THREE.MeshStandardMaterial({color:COLORS.cyan,emissive:COLORS.cyan,emissiveIntensity:2.3,metalness:0.15,roughness:0.2});
+    const pink = new THREE.MeshStandardMaterial({color:COLORS.pink,emissive:COLORS.pink,emissiveIntensity:2.2,metalness:0.15,roughness:0.2});
+    const visor = new THREE.MeshPhysicalMaterial({color:0x07101d,emissive:COLORS.cyan,emissiveIntensity:1.15,metalness:0.45,roughness:0.08,transparent:true,opacity:0.92,clearcoat:1,clearcoatRoughness:0.08});
+    const skin = new THREE.MeshStandardMaterial({color:0x8d6b70,roughness:0.45,emissive:0x120b16,emissiveIntensity:0.15});
+    const glow = new THREE.MeshBasicMaterial({color:COLORS.cyan,transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false});
+    const pglow = new THREE.MeshBasicMaterial({color:COLORS.pink,transparent:true,opacity:0.78,blending:THREE.AdditiveBlending,depthWrite:false});
+    const add=(geo,mat,x,y,z,sx=1,sy=1,sz=1)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.castShadow=true;this.group.add(m);return m;};
 
-    const body = new THREE.Mesh(new THREE.ConeGeometry(1.05, 3.25, 6), hullMat);
-    body.rotation.x = -Math.PI / 2;
-    body.rotation.y = Math.PI / 6;
-    body.position.set(0, 0.52, 0);
-    body.scale.set(1, 1, 0.92);
-    body.castShadow = true;
-    this.group.add(body);
+    this.torso=add(new THREE.CapsuleGeometry(.48,.72,5,10),armor,0,1.42,0,.9,1.05,.52);
+    this.chest=add(new THREE.BoxGeometry(.78,.58,.16),armor,0,1.5,-.43);
+    this.pelvis=add(new THREE.BoxGeometry(.66,.36,.42),dark,0,.98,0);
+    this.neck=add(new THREE.CylinderGeometry(.16,.2,.24,8),joint,0,2.02,0);
+    this.head=add(new THREE.SphereGeometry(.34,12,10),skin,0,2.34,0,.92,1.08,.82);
+    this.helmet=add(new THREE.SphereGeometry(.37,12,8),dark,0,2.37,0,.98,1.04,.86);
+    this.visor=add(new THREE.BoxGeometry(.48,.12,.08),visor,0,2.39,-.31);
+    add(new THREE.BoxGeometry(.37,.025,.025),glow,0,2.39,-.36);
 
-    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.48, 1.25, 5), hullMat);
-    nose.rotation.x = -Math.PI / 2;
-    nose.position.set(0, 0.55, -1.65);
-    nose.castShadow = true;
-    this.group.add(nose);
-
-    const wings = new THREE.Mesh(new THREE.BoxGeometry(3.35, 0.12, 0.82), darkMat);
-    wings.position.set(0, 0.42, 0.35);
-    wings.rotation.z = 0;
-    wings.scale.x = 0.92;
-    this.group.add(wings);
-    this.wings = wings;
-
-    const finGeo = new THREE.BoxGeometry(0.16, 0.22, 1.55);
-    for (const x of [-1.18, 1.18]) {
-      const fin = new THREE.Mesh(finGeo, hullMat);
-      fin.position.set(x, 0.58, 0.5);
-      fin.rotation.z = x < 0 ? -0.18 : 0.18;
-      this.group.add(fin);
+    this.armParts=[]; for(const side of [-1,1]){
+      const accent=side<0?cyan:pink;
+      const shoulder=add(new THREE.SphereGeometry(.25,8,6),armor,side*.58,1.74,0,1.15,.82,1);
+      const upper=add(new THREE.CapsuleGeometry(.13,.38,4,7),dark,side*.72,1.4,.02);
+      const elbow=add(new THREE.SphereGeometry(.14,8,6),joint,side*.76,1.12,0);
+      const lower=add(new THREE.CapsuleGeometry(.12,.42,4,7),armor,side*.75,.88,-.06);
+      const hand=add(new THREE.SphereGeometry(.13,8,6),skin,side*.74,.6,-.1,.82,1.15,.82);
+      const strip=add(new THREE.BoxGeometry(.045,.42,.035),accent,side*.88,1.02,-.14);
+      this.armParts.push({shoulder,upper,elbow,lower,hand,strip,side});
     }
 
-    const trimGeo = new THREE.BoxGeometry(0.09, 0.12, 2.55);
-    for (const x of [-0.68, 0.68]) {
-      const trim = new THREE.Mesh(trimGeo, cyanMat);
-      trim.position.set(x, 0.61, -0.05);
-      trim.rotation.y = x < 0 ? -0.04 : 0.04;
-      this.group.add(trim);
+    this.legParts=[]; for(const side of [-1,1]){
+      const accent=side<0?cyan:pink;
+      const hip=add(new THREE.SphereGeometry(.2,8,6),joint,side*.25,.78,0);
+      const thigh=add(new THREE.CapsuleGeometry(.18,.48,5,8),armor,side*.25,.43,0,1,1,.9);
+      const knee=add(new THREE.SphereGeometry(.17,8,6),joint,side*.25,.08,-.02);
+      const shin=add(new THREE.CapsuleGeometry(.15,.48,5,8),dark,side*.25,-.28,0,1,1,.9);
+      const boot=add(new THREE.BoxGeometry(.32,.28,.68),armor,side*.25,-.68,-.16);
+      const sole=add(new THREE.BoxGeometry(.34,.055,.72),accent,side*.25,-.83,-.16);
+      this.legParts.push({hip,thigh,knee,shin,boot,sole,side});
     }
 
-    const armorGeo = new THREE.BoxGeometry(0.24, 0.16, 1.15);
-    for (const x of [-1.02, 1.02]) {
-      const armor = new THREE.Mesh(armorGeo, darkMat);
-      armor.position.set(x, 0.66, -0.15);
-      armor.rotation.z = x < 0 ? -0.18 : 0.18;
-      armor.rotation.y = x < 0 ? -0.08 : 0.08;
-      this.group.add(armor);
-      const armorLight = new THREE.Mesh(
-        new THREE.BoxGeometry(0.055, 0.05, 0.72),
-        x < 0 ? cyanMat : pinkMat,
-      );
-      armorLight.position.set(x * 1.012, 0.75, -0.18);
-      armorLight.rotation.y = x < 0 ? -0.08 : 0.08;
-      this.group.add(armorLight);
-    }
+    this.spineSegments=[]; for(let i=0;i<6;i++) this.spineSegments.push(add(new THREE.BoxGeometry(.1,.13,.08),i%2?pinkglow:glow,0,.98+i*.19,.34));
+    this.energyBack=add(new THREE.BoxGeometry(.08,1,.045),glow,0,1.46,.36);
+    this.backFins=[]; for(const side of [-1,1]){const f=add(new THREE.BoxGeometry(.09,.5,.3),side<0?glow:pglow,side*.43,1.56,.25);f.rotation.z=side*-.18;this.backFins.push(f);}
 
-    // High-contrast canopy and side blades make the craft read clearly on small screens.
-    const canopyRailGeo = new THREE.BoxGeometry(0.08, 0.08, 0.92);
-    for (const x of [-0.34, 0.34]) {
-      const rail = new THREE.Mesh(canopyRailGeo, x < 0 ? cyanMat : pinkMat);
-      rail.position.set(x, 0.9, -0.38);
-      rail.rotation.y = x < 0 ? -0.12 : 0.12;
-      this.group.add(rail);
-    }
-
-    const sideBladeGeo = new THREE.BoxGeometry(0.12, 0.08, 1.18);
-    for (const x of [-1.42, 1.42]) {
-      const blade = new THREE.Mesh(sideBladeGeo, darkMat);
-      blade.position.set(x, 0.48, -0.18);
-      blade.rotation.y = x < 0 ? -0.16 : 0.16;
-      blade.rotation.z = x < 0 ? -0.12 : 0.12;
-      this.group.add(blade);
-      const bladeEdge = new THREE.Mesh(
-        new THREE.BoxGeometry(0.035, 0.035, 0.86),
-        x < 0 ? cyanMat : pinkMat,
-      );
-      bladeEdge.position.set(x * 1.01, 0.54, -0.25);
-      bladeEdge.rotation.y = x < 0 ? -0.16 : 0.16;
-      this.group.add(bladeEdge);
-    }
-
-    const cockpitFrame = new THREE.Mesh(
-      new THREE.TorusGeometry(0.5, 0.045, 6, 16),
-      cyanMat,
-    );
-    cockpitFrame.scale.set(0.92, 0.58, 1.45);
-    cockpitFrame.rotation.x = Math.PI / 2;
-    cockpitFrame.position.set(0, 0.79, -0.28);
-    this.group.add(cockpitFrame);
-
-    const cockpit = new THREE.Mesh(
-      new THREE.SphereGeometry(0.48, 10, 8),
-      new THREE.MeshStandardMaterial({
-        color: COLORS.pink,
-        emissive: COLORS.pink,
-        emissiveIntensity: 0.72,
-        roughness: 0.08,
-        metalness: 0.5,
-        transparent: true,
-        opacity: 0.88,
-      }),
-    );
-    cockpit.scale.set(0.88, 0.58, 1.65);
-    cockpit.position.set(0, 0.78, -0.28);
-    this.group.add(cockpit);
-    this.cockpit = cockpit;
-
-    const enginePodGeo = new THREE.CylinderGeometry(0.28, 0.38, 0.72, 8);
-    const engineGeo = new THREE.CylinderGeometry(0.2, 0.3, 0.46, 8);
-    const engineMat = new THREE.MeshStandardMaterial({
-      color: 0x0a2536, emissive: COLORS.cyan, emissiveIntensity: 2.6,
-      metalness: 0.32, roughness: 0.1, flatShading: true,
-    });
-    for (const x of [-0.58, 0.58]) {
-      const pod = new THREE.Mesh(enginePodGeo, darkMat);
-      pod.rotation.x = Math.PI / 2;
-      pod.position.set(x, 0.44, 1.18);
-      this.group.add(pod);
-
-      const engine = new THREE.Mesh(engineGeo, engineMat);
-      engine.rotation.x = Math.PI / 2;
-      engine.position.set(x, 0.44, 1.52);
-      this.group.add(engine);
-    }
-
-    // Rear spine and underside hover housings complete the craft silhouette from side/rear views.
-    const spine = new THREE.Mesh(
-      new THREE.ConeGeometry(0.24, 1.35, 5),
-      darkMat,
-    );
-    spine.rotation.x = Math.PI / 2;
-    spine.position.set(0, 0.5, 1.18);
-    spine.scale.z = 0.72;
-    this.group.add(spine);
-
-    const spineLight = new THREE.Mesh(
-      new THREE.BoxGeometry(0.08, 0.07, 0.72),
-      pinkMat,
-    );
-    spineLight.position.set(0, 0.64, 1.02);
-    this.group.add(spineLight);
-
-    const hoverHousingGeo = new THREE.CylinderGeometry(0.16, 0.24, 0.58, 6);
-    for (const x of [-0.9, 0.9]) {
-      const housing = new THREE.Mesh(hoverHousingGeo, darkMat);
-      housing.rotation.x = Math.PI / 2;
-      housing.position.set(x, 0.22, 0.72);
-      this.group.add(housing);
-      const housingRing = new THREE.Mesh(
-        new THREE.TorusGeometry(0.18, 0.025, 6, 12),
-        x < 0 ? cyanMat : pinkMat,
-      );
-      housingRing.rotation.x = Math.PI / 2;
-      housingRing.position.set(x, 0.22, 1.02);
-      this.group.add(housingRing);
-    }
-
-    // Central keel visually ties the nose, cockpit and rear propulsion into one chassis.
-    const keel = new THREE.Mesh(
-      new THREE.BoxGeometry(0.28, 0.18, 2.25),
-      darkMat,
-    );
-    keel.position.set(0, 0.34, -0.02);
-    keel.rotation.x = 0.025;
-    this.group.add(keel);
-
-    const keelLight = new THREE.Mesh(
-      new THREE.BoxGeometry(0.06, 0.035, 1.45),
-      cyanMat,
-    );
-    keelLight.position.set(0, 0.45, -0.35);
-    this.group.add(keelLight);
-
-    const engineCollarGeo = new THREE.TorusGeometry(0.31, 0.045, 6, 12);
-    for (const x of [-0.58, 0.58]) {
-      const collar = new THREE.Mesh(engineCollarGeo, x < 0 ? cyanMat : pinkMat);
-      collar.rotation.x = Math.PI / 2;
-      collar.position.set(x, 0.44, 1.27);
-      this.group.add(collar);
-    }
-
-    const exhaustGlowGeo = new THREE.ConeGeometry(0.26, 0.9, 8, 1, true);
-    this.exhaustGlows = [];
-    for (const x of [-0.58, 0.58]) {
-      const exhaust = new THREE.Mesh(
-        exhaustGlowGeo,
-        new THREE.MeshBasicMaterial({
-          color: COLORS.cyan, transparent: true, opacity: 0.62,
-          blending: THREE.AdditiveBlending, depthWrite: false,
-        }),
-      );
-      exhaust.rotation.x = Math.PI / 2;
-      exhaust.position.set(x, 0.44, 1.86);
-      exhaust.scale.set(0.72, 0.9, 0.72);
-      this.group.add(exhaust);
-      this.exhaustGlows.push(exhaust);
-    }
-
-    const underGlow = new THREE.Mesh(
-      new THREE.TorusGeometry(1.08, 0.035, 6, 32),
-      new THREE.MeshBasicMaterial({
-        color: COLORS.cyan, transparent: true, opacity: 0.34,
-        blending: THREE.AdditiveBlending, depthWrite: false,
-      }),
-    );
-    underGlow.rotation.x = Math.PI / 2;
-    underGlow.position.y = 0.08;
-    this.group.add(underGlow);
-    this.underGlow = underGlow;
-
-    this.thrusterLight = new THREE.PointLight(COLORS.cyan, 2.6, 9);
-    this.thrusterLight.position.set(0, 0.5, 2);
-    this.group.add(this.thrusterLight);
-
-    this.hoverRing = new THREE.Mesh(
-      new THREE.TorusGeometry(1.38, 0.045, 8, 32),
-      new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.72 }),
-    );
-    this.hoverRing.rotation.x = Math.PI / 2;
-    this.hoverRing.position.y = 0.12;
-    this.group.add(this.hoverRing);
-
-    this.frontBar = new THREE.Mesh(
-      new THREE.BoxGeometry(1.25, 0.055, 0.08),
-      pinkMat,
-    );
-    this.frontBar.position.set(0, 0.73, -1.4);
-    this.group.add(this.frontBar);
-
-    this.energyHalo = new THREE.Mesh(
-      new THREE.TorusGeometry(0.84, 0.025, 6, 28),
-      new THREE.MeshBasicMaterial({ color: COLORS.yellow, transparent: true, opacity: 0.65 }),
-    );
-    this.energyHalo.rotation.x = Math.PI / 2;
-    this.energyHalo.position.set(0, 0.7, -1.3);
-    this.group.add(this.energyHalo);
-
-    this.shield = new THREE.Mesh(
-      new THREE.SphereGeometry(2, 16, 16),
-      new THREE.MeshBasicMaterial({ color: COLORS.green, wireframe: true, transparent: true, opacity: 0.5 }),
-    );
-    this.shield.position.set(0, 0.6, 0);
-    this.shield.visible = false;
-    this.group.add(this.shield);
+    this.underGlow=new THREE.Mesh(new THREE.TorusGeometry(.58,.018,6,28),new THREE.MeshBasicMaterial({color:COLORS.cyan,transparent:true,opacity:.28,blending:THREE.AdditiveBlending,depthWrite:false}));
+    this.underGlow.rotation.x=Math.PI/2;this.underGlow.position.y=-.78;this.group.add(this.underGlow);
+    this.energyHalo=new THREE.Mesh(new THREE.TorusGeometry(.48,.025,6,24),new THREE.MeshBasicMaterial({color:COLORS.cyan,transparent:true,opacity:.48}));
+    this.energyHalo.rotation.x=Math.PI/2;this.energyHalo.position.set(0,1.18,-.34);this.group.add(this.energyHalo);
+    this.boostTrail=new THREE.Mesh(new THREE.ConeGeometry(.13,1.25,8,1,true),new THREE.MeshBasicMaterial({color:COLORS.pink,transparent:true,opacity:.42,blending:THREE.AdditiveBlending,depthWrite:false}));
+    this.boostTrail.rotation.x=Math.PI/2;this.boostTrail.position.set(0,-.62,.78);this.boostTrail.visible=false;this.group.add(this.boostTrail);
+    this.thrusterLight=new THREE.PointLight(COLORS.cyan,1.2,4.5);this.thrusterLight.position.set(0,-.35,.55);this.group.add(this.thrusterLight);
+    this.shield=new THREE.Mesh(new THREE.SphereGeometry(1.45,24,18),new THREE.MeshBasicMaterial({color:COLORS.green,wireframe:true,transparent:true,opacity:.34}));
+    this.shield.scale.set(.72,1.25,.62);this.shield.position.set(0,.65,0);this.shield.visible=false;this.group.add(this.shield);
   }
   moveLane(direction) {
     const next = this.currentLane + direction;
