@@ -78,6 +78,7 @@ export class AudioManager {
     filter.connect(gain);
     gain.connect(this.ctx.destination);
     noise.start(now);
+    noise.stop(now + 0.21);
 
     this._tone(140, 30, 0.25, "sawtooth", 0.35);
   }
