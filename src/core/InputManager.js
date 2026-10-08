@@ -31,6 +31,7 @@ export class InputManager {
     this.listeners = new Set();
     this._buttonHandlers = new Map();
     this._touch = null;
+    this._touches = new Set();
     this._onKey = this._onKey.bind(this);
     this._onTouchStart = this._onTouchStart.bind(this);
     this._onTouchEnd = this._onTouchEnd.bind(this);
@@ -38,9 +39,9 @@ export class InputManager {
     this._onContextMenu = (e) => e.preventDefault();
     this._onMouseMove = this._onMouseMove.bind(this);
     window.addEventListener("keydown", this._onKey, { passive: false });
-    window.addEventListener("touchstart", this._onTouchStart, { passive: true });
-    window.addEventListener("touchend", this._onTouchEnd, { passive: true });
-    window.addEventListener("touchcancel", this._onTouchCancel, { passive: true });
+    window.addEventListener("touchstart", this._onTouchStart, { passive: false });
+    window.addEventListener("touchend", this._onTouchEnd, { passive: false });
+    window.addEventListener("touchcancel", this._onTouchCancel, { passive: false });
     window.addEventListener("contextmenu", this._onContextMenu, { passive: false });
     window.addEventListener("mousemove", this._onMouseMove, { passive: true });
     this.bindButton("btn-left", ACTIONS.LEFT);
@@ -69,6 +70,7 @@ export class InputManager {
   _onTouchStart(e) {
     const target = e.target;
     if (target instanceof Element && target.closest("button, a, input, select, textarea")) return;
+    if (this._touch) return;
     const t = e.changedTouches[0];
     this._touch = { identifier: t.identifier, x: t.clientX, y: t.clientY, time: performance.now() };
   }
@@ -76,6 +78,7 @@ export class InputManager {
     if (!this._touch || !e.changedTouches.length) return;
     const target = e.target;
     if (target instanceof Element && target.closest("button, a, input, select, textarea")) { this._touch = null; return; }
+    e.preventDefault();
     const t = Array.from(e.changedTouches).find((touch) => touch.identifier === this._touch.identifier);
     if (!t) return;
     const dx = t.clientX - this._touch.x;
@@ -83,8 +86,10 @@ export class InputManager {
     const duration = performance.now() - this._touch.time;
     this._touch = null;
     const threshold = 30;
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < threshold && duration < 250) { this.emit(ACTIONS.JUMP); return; }
-    if (Math.abs(dx) > Math.abs(dy)) this.emit(dx > 0 ? ACTIONS.RIGHT : ACTIONS.LEFT);
+    const ax = Math.abs(dx);
+    const ay = Math.abs(dy);
+    if (Math.max(ax, ay) < threshold && duration < 250) { this.emit(ACTIONS.JUMP); return; }
+    if (ax > ay * 1.12) this.emit(dx > 0 ? ACTIONS.RIGHT : ACTIONS.LEFT);
     else if (dy < -threshold) this.emit(ACTIONS.JUMP);
     else if (dy > threshold) this.emit(ACTIONS.SLIDE);
   }
@@ -105,6 +110,7 @@ export class InputManager {
     window.removeEventListener("mousemove", this._onMouseMove);
     for (const [el, handler] of this._buttonHandlers) el.removeEventListener("pointerdown", handler);
     this._buttonHandlers.clear();
+    this._touch = null;
     this.listeners.clear();
   }
 }
